@@ -10,10 +10,12 @@
 
 #include <raspicam.h>
 #include <raspicam_cv.h>
+#include <opencv2/opencv.hpp>
 
+using namespace cv;
 using namespace raspicam;
 
-class CameraWrapper()
+class CameraWrapper
 {
     public:
 
@@ -23,13 +25,13 @@ class CameraWrapper()
     void Init();
     void Loop();
 
-
+    const Mat& GetImage() const { return m_image; }
 
 
     private:
-    RaspiCam_Cv Camera;
-    const Scalar upper = Scalar(20, 280, 50);
-    const Scalar lower = Scalar(40, 255, 255);
+    RaspiCam_Cv m_Camera;
+    Mat m_image;
+
 
 }
 #endif

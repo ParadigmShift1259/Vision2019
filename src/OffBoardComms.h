@@ -13,27 +13,27 @@
 
 using namespace nt;
 
-class OffBoardComms()
+class OffBoardComms
 {
     public:
 
     void Init();
-    void Loop();
+    void Publish();
 
-    double Total_Distance_Inch = 0;
-    double Horizontal_Angle_Degree = 0;
-    double Vertical_Angle_Degree = 0;
+    double m_Total_Distance_Inch = 0;
+    double m_Horizontal_Angle_Degree = 0;
+    double m_Vertical_Angle_Degree = 0;
 
     private:
-    NetworkTableInstance nt_Inst;
-    shared_ptr<NetworkTable> netTable;
-    double visioncounter;
-    auto Keys;
-    auto ntval;
-    int counter; 
-    double Horizontal_Distance_Inch = 0;
-    double Vertical_Distance_Inch = 0;
-    double Forward_Distance_Inch = 0;
+    NetworkTableInstance m_nt_Inst;
+    shared_ptr<NetworkTable> m_netTable;
+    double m_visioncounter;
+    //auto m_Keys;
+    shared_ptr<Value> m_ntval;
+    int m_counter; 
+    double m_Horizontal_Distance_Inch = 0;
+    double m_Vertical_Distance_Inch = 0;
+    double m_Forward_Distance_Inch = 0;
 
 
 }

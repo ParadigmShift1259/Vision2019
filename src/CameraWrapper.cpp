@@ -7,14 +7,7 @@
 
 #include "CameraWrapper.h"
 
-CameraWrapper::CameraWrapper(){}
-
-CameraWrapper::~CameraWrapper()
-{
-    Camera.release();
-}
-
-void CameraWrapper::Init()
+CameraWrapper::CameraWrapper()
 {
     Camera.set(CV_CAP_PROP_GAIN, 10);
 	Camera.set(CV_CAP_PROP_EXPOSURE, 200);
@@ -27,13 +20,20 @@ void CameraWrapper::Init()
 	{
 		Camera.grab();
 	}
-	Camera.retrieve(image);
+	//Camera.retrieve(m_image);
+}
+
+CameraWrapper::~CameraWrapper()
+{
+    Camera.release();
 }
 
 void CameraWrapper::Loop()
 {
     Camera.grab();
     //counter += 3;
-    Camera.retrieve(image);
+    Camera.retrieve(m_image);
     
 }
+
+

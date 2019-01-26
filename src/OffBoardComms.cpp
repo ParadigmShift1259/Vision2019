@@ -6,6 +6,10 @@
 */
 
 #include "OffBoardComms.h"
+#include <iostream>
+//#include <stdio.h>
+//#include <cstdint>
+#include <unistd.h>
 //#include "CubeProcessing"
 
 OffBoardComms::OffBoardComms()
@@ -30,7 +34,7 @@ OffBoardComms::OffBoardComms()
 
     if (m_ntval)
 	{
-		m_visioncounter = ntval->GetDouble();
+		m_visioncounter = m_ntval->GetDouble();
 		cout << "Retrieving counter value: " << m_visioncounter << endl;
 	}
 
@@ -38,12 +42,10 @@ OffBoardComms::OffBoardComms()
 
 }
 
-void OffBoardComms::Publish()
+void OffBoardComms::Publish(double value)
 {
-    /*Horizontal_Distance_Inch = Total_Distance_Inch * sin(Horizontal_Angle_Degree*PI/180);
-    INCLUDE CUBE PROCESSING DIRECTORY IN ORDER TO ACCESS VARIABLES BELOW
-	Vertical_Distance_Inch = Total_Distance_Inch * sin(Vertical_Angle_Degree*PI/180);
-	Forward_Distance_Inch = Total_Distance_Inch*cos(Vertical_Angle_Degree*PI/180)*cos(Horizontal_Angle_Degree*PI/180);*/
+	m_netTable->PutNumber("visioncounter", m_counter);
+	m_netTable->PutNumber("XOffAngle", value);
 
 	m_counter++;
 

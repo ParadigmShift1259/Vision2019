@@ -14,11 +14,11 @@
 
 using namespace cv;
 using namespace raspicam;
+using namespace std;
 
 class CameraWrapper
 {
-    public:
-
+public:
     CameraWrapper();
     ~CameraWrapper();
 
@@ -27,11 +27,8 @@ class CameraWrapper
 
     const Mat& GetImage() const { return m_image; }
 
-
-    private:
+private:
     RaspiCam_Cv m_Camera;
     Mat m_image;
-
-
-}
-#endif
+};
+#endif  // CAMERAWRAPPER_H

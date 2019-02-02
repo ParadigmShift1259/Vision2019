@@ -22,20 +22,13 @@ int main()
 	while (true)
 	{
 		camera.Loop();
-		cout << "Past camera.Loop()" << endl;
 
 		processing.Prepare(camera.GetImage());
-		cout << "Past processing.Prepare()" << endl;
 	    processing.FindContour();
-		cout << "Past processing.FindContour()" << endl;
 		processing.FindCenter();
-		cout << "processing.FindCenter()" << endl;
 		processing.FindBiggestContour();
-		cout << "processing.FindBiggestContour()" << endl;
 		processing.CalcCubeHeight();
-		cout << "Calc cube height" << endl;
 		double value = processing.CalcOutputValues();
-		cout << "Calc output variable defined" << endl;
 		//offBoardComms.Publish(value);
 
 		processing.PrintDebugValues();

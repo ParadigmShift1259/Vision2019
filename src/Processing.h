@@ -5,9 +5,13 @@
  * Ping Xue
 */
 
+#ifndef PROCESSING_H
+#define PROCESSING_H
+
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
@@ -17,14 +21,9 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdint.h>
-#include <math.h>
-#include <cmath>
+//#include <cmath>
 
-#ifndef PROCESSING_H
-#define PROCESSING_H
-
-const double PI = 4.0 * atan(1.0);
-//const double PI = acos(-1.0);
+#include "Const.h"
 
 using namespace cv;
 using namespace std;

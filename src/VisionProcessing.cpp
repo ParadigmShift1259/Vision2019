@@ -7,7 +7,8 @@
 
 #include "CameraWrapper.h"
 #include "OffBoardComms.h"
-#include "Processing.h"
+//#include "Processing.h"
+#include "ProcessingCargo.h"
 #include <iostream>
 
 using namespace std;
@@ -15,7 +16,8 @@ using namespace std;
 int main()
 {
 	CameraWrapper camera;
-	Processing processing;
+	ProcessingCargo processing;
+
 	//OffBoardComms offBoardComms;
 
 	cout << "Starting main loop" << endl;

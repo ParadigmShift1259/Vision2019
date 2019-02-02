@@ -6,6 +6,7 @@
 */
 
 #include "CameraWrapper.h"
+#include "Const.h"
 
 CameraWrapper::CameraWrapper()
 {
@@ -30,8 +31,16 @@ CameraWrapper::~CameraWrapper()
 
 void CameraWrapper::Loop()
 {
-    m_Camera.grab();
-    m_Camera.retrieve(m_image);
+	if (c_bUseLastDiagImage)
+	{
+		// Reread the previously saved image to consistently process the same image
+		m_image = imread("image.bmp", CV_LOAD_IMAGE_COLOR);
+	}
+	else
+	{
+		m_Camera.grab();
+    	m_Camera.retrieve(m_image);
+	}
 }
 
 

@@ -33,13 +33,16 @@ public:
     ProcessingBase(const Scalar& upper, const Scalar& lower);
     ~ProcessingBase();
 
-    void Prepare(const Mat& image);
+    void Prepare(const Mat& image, bool bSkipHSVConvert = false);
     void FindContour();
     void FindCenter();
     void CalcCubeHeight();
     void FindBiggestContour();
     double CalcOutputValues();
     void PrintDebugValues();
+
+    const Mat& GetImageHSV() const { return m_imageHSV; }
+    void SetImageHSV(const Mat& imageHSV) { m_imageHSV = imageHSV; }
 
 protected:
     // Following settings is for camera calibrated value

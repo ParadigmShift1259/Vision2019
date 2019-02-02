@@ -23,14 +23,16 @@ ProcessingBase::~ProcessingBase()
 {
 }
 
-void ProcessingBase::Prepare(const Mat& image)
+void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false */)
 {
 #ifdef GRAB_DIAG_IMAGE
 	imwrite("CameraGrab.bmp", image);
 #endif
-
-	cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
-
+    if (!bSkipHSVConvert)
+    {
+	    cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
+    }
+    
 #ifdef GRAB_DIAG_IMAGE
 	imwrite("CamerGrabHsv.bmp", m_imageHSV);
 #endif

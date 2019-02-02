@@ -5,16 +5,16 @@
  * Ping Xue
 */
 
-#ifndef PROCESSING_CARGO_H
-#define PROCESSING_CARGO_H
+#ifndef PROCESSING_HATCH_H
+#define PROCESSING_HATCH_H
 
 #include "ProcessingBase.h"
 
-class ProcessingCargo : public ProcessingBase
+class ProcessingHatch : public ProcessingBase
 {
 public:
-    ProcessingCargo();
-    ~ProcessingCargo();
+    ProcessingHatch();
+    ~ProcessingHatch();
 
 private:
 

@@ -256,11 +256,11 @@ void ProcessingBase::CalcCubeHeight()
     }
 }
 
-double ProcessingBase::CalcOutputValues()
+void ProcessingBase::CalcOutputValues()
 {
     if (m_contours.size() == 0)
     { 
-        return 0.0;
+        return;
     }
     
     m_standard_height_p = m_DEFAULT_HEIGHT_PIXEL / (m_DEFAULT_FOV_ROW_NUM / m_drawing.size().height);
@@ -288,7 +288,11 @@ double ProcessingBase::CalcOutputValues()
         m_Forward_Distance_Inch =0;
     }
 
-    return m_Horizontal_Angle_Degree;
+    int quality = eYellowTrackingObjects; // TODO: Calculate this
+
+    m_OutputValues.SetDistance(m_Forward_Distance_Inch);
+    m_OutputValues.SetAngle(m_Horizontal_Angle_Degree);
+    m_OutputValues.SetQuality(quality);
 }
 
 void ProcessingBase::PrintDebugValues()

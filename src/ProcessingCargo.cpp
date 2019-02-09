@@ -18,4 +18,3 @@ ProcessingCargo::~ProcessingCargo()
 {
 }
 
-

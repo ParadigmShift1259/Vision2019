@@ -7,10 +7,8 @@
 
 #include "OffBoardComms.h"
 #include <iostream>
-//#include <stdio.h>
-//#include <cstdint>
 #include <unistd.h>
-//#include "CubeProcessing"
+
 
 OffBoardComms::OffBoardComms()
 {

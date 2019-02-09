@@ -16,18 +16,7 @@ public:
     ProcessingCargo();
     ~ProcessingCargo();
 
-
 private:
-
-    double m_distCargo;
-    double m_angleCargo;
-    
-    enum EQualityCargo 
-    {
-        eRedNoData,
-        eYellowTrackingObjects,
-        eGreenReady,
-    };
 
 };
 

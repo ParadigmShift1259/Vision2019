@@ -22,7 +22,6 @@ public:
     CameraWrapper();
     ~CameraWrapper();
 
-    void Init();
     void AcquireImage();
 
     const Mat& GetImage() const { return m_image; }

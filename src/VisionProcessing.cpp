@@ -22,8 +22,11 @@ int main()
 	ProcessingHatch hatch;
 	ProcessingLine line;
 	ProcessingRetro retro;
-	//OffBoardComms offBoardComms;
-	
+
+#ifdef USE_OFFBOARD_COMMS
+	OffBoardComms offBoardComms;
+#endif
+
 	enum EVisionTarget
 	{
 		eUnknown,
@@ -35,9 +38,6 @@ int main()
 	} state = eUnknown;
 
 	state = eFindCargo;
-
-	
-	double value = 0.0;
 
 	cout << "Starting main loop" << endl;
 	while (true)
@@ -53,7 +53,10 @@ int main()
 				retro.FindCenter();
 				retro.FindBiggestContour();
 				retro.CalcCubeHeight();
-				value = retro.CalcOutputValues();
+				retro.CalcOutputValues();
+#ifdef USE_OFFBOARD_COMMS
+				offBoardComms.SetRetro(retro.GetOutputValues().GetDistance(), retro.GetOutputValues().GetAngle(), retro.GetOutputValues().GetQuality());
+#endif
 				retro.PrintDebugValues();
 
 				line.SetImageHSV(retro.GetImageHSV());
@@ -62,7 +65,10 @@ int main()
 				line.FindCenter();
 				line.FindBiggestContour();
 				line.CalcCubeHeight();
-				value = line.CalcOutputValues();
+				line.CalcOutputValues();
+#ifdef USE_OFFBOARD_COMMS
+				offBoardComms.SetLine(line.GetOutputValues().GetDistance(), line.GetOutputValues().GetAngle(), line.GetOutputValues().GetQuality());
+#endif
 				line.PrintDebugValues();				
 				break;	
 			
@@ -72,7 +78,10 @@ int main()
 				cargo.FindCenter();
 				cargo.FindBiggestContour();
 				cargo.CalcCubeHeight();
-				value = cargo.CalcOutputValues();
+				cargo.CalcOutputValues();
+#ifdef USE_OFFBOARD_COMMS
+				offBoardComms.SetCargo(cargo.GetOutputValues().GetDistance(), cargo.GetOutputValues().GetAngle(), cargo.GetOutputValues().GetQuality());
+#endif
 				cargo.PrintDebugValues();
 				break;
 
@@ -82,7 +91,10 @@ int main()
 				hatch.FindCenter();
 				hatch.FindBiggestContour();
 				hatch.CalcCubeHeight();
-				value = hatch.CalcOutputValues();
+				hatch.CalcOutputValues();
+#ifdef USE_OFFBOARD_COMMS
+				offBoardComms.SetHatch(hatch.GetOutputValues().GetDistance(), hatch.GetOutputValues().GetAngle(), hatch.GetOutputValues().GetQuality());
+#endif
 				hatch.PrintDebugValues();
 				break;
 
@@ -90,7 +102,10 @@ int main()
 				break;
 		}
 
-		//offBoardComms.Publish(value);
+#ifdef USE_OFFBOARD_COMMS
+		offBoardComms.Publish();
+#endif
+
 	}  //end of while  
 
 	return 0;

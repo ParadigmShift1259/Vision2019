@@ -16,16 +16,10 @@ public:
     ProcessingHatch();
     ~ProcessingHatch();
 
+
+
 private:
-    double m_distHatch;
-    double m_angleHatch;
     
-    enum EQualityHatch 
-    {
-        eRedNoData,
-        eYellowTrackingObjects,
-        eGreenReady,
-    };
 };
 
 

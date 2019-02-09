@@ -25,7 +25,8 @@ enum EQuality
 class OutputValues
 {
 public:
-    OuputValues(double dist, double angle, int quality)
+    OutputValues(){}
+    OutputValues(double dist, double angle, int quality)
         : m_distance(dist)
         , m_angle(angle)
         , m_quality(quality)
@@ -69,6 +70,21 @@ public:
         return m_quality;
     }
 
+    void SetDistance(double distance) 
+    {
+        m_distance = distance;
+    }
+
+    void SetAngle(double angle) 
+    {
+        m_angle = angle;
+    }
+
+    void SetQuality(int quality) 
+    {
+        m_quality = quality;
+    }
+
 private:
     double m_distance = 0.0;
     double m_angle = 0.0;
@@ -97,18 +113,14 @@ private:
     NetworkTableInstance m_nt_Inst;
     shared_ptr<NetworkTable> m_netTableOpenCV;
     shared_ptr<NetworkTable> m_netTableSmartDashboard;
-
+    shared_ptr<Value> m_ntval;
 
     double m_visioncounter;
+    int m_counter;
 
     OutputValues m_RetroValues;
     OutputValues m_LineValues;
     OutputValues m_CargoValues;
     OutputValues m_HatchValues;
-
-    //auto m_Keys;
-    shared_ptr<Value> m_ntval;
-    int m_counter; 
-
 };
 #endif  // OFFBOARDCOMMS_H

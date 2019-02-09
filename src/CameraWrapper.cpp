@@ -34,7 +34,7 @@ void CameraWrapper::AcquireImage()
 	if (c_bUseLastDiagImage)
 	{
 		// Reread the previously saved image to consistently process the same image
-		m_image = imread("imageHATCH.bmp", CV_LOAD_IMAGE_COLOR);
+		m_image = imread("image.bmp", CV_LOAD_IMAGE_COLOR);
 	}
 	else
 	{

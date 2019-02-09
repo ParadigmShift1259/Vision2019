@@ -22,7 +22,8 @@ OffBoardComms::OffBoardComms()
 		sleep(0.1);
 	}
 
-    m_netTable = m_nt_Inst.GetTable("OpenCV");
+    m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
+    m_netTableSmartDashboard = m_nt_Inst.GetTable("SmartDashboard");
 
     m_visioncounter = 0;
 	//Keys = netTable->GetKeys();
@@ -30,7 +31,7 @@ OffBoardComms::OffBoardComms()
 	//{
 	//	cout<<"These are the keys: "<<key<<endl;
 	//}
-	m_ntval = m_netTable->GetValue("visioncounter");
+	m_ntval = m_netTableOpenCV->GetValue("visioncounter");
 
     if (m_ntval)
 	{
@@ -44,23 +45,23 @@ void OffBoardComms::Publish()
 {
 	if (m_RetroValues.IsChanged() || m_LineValues.IsChanged() || m_CargoValues.IsChanged() || m_HatchValues.IsChanged())
 	{
-		m_netTable->PutNumber("visioncounter", m_counter);
+		m_netTableOpenCV->PutNumber("visioncounter", m_counter);
 
-		m_netTable->PutNumber("RetroDistance",  m_RetroValues.GetDistance());
-		m_netTable->PutNumber("RetroAngle", m_RetroValues.GetAngle());
-		m_netTable->PutNumber("RetroQuality", m_RetroValues.GetQuality());
+		m_netTableOpenCV->PutNumber("RetroDistance",  m_RetroValues.GetDistance());
+		m_netTableOpenCV->PutNumber("RetroAngle", m_RetroValues.GetAngle());
+		m_netTableOpenCV->PutNumber("RetroQuality", m_RetroValues.GetQuality());
 
-		m_netTable->PutNumber("LineDistance",  m_LineValues.GetDistance());
-		m_netTable->PutNumber("LineAngle", m_LineValues.GetAngle());
-		m_netTable->PutNumber("LineQuality", m_LineValues.GetQuality());
+		m_netTableOpenCV->PutNumber("LineDistance",  m_LineValues.GetDistance());
+		m_netTableOpenCV->PutNumber("LineAngle", m_LineValues.GetAngle());
+		m_netTableOpenCV->PutNumber("LineQuality", m_LineValues.GetQuality());
 
-		m_netTable->PutNumber("CargoDistance",  m_CargoValues.GetDistance());
-		m_netTable->PutNumber("CargoAngle", m_CargoValues.GetAngle());
-		m_netTable->PutNumber("CargoQuality", m_CargoValues.GetQuality());
+		m_netTableOpenCV->PutNumber("CargoDistance",  m_CargoValues.GetDistance());
+		m_netTableOpenCV->PutNumber("CargoAngle", m_CargoValues.GetAngle());
+		m_netTableOpenCV->PutNumber("CargoQuality", m_CargoValues.GetQuality());
 
-		m_netTable->PutNumber("HatchDistance",  m_HatchValues.GetDistance());
-		m_netTable->PutNumber("HatchAngle", m_HatchValues.GetAngle());
-		m_netTable->PutNumber("HatchQuality", m_HatchValues.GetQuality());
+		m_netTableOpenCV->PutNumber("HatchDistance",  m_HatchValues.GetDistance());
+		m_netTableOpenCV->PutNumber("HatchAngle", m_HatchValues.GetAngle());
+		m_netTableOpenCV->PutNumber("HatchQuality", m_HatchValues.GetQuality());
 
 		m_counter++;
 	}
@@ -88,10 +89,10 @@ void OffBoardComms::SetCargo(double distance, double angle, int quality)
 
 double OffBoardComms::GetGyroAngle()
 {
-	return m_netTable->GetNumber("GyroAngle", 0);
+	return m_netTableSmartDashboard->GetNumber("GyroFused", 0);
 }
 
 int OffBoardComms::GetState()
 {
-	return m_netTable->GetNumber("Quality", 0);
+	return m_netTableOpenCV->GetNumber("SelectedVisionTarget", 0);
 }

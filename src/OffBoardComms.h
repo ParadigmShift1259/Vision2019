@@ -95,7 +95,9 @@ public:
 
 private:
     NetworkTableInstance m_nt_Inst;
-    shared_ptr<NetworkTable> m_netTable;
+    shared_ptr<NetworkTable> m_netTableOpenCV;
+    shared_ptr<NetworkTable> m_netTableSmartDashboard;
+
 
     double m_visioncounter;
 

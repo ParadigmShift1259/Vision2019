@@ -13,7 +13,7 @@ CameraWrapper::CameraWrapper()
     m_Camera.set(CV_CAP_PROP_GAIN, 30);
 	m_Camera.set(CV_CAP_PROP_EXPOSURE, 200);
 	cout << "Vision has Started" << endl;
-	m_Camera.open();
+//	m_Camera.open(0);
 	cout << "Camera is opened" << endl;
 	
 	// Warm up camera for 60 frames to stabilize image brightness

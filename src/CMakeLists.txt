@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8)
 project(VisionProcessing)
+
+set (CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /usr/local/frc/share/OpenCV)
+
 find_package(OpenCV REQUIRED)
 #find_package(wpilib REQUIRED)
 #include_directories(${/usr/local/frc/include})
 
-set (CMAKE_CXX_FLAGS "-L/usr/local/frc/lib -lntcore -I/usr/local/frc/include -lraspicam -lraspicam_cv -I/home/pi/raspicam-0.1.6/src")
+set (CMAKE_CXX_FLAGS "-L/usr/local/frc/lib -lntcore -I/usr/local/frc/include")
 
 add_executable( VisionProcessing
                 VisionProcessing.cpp

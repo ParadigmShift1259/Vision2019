@@ -37,17 +37,61 @@ OffBoardComms::OffBoardComms()
 		m_visioncounter = m_ntval->GetDouble();
 		cout << "Retrieving counter value: " << m_visioncounter << endl;
 	}
-
 	m_counter = m_visioncounter;
-
 }
 
-void OffBoardComms::Publish(double value)
+void OffBoardComms::Publish()
 {
-	m_netTable->PutNumber("visioncounter", m_counter);
-	m_netTable->PutNumber("XOffAngle", value);
+	if (m_RetroValues.IsChanged() || m_LineValues.IsChanged() || m_CargoValues.IsChanged() || m_HatchValues.IsChanged())
+	{
+		m_netTable->PutNumber("visioncounter", m_counter);
 
-	m_counter++;
+		m_netTable->PutNumber("RetroDistance",  m_RetroValues.GetDistance());
+		m_netTable->PutNumber("RetroAngle", m_RetroValues.GetAngle());
+		m_netTable->PutNumber("RetroQuality", m_RetroValues.GetQuality());
 
+		m_netTable->PutNumber("LineDistance",  m_LineValues.GetDistance());
+		m_netTable->PutNumber("LineAngle", m_LineValues.GetAngle());
+		m_netTable->PutNumber("LineQuality", m_LineValues.GetQuality());
+
+		m_netTable->PutNumber("CargoDistance",  m_CargoValues.GetDistance());
+		m_netTable->PutNumber("CargoAngle", m_CargoValues.GetAngle());
+		m_netTable->PutNumber("CargoQuality", m_CargoValues.GetQuality());
+
+		m_netTable->PutNumber("HatchDistance",  m_HatchValues.GetDistance());
+		m_netTable->PutNumber("HatchAngle", m_HatchValues.GetAngle());
+		m_netTable->PutNumber("HatchQuality", m_HatchValues.GetQuality());
+
+		m_counter++;
+	}
 }
 
+void OffBoardComms::SetRetro(double distance, double angle, int quality)
+{
+	m_RetroValues = OutputValues(distance, angle, quality);
+}
+
+void OffBoardComms::SetLine(double distance, double angle, int quality)
+{
+	m_LineValues = OutputValues(distance, angle, quality);
+}
+
+void OffBoardComms::SetHatch(double distance, double angle, int quality)
+{
+	m_HatchValues = OutputValues(distance, angle, quality);
+}
+
+void OffBoardComms::SetCargo(double distance, double angle, int quality)
+{
+	m_CargoValues = OutputValues(distance, angle, quality);
+}
+
+double OffBoardComms::GetGyroAngle()
+{
+	return m_netTable->GetNumber("GyroAngle", 0);
+}
+
+int OffBoardComms::GetState()
+{
+	return m_netTable->GetNumber("Quality", 0);
+}

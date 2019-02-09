@@ -17,7 +17,15 @@ public:
     ~ProcessingLine();
 
 private:
-
+    double m_distLine;
+    double m_angleLine;
+    
+    enum EQualityLine 
+    {
+        eRedNoData,
+        eYellowTrackingObjects,
+        eGreenReady,
+    };
 };
 
 

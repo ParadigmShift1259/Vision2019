@@ -22,7 +22,8 @@ int main()
 	ProcessingHatch hatch;
 	ProcessingLine line;
 	ProcessingRetro retro;
-
+	//OffBoardComms offBoardComms;
+	
 	enum EVisionTarget
 	{
 		eUnknown,
@@ -35,7 +36,7 @@ int main()
 
 	state = eFindCargo;
 
-	//OffBoardComms offBoardComms;
+	
 	double value = 0.0;
 
 	cout << "Starting main loop" << endl;

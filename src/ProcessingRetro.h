@@ -17,7 +17,15 @@ public:
     ~ProcessingRetro();
 
 private:
-
+    double m_distRetro;
+    double m_angleRetro;
+    
+    enum EQualityRetro 
+    {
+        eRedNoData,
+        eYellowTrackingObjects,
+        eGreenReady,
+    };
 };
 
 

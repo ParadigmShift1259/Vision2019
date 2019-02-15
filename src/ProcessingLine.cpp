@@ -10,7 +10,7 @@
 #include "ProcessingLine.h"
 
 ProcessingLine::ProcessingLine()
-    : ProcessingBase( { 16, 255, 255 }, { 1, 50, 30 } )
+    : ProcessingBase( { 16, 255, 255 }, { 1, 50, 30 } )     // TODO: Pick colors for Gaffer's tape
 {
 }
 

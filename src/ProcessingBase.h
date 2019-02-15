@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include "Const.h"
+#include "OffBoardComms.h"
 
 using namespace cv;
 using namespace std;
@@ -33,13 +34,16 @@ public:
     ProcessingBase(const Scalar& upper, const Scalar& lower);
     ~ProcessingBase();
 
-    void Prepare(const Mat& image);
+    void Prepare(const Mat& image, bool bSkipHSVConvert = false);
     void FindContour();
     void FindCenter();
     void CalcCubeHeight();
     void FindBiggestContour();
-    double CalcOutputValues();
+    void CalcOutputValues();
     void PrintDebugValues();
+    OutputValues& GetOutputValues(){ return m_OutputValues; }
+    const Mat& GetImageHSV() const { return m_imageHSV; }
+    void SetImageHSV(const Mat& imageHSV) { m_imageHSV = imageHSV; }
 
 protected:
     // Following settings is for camera calibrated value
@@ -57,6 +61,8 @@ protected:
 	static constexpr double m_radiansTodegrees = 180.0 / PI;	//!< Angle units converison factor
 
     static constexpr bool m_bFishEyeCorrection = true;			//!< Set to true if using a wide angle camera
+    
+    OutputValues m_OutputValues;                                //!< Values to send to the Robot
 
     Scalar m_upper;                                             //!< [HSV triplet] Upper color bound
     Scalar m_lower;                                             //!< [HSV triplet]Lower color bound

@@ -16,8 +16,10 @@ public:
     ProcessingHatch();
     ~ProcessingHatch();
 
-private:
 
+
+private:
+    
 };
 
 

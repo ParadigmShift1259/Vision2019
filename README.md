@@ -24,6 +24,11 @@ Prerequisites:
 		Run WinScp
 		Connect to frcvision.local
 		
+	In at the frcvision.local site created by the pi do the following:
+		Open Vision Settings
+		Set the team number to 1259
+		Delete the Pi Cam from the execution routine
+		
 	In the Putty SSH shell execute the following:
 		sudo raspi-config:
 			Change keyboard settings to U.S

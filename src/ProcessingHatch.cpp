@@ -10,12 +10,13 @@
 #include "ProcessingHatch.h"
 
 ProcessingHatch::ProcessingHatch()
-    : ProcessingBase( { 16, 255, 255 }, { 1, 50, 30 } )
+    : ProcessingBase( { 40, 255, 255 }, { 20, 280, 50 } )     // TODO: Pick colors for Hatch game piece
 {
 }
 
 ProcessingHatch::~ProcessingHatch()
 {
 }
+
 
 

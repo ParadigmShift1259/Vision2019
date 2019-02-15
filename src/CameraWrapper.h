@@ -8,12 +8,9 @@
 #ifndef CAMERAWRAPPER_H
 #define CAMERAWRAPPER_H
 
-#include <raspicam.h>
-#include <raspicam_cv.h>
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
-using namespace raspicam;
 using namespace std;
 
 class CameraWrapper
@@ -27,7 +24,7 @@ public:
     const Mat& GetImage() const { return m_image; }
 
 private:
-    RaspiCam_Cv m_Camera;
+    VideoCapture m_Camera = VideoCapture(0);
     Mat m_image;
 };
 #endif  // CAMERAWRAPPER_H

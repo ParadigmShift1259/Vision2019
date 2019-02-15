@@ -36,6 +36,9 @@ public:
 
     void Prepare(const Mat& image, bool bSkipHSVConvert = false);
     void FindContour();
+    void FindVerticalRange();
+    void RejectSmallContours();
+    void FindCornerCoordinates();
     void FindCenter();
     void CalcCubeHeight();
     void FindBiggestContour();
@@ -101,7 +104,8 @@ protected:
     int m_calibImageCount = 0;									//!< 
 
     vector<Vec4i> m_hierarchy;									//!< 
-    vector<vector<Point> > m_contours;							//!< 
+    vector<vector<Point>> m_contours;							//!< 
+    vector<RotatedRect> m_minRect;                              //!< minimum area rectangle for contours
 
     Mat m_inrange;												//!< 
     Mat m_imageHSV;												//!< 

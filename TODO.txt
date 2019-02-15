@@ -1,0 +1,22 @@
+TODO List
+
+2019 Feb 15
+	Push the code on Wisdom that builds in Windows up to Github
+	Re-add the OpenCV fitLine call to ProcessingBase::FindBiggestContour()
+	Draw the line returned from fitLine (modifed from https://docs.opencv.org/3.4/js_contour_features_fitLine.html)
+		Vec4f lineOutput;
+
+			fitLine(m_contours[i], lineOutput, 2, 0, 0.01, 0.01);	// Third arg: DIST_L2 = 2 is the fastest least squares method
+			auto vx = lineOutput[0];
+			auto vy = lineOutput[1];
+			auto x  = lineOutput[2];
+			auto y  = lineOutput[3];
+			auto lefty = round((-x * vy / vx) + y);
+			auto righty = round(((m_drawing.cols - x) * vy / vx) + y);
+			Point point1(m_drawing.cols - 1, righty);
+			Point point2(0, lefty);
+			Scalar lineColor(0, 255, 0);
+			line(drawing, point1, point2, lineColor, 2, 4, 0);	// Sixth arg LINE_4 = 4 px wide line
+	Work with Mr. Xue and Mr. Seidl to gather test images with the plywood test targets (6 cargo "retro" stripes made with gaffer's tape)
+	We are looking for a calibration image that will give us a scaling factor pixels to inches at a known distance to the camera.
+	We are also looking for images at a known distance and angle to the targets.

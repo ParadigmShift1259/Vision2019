@@ -9,9 +9,7 @@
 #define CONST_H
 
 #define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
-
 //#define USE_OFFBOARD_COMMS				// Uncomment if you want to use it
-
 #define TEST_GAFFER_TAPE_ALIGNMENT_IMGS		// Use this when testing hatch vision targets made with white gaffer's tape
 
 #include <math.h>

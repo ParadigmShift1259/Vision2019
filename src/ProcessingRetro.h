@@ -16,6 +16,8 @@ public:
     ProcessingRetro();
     ~ProcessingRetro();
 
+	void ProcessImage(const Mat& image) override;
+
 private:
 	static constexpr double m_DEFAULT_HEIGHT_PIXEL = 510.0;	    //!< [pixel] Height in pixels of a cube placed 12 inches from the camer
 	static constexpr double m_CAL_DISTANCE_INCH = 12.0;  		//!< [inch] Calibration distance from camera to cube

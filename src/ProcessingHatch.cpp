@@ -18,5 +18,16 @@ ProcessingHatch::~ProcessingHatch()
 {
 }
 
+void ProcessingHatch::ProcessImage(const Mat& image)
+{
+	Prepare(image);
+	FindContour();
+	FindVerticalRange();
+	FindCenter();
+	FindBiggestContour();
+	CalcCubeHeight();
+	CalcOutputValues();
+	PrintDebugValues();
+}
 
 

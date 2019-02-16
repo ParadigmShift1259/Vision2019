@@ -23,3 +23,16 @@ ProcessingRetro::ProcessingRetro()
 ProcessingRetro::~ProcessingRetro()
 {
 }
+
+void ProcessingRetro::ProcessImage(const Mat& image)
+{
+	Prepare(image);
+	FindContour();
+	RejectSmallContours();
+	FindCornerCoordinates();
+	//FindCenter();
+	FindBiggestContour();
+	//CalcCubeHeight();
+	CalcOutputValues();
+	PrintDebugValues();
+}

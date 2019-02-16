@@ -16,6 +16,8 @@ public:
     ProcessingCargo();
     ~ProcessingCargo();
 
+	void ProcessImage(const Mat& image) override;
+
 private:
 	// TODO rename these
 	static constexpr double m_DEFAULT_HEIGHT_PIXEL = 510.0;	    //!< [pixel] Height in pixels of a cube placed 12 inches from the camer

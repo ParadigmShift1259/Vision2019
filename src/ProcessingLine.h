@@ -16,6 +16,8 @@ public:
     ProcessingLine();
     ~ProcessingLine();
 
+	void ProcessImage(const Mat& image) override;
+
 private:
     
 };

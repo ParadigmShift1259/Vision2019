@@ -10,7 +10,7 @@
 
 CameraWrapper::CameraWrapper()
 {
-    m_Camera.set(CV_CAP_PROP_GAIN, 30);
+    m_Camera.set(CV_CAP_PROP_GAIN, 30);				// TODO unsupported with VideoCapture?
 	m_Camera.set(CV_CAP_PROP_EXPOSURE, 200);
 	cout << "Vision has Started" << endl;
 	cout << "Camera is opened" << endl;

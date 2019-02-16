@@ -15,8 +15,10 @@
 
 const char* c_testOutputPath = "C:/Users/Developer/Documents/TestData/Output/";
 
+#ifdef BUILD_ON_WINDOWS
 double ProcessingBase::m_degreesToRadians = PI / 180.0;
 double ProcessingBase::m_radiansTodegrees = 180.0 / PI;
+#endif
 
 ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
     : m_upper(upper) 
@@ -30,17 +32,11 @@ ProcessingBase::~ProcessingBase()
 
 void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false */)
 {
-#ifdef GRAB_DIAG_IMAGE
-	imwrite("CameraGrab.bmp", image);
-#endif
     if (!bSkipHSVConvert)
     {
 	    cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
     }
     
-#ifdef GRAB_DIAG_IMAGE
-	imwrite("CamerGrabHsv.bmp", m_imageHSV);
-#endif
 
     if (c_bUseLastDiagImage)
 	{
@@ -89,19 +85,20 @@ void ProcessingBase::FindContour()
     // Reset the contour values to zero
     m_biggestContour = 0;
     m_biggestContourLocation = 0;
-    m_currentContourSize = 0;
 }
 
 void ProcessingBase::FindBiggestContour()
 {
+	int currentContourSize = 0;
+
     // Walk through each contour that we found looking for the biggest contour
     for (size_t i = 0; i < m_contours.size(); i++)
     {
-        m_currentContourSize = (int)moments(m_contours[i],true).m00;
-        cout << "Contour " << i << " vector size " << m_contours[i].size() << " moment size " << m_currentContourSize << endl;
-        if (m_biggestContour < m_currentContourSize)
+        currentContourSize = (int)moments(m_contours[i],true).m00;
+        cout << "Contour " << i << " vector size " << m_contours[i].size() << " moment size " << currentContourSize << endl;
+        if (m_biggestContour < currentContourSize)
         {
-            m_biggestContour = m_currentContourSize;
+            m_biggestContour = currentContourSize;
             m_biggestContourLocation = (int)i;
         }
 
@@ -245,7 +242,7 @@ void ProcessingBase::FindCenter()
 
     //cout << "Biggest contour location: " << m_biggestContourLocation << "\n Size of contour: " << m_contours.size() << endl;
     // Finding the moment of the biggest contour
-    Moments m = moments(m_contours[m_biggestContourLocation], true);
+    Moments m = moments(m_contours[m_biggestContourLocation], true);		// TODO we should save the moments calculated in FindBiggestContour
 
     // Find cube center coordinate and draw a circle at that point
     m_cube_center_x = m.m10 / m.m00;
@@ -268,25 +265,26 @@ void ProcessingBase::FindVerticalRange()
     // Find cube height per center coordinate of the cube and contour info
     m_cube_contour_max_y = 10000;   // assign a big value
     m_cube_contour_min_y = 10000;   // assign a big value
+	double im_actual_dist;
 
     for (size_t i = 0; i < m_contours[m_biggestContourLocation].size(); i++)
     {
-        m_im_actual_dist = abs(m_cube_center_x - m_contours[m_biggestContourLocation][i].x);
-        if (m_cube_contour_max_y > m_im_actual_dist)
+        im_actual_dist = abs(m_cube_center_x - m_contours[m_biggestContourLocation][i].x);
+        if (m_cube_contour_max_y > im_actual_dist)
         {
             if (m_contours[m_biggestContourLocation][i].y > m_cube_center_y) // Find coordinate > object center
             {
                 m_cube_contour_max_index = (int)i;
-                m_cube_contour_max_y = m_im_actual_dist;
+                m_cube_contour_max_y = im_actual_dist;
             }
         }
 
-        if (m_cube_contour_min_y > m_im_actual_dist)
+        if (m_cube_contour_min_y > im_actual_dist)
         {
             if (m_contours[m_biggestContourLocation][i].y <= m_cube_center_y) // Find coordinate <= object center
             {
                 m_cube_contour_min_index = (int)i;
-                m_cube_contour_min_y = m_im_actual_dist;
+                m_cube_contour_min_y = im_actual_dist;
             }
         }
     }
@@ -378,7 +376,7 @@ void ProcessingBase::CalcCubeHeight()
     {
         // Return the cube height with Fish Eye correction
         m_cube_height = 	abs(m_contours[m_biggestContourLocation][m_cube_contour_max_index].y -  
-                            m_contours[m_biggestContourLocation][m_cube_contour_min_index].y);
+                                m_contours[m_biggestContourLocation][m_cube_contour_min_index].y);
     }
 }
 

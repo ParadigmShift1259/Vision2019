@@ -18,3 +18,14 @@ ProcessingCargo::~ProcessingCargo()
 {
 }
 
+void ProcessingCargo::ProcessImage(const Mat& image)
+{
+	Prepare(image);
+	FindContour();
+	FindVerticalRange();
+	FindCenter();
+	FindBiggestContour();
+	CalcCubeHeight();
+	CalcOutputValues();
+	PrintDebugValues();
+}

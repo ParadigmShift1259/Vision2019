@@ -18,3 +18,16 @@ ProcessingLine::ProcessingLine()
 ProcessingLine::~ProcessingLine()
 {
 }
+
+void ProcessingLine::ProcessImage(const Mat& image)
+{
+	Prepare(image, true);	// We can skip HSV conversion since the retro object already did it
+	//FindContour();
+	//RejectSmallContours();
+	//FindCornerCoordinates();
+	//FindCenter();
+	//FindBiggestContour();
+	//CalcCubeHeight();
+	//CalcOutputValues();
+	//PrintDebugValues();
+}

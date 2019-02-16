@@ -7,7 +7,10 @@
 
 #include "OffBoardComms.h"
 #include <iostream>
-//#include <unistd.h>
+
+#ifndef BUILD_ON_WINDOWS
+#include <unistd.h>	// For sleep; building on Pi only
+#endif
 
 OffBoardComms::OffBoardComms()
 {
@@ -17,7 +20,11 @@ OffBoardComms::OffBoardComms()
 
 	while (!m_nt_Inst.IsConnected())
 	{
+#ifdef BUILD_ON_WINDOWS
+		Sleep(100);
+#else
 		sleep(0.1);
+#endif
 	}
 
     m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
@@ -67,24 +74,24 @@ void OffBoardComms::Publish()
 	}
 }
 
-void OffBoardComms::SetRetro(double distance, double angle, int quality)
+void OffBoardComms::SetRetro(const ProcessingBase& retro)
 {
-	m_RetroValues = OutputValues(distance, angle, quality);
+	m_RetroValues = retro.GetOutputValues();
 }
 
-void OffBoardComms::SetLine(double distance, double angle, int quality)
+void OffBoardComms::SetLine(const ProcessingBase& line)
 {
-	m_LineValues = OutputValues(distance, angle, quality);
+	m_LineValues = line.GetOutputValues();
 }
 
-void OffBoardComms::SetHatch(double distance, double angle, int quality)
+void OffBoardComms::SetHatch(const ProcessingBase& hatch)
 {
-	m_HatchValues = OutputValues(distance, angle, quality);
+	m_HatchValues = hatch.GetOutputValues();
 }
 
-void OffBoardComms::SetCargo(double distance, double angle, int quality)
+void OffBoardComms::SetCargo(const ProcessingBase& cargo)
 {
-	m_CargoValues = OutputValues(distance, angle, quality);
+	m_CargoValues = cargo.GetOutputValues();
 }
 
 double OffBoardComms::GetGyroAngle()
@@ -96,11 +103,11 @@ double OffBoardComms::GetGyroAngle()
 #endif
 }
 
-int OffBoardComms::GetState()
+EVisionTarget OffBoardComms::GetState()
 {
 #ifdef USE_OFFBOARD_COMMS
-	return m_netTableOpenCV->GetNumber("SelectedVisionTarget", 0);
+	return (EVisionTarget)(int)m_netTableOpenCV->GetNumber("SelectedVisionTarget", 0);
 #else
-	return 1;
+	return eLoadingStation;
 #endif
 }

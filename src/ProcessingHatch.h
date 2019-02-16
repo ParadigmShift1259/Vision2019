@@ -16,7 +16,7 @@ public:
     ProcessingHatch();
     ~ProcessingHatch();
 
-
+	void ProcessImage(const Mat& image) override;
 
 private:
     

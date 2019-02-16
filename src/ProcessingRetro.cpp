@@ -10,10 +10,13 @@
 #include "ProcessingRetro.h"
 
 ProcessingRetro::ProcessingRetro()
-//    : ProcessingBase(   { 16, 255, 255 }, 
-//                        {  1,  50,  30 } )     // TODO: Pick colors for Retro reflective tape
-    : ProcessingBase(   { 179, 52, 255 }, 
-                        {   0,  0, 180 } )     // White gaffer tape test
+#ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
+	: ProcessingBase({ 179, 52, 255 },
+			 		 { 0,  0, 180 })     // White gaffer tape test
+#else
+    : ProcessingBase(   { 90, 255, 255 }, 
+                        { 65,  90,  90 } )     // Colors for Retro reflective tape
+#endif
 {
 }
 

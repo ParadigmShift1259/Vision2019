@@ -18,8 +18,7 @@
 #include <stdio.h>
 #include <cstdint>
 #include <string.h>
-#include <termios.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <stdint.h>
 
 #include "Const.h"
@@ -60,8 +59,10 @@ protected:
     static constexpr double m_FORWARD_DIST_THRESHOLD = 240.0;	//!< [inch] 20 feet; if we calculate an output distance more than this, do not send it
 	static constexpr double m_CUBE_CONTOUR_THRESHOLD = 100.0; 	//!< [pixel] If the contour is smaller than this, do not process it
 
-	static constexpr double m_degreesToRadians = PI / 180.0;	//!< Angle units converison factor
-	static constexpr double m_radiansTodegrees = 180.0 / PI;	//!< Angle units converison factor
+//	static constexpr double m_degreesToRadians = PI / 180.0;	//!< Angle units converison factor
+//	static constexpr double m_radiansTodegrees = 180.0 / PI;	//!< Angle units converison factor
+	static double m_degreesToRadians;							//!< Angle units converison factor
+	static double m_radiansTodegrees;							//!< Angle units converison factor
 
     static constexpr bool m_bFishEyeCorrection = true;			//!< Set to true if using a wide angle camera
     

@@ -35,9 +35,51 @@ void CameraWrapper::AcquireImage()
 		// Reread the previously saved image to consistently process the same image
 		//string fileName = "image.jpg";
 		//string fileName = "alignment_line3.jpg";
-		static int count = 1;
+		static int count = 0;
+
+#ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
 		char fileName[100];
-        sprintf(fileName, "alignment_line%d.jpg", count % 34 + 1);
+#ifdef BUILD_ON_WINDOWS
+		const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/Input/";
+		sprintf_s<sizeof(fileName)>(fileName, "%salignment_line%d.jpg", c_testImagePath, count % 34 + 1);
+#else
+		sprintf(fileName, "alignment_line%d.jpg", count % 34 + 1);
+#endif
+
+#else	// if TEST_GAFFER_TAPE_ALIGNMENT_IMGS
+
+		vector<string> files
+		{
+			  "RocketPanelStraightDark16in.jpg"
+			, "RocketPanelStraightDark24in.jpg"
+			, "RocketPanelStraightDark36in.jpg"
+			, "RocketPanelStraightDark48in.jpg"
+			, "RocketPanelStraightDark60in.jpg"
+			, "RocketPanelStraightDark72in.jpg"
+			, "RocketPanelStraightDark96in.jpg"
+			, "RocketStraightDark96in.jpg"
+			, "RocketPanelStraightDark12in.jpg"
+
+			, "CargoSideStraightDark36in.jpg"
+			, "CargoSideStraightDark60in.jpg"
+			, "CargoSideStraightDark72in.jpg"
+			, "CargoSideStraightPanelDark36in.jpg"
+			, "CargoStraightDark19in.jpg"
+			, "CargoStraightDark24in.jpg"
+			, "CargoStraightDark48in.jpg"
+			, "CargoStraightDark72in.jpg"
+			, "CargoStraightDark90in.jpg"
+		};
+
+#ifdef BUILD_ON_WINDOWS
+		const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/Input/";
+		string fileName = c_testImagePath + files[count % files.size()];
+#else
+		string fileName = files[count % files.size()];
+#endif
+
+#endif	// if TEST_GAFFER_TAPE_ALIGNMENT_IMGS
+
 		count++;
 		
 		m_image = imread(fileName, CV_LOAD_IMAGE_COLOR);

@@ -37,7 +37,6 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
 	    cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
     }
     
-
     if (c_bUseLastDiagImage)
 	{
         // if (m_calibImageCount == 0)

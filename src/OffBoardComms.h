@@ -8,11 +8,17 @@
 #ifndef OFFBOARDCOMMS_H
 #define OFFBOARDCOMMS_H
 
+#include "Const.h"
+#ifdef USE_OFFBOARD_COMMS
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
+#endif
+
 #include <memory>
 
+#ifdef USE_OFFBOARD_COMMS
 using namespace nt;
+#endif
 using namespace std;
 
 enum EQuality
@@ -110,10 +116,12 @@ public:
     int GetState();
 
 private:
+#ifdef USE_OFFBOARD_COMMS
     NetworkTableInstance m_nt_Inst;
     shared_ptr<NetworkTable> m_netTableOpenCV;
     shared_ptr<NetworkTable> m_netTableSmartDashboard;
     shared_ptr<Value> m_ntval;
+#endif
 
     double m_visioncounter;
     int m_counter;
@@ -123,4 +131,5 @@ private:
     OutputValues m_CargoValues;
     OutputValues m_HatchValues;
 };
+
 #endif  // OFFBOARDCOMMS_H

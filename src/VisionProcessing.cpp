@@ -61,7 +61,11 @@ int main()
 
 	cout << "Starting main loop" << endl;
 	//while (true)
-	for (int i = 0; i < 35; i++)
+#ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
+	for (int i = 0; i < 34; i++)
+#else
+	for (int i = 0; i < 18; i++)
+#endif
 	{
 		camera.AcquireImage();
 		switch (state)
@@ -82,8 +86,8 @@ int main()
 #endif
 				retro.PrintDebugValues();
 
-// 				line.SetImageHSV(retro.GetImageHSV());
-// 				line.Prepare(camera.GetImage(), true);
+ 				line.SetImageHSV(retro.GetImageHSV());
+ 				line.Prepare(camera.GetImage(), true);
 // 				line.FindContour();
 // 				line.FindCenter();
 // 				line.FindBiggestContour();

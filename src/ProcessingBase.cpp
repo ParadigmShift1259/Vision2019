@@ -13,6 +13,11 @@
 //Scalar ProcessingBase::m_upper = { 20, 280, 50 };                  
 //Scalar ProcessingBase::m_lower = { 40, 255, 255 };
 
+const char* c_testOutputPath = "C:/Users/Developer/Documents/TestData/Output/";
+
+double ProcessingBase::m_degreesToRadians = PI / 180.0;
+double ProcessingBase::m_radiansTodegrees = 180.0 / PI;
+
 ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
     : m_upper(upper) 
     , m_lower(lower)
@@ -51,12 +56,15 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
         //         imwrite(buf, m_inrange);
         //     }
         // }
-        static int count = 1;
+        static int count = 0;
 		char fileName[100];
-        sprintf(fileName, "inrange%d.jpg", count % 34 + 1);
+#ifdef BUILD_ON_WINDOWS
+		sprintf_s<sizeof(fileName)>(fileName, "%sinrange%d.jpg", c_testOutputPath, count % 34 + 1);
+#else
+		sprintf(fileName, "inrange%d.jpg", count % 34 + 1);
+#endif
 		count++;        
         imwrite(fileName, m_inrange);
-        //imwrite("inrange.bmp", m_inrange);
     }
     else
     {    
@@ -87,19 +95,19 @@ void ProcessingBase::FindContour()
 void ProcessingBase::FindBiggestContour()
 {
     // Walk through each contour that we found looking for the biggest contour
-    for (int i = 0; i < m_contours.size(); i++)
+    for (size_t i = 0; i < m_contours.size(); i++)
     {
-        m_currentContourSize = moments(m_contours[i],true).m00;
+        m_currentContourSize = (int)moments(m_contours[i],true).m00;
         cout << "Contour " << i << " vector size " << m_contours[i].size() << " moment size " << m_currentContourSize << endl;
         if (m_biggestContour < m_currentContourSize)
         {
             m_biggestContour = m_currentContourSize;
-            m_biggestContourLocation = i;
+            m_biggestContourLocation = (int)i;
         }
 
         if (c_bDrawAllContours)
         {
-            drawContours(m_drawing, m_contours, i , c_contourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
+            drawContours(m_drawing, m_contours, (int)i , c_contourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
         }
     }
     if (m_contours.size() > 0)
@@ -115,9 +123,13 @@ void ProcessingBase::FindBiggestContour()
     if (m_calibImageCount == 10 || c_bUseLastDiagImage)
     {
         // For manually calibrating the camera
-        static int count = 1;
+        static int count = 0;
 		char fileName[100];
-        sprintf(fileName, "drawing%d.jpg", count % 34 + 1);
+#ifdef BUILD_ON_WINDOWS
+		sprintf_s<sizeof(fileName)>(fileName, "%sdrawing%d.jpg", c_testOutputPath, count % 34 + 1);
+#else
+		sprintf(fileName, "drawing%d.jpg", count % 34 + 1);
+#endif
 		count++;        
         imwrite(fileName, m_drawing);
         //imwrite("drawing.bmp", m_drawing);
@@ -130,25 +142,36 @@ void ProcessingBase::RejectSmallContours()
     // Walk through each contour that we found looking for the biggest contour by point count
     size_t maxSize = 0;
     cout << "Finding max contour size out of " << m_contours.size() << " contours"<< endl;
-    for (int i = 0; i < m_contours.size(); i++)
-    {
-        maxSize = max(m_contours[i].size(), maxSize);
+	for (size_t i = 0; i < m_contours.size(); i++)
+	{
+		if (m_contours[i].size() < c_maxContourPoints)
+		{
+			maxSize = max(m_contours[i].size(), maxSize);
+		}
     }
 
     vector<vector<Point>> contours;
-    size_t threshold = c_smallContourPercentOfMax * maxSize;
+    size_t threshold = (size_t)(c_smallContourPercentOfMax * maxSize);
     cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
-    for (int i = 0; i < m_contours.size(); i++)
+    for (size_t i = 0; i < m_contours.size(); i++)
     {
         if (m_contours[i].size() > threshold)
         {
-            cout << "Saving contour of size " << m_contours[i].size() << endl;
-            contours.push_back(m_contours[i]);
+#ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
+			auto arcLen = arcLength(m_contours[i], true);
+			auto unorientedArea = contourArea(m_contours[i], false);
+			cout << "arcLen " << arcLen << " unorientedArea " << unorientedArea << endl;
+			if (arcLen > c_arcLenThreshold && unorientedArea > c_areaThreshold)
+#endif
+			{
+				cout << "Saving contour of size " << m_contours[i].size() << endl;
+				contours.push_back(m_contours[i]);
+			}
+		}
+        else
+        {
+            //cout << "Rejecting contour of size " << m_contours[i].size() << endl;
         }
-        // else
-        // {
-        //     cout << "Rejecting contour of size " << m_contours[i].size() << endl;
-        // }
     }
 
     m_contours.swap(contours);
@@ -158,33 +181,27 @@ void ProcessingBase::FindCornerCoordinates()
 {
     Mat image(960, 1280, CV_8UC3, Scalar(0));
     vector<Point> vertVectOut;
+	RotatedRect calculatedRect;
 
     cout << "Approximating polygons for " << m_contours.size() << " contours" << endl;
     for (size_t i = 0; i < m_contours.size(); i++)
     {
         approxPolyDP(m_contours[i], vertVectOut, 5.0, true);
 
-        for (int j = 0; j < 4; j++)
-        {
-            //line(image, vertices[i], vertices[(i+1)%4], Scalar(0, 255, 0));
-            //line(image, vertVect[j] + Point2f(200, 0), vertVect[(i+1)%4], Scalar(0, 255, 0));
-            line(image, vertVectOut[j], vertVectOut[(j + 1) % 4], Scalar(255, 255, 255));
-        }
-
-        // char buf[30];
-        // sprintf(buf, "trapezoid%d.bmp", i);
-        // imwrite(buf, image);
+		if (vertVectOut.size() >= 4)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				//line(image, vertices[i], vertices[(i+1)%4], Scalar(0, 255, 0));
+				//line(image, vertVect[j] + Point2f(200, 0), vertVect[(i+1)%4], Scalar(0, 255, 0));
+				line(image, vertVectOut[j], vertVectOut[(j + 1) % 4], Scalar(255, 255, 255));
+			}
+		}
     }
-    static int count = 1;
-    char fileName[100];
-    sprintf(fileName, "trapezoid%d.jpg", count % 34 + 1);
-    count++;        
-    imwrite(fileName, image);
-    //imwrite("trapezoid.bmp", image);
 
     m_minRect.resize(m_contours.size());
     float angle;
-    //Point2f vertices[4];
+    Point2f vertices[4];
     for (size_t i = 0; i < m_contours.size(); i++)
     {
         m_minRect[i] = minAreaRect(m_contours[i]);
@@ -198,12 +215,25 @@ void ProcessingBase::FindCornerCoordinates()
         }
         cout << "Angle of minimum area rectangle " << angle << endl;
 
-        // m_minRect[i].points(vertices);
-        // for (int j = 0; j < 4; j++)
-        // {
-        //     line(image, vertices[i], vertices[(i+1)%4], Scalar(0, 255, 0));
-        // }        
+        m_minRect[i].points(vertices);
+		//m_minRect[i].size.area;
+		//m_minRect[i].size.height;
+		//m_minRect[i].size.width;
+		for (int j = 0; j < 4; j++)
+		{
+			line(image, vertices[i], vertices[(i + 1) % 4], Scalar(0, 255, 0));
+		}
     }
+
+	static int count = 0;
+	char fileName[100];
+#ifdef BUILD_ON_WINDOWS
+	sprintf_s<sizeof(fileName)>(fileName, "%strapezoid%d.jpg", c_testOutputPath, count % 34 + 1);
+#else
+	sprintf(fileName, "trapezoid%d.jpg", count % 34 + 1);
+#endif
+	count++;
+	imwrite(fileName, image);
 }
 
 void ProcessingBase::FindCenter()
@@ -220,12 +250,12 @@ void ProcessingBase::FindCenter()
     // Find cube center coordinate and draw a circle at that point
     m_cube_center_x = m.m10 / m.m00;
     m_cube_center_y = m.m01 / m.m00;
-    circle(m_drawing, Point(m_cube_center_x, m_cube_center_y), 16, c_centerColor, 2);
+    circle(m_drawing, Point((int)m_cube_center_x, (int)m_cube_center_y), 16, c_centerColor, 2);
 
     // Find image center coordinate
     m_im_center_x = m_drawing.size().width / 2;
     m_im_center_y = m_drawing.size().height / 2;
-    circle(m_drawing, Point(m_im_center_x, m_im_center_y), 1, c_centerColor);    // Replacement for drawMarker since drawMarker didn't work.
+    circle(m_drawing, Point((int)m_im_center_x, (int)m_im_center_y), 1, c_centerColor);    // Replacement for drawMarker since drawMarker didn't work.
 }
 
 void ProcessingBase::FindVerticalRange()
@@ -239,14 +269,14 @@ void ProcessingBase::FindVerticalRange()
     m_cube_contour_max_y = 10000;   // assign a big value
     m_cube_contour_min_y = 10000;   // assign a big value
 
-    for (int i = 0; i < m_contours[m_biggestContourLocation].size(); i++)
+    for (size_t i = 0; i < m_contours[m_biggestContourLocation].size(); i++)
     {
         m_im_actual_dist = abs(m_cube_center_x - m_contours[m_biggestContourLocation][i].x);
         if (m_cube_contour_max_y > m_im_actual_dist)
         {
             if (m_contours[m_biggestContourLocation][i].y > m_cube_center_y) // Find coordinate > object center
             {
-                m_cube_contour_max_index = i;
+                m_cube_contour_max_index = (int)i;
                 m_cube_contour_max_y = m_im_actual_dist;
             }
         }
@@ -255,7 +285,7 @@ void ProcessingBase::FindVerticalRange()
         {
             if (m_contours[m_biggestContourLocation][i].y <= m_cube_center_y) // Find coordinate <= object center
             {
-                m_cube_contour_min_index = i;
+                m_cube_contour_min_index = (int)i;
                 m_cube_contour_min_y = m_im_actual_dist;
             }
         }
@@ -399,4 +429,5 @@ void ProcessingBase::PrintDebugValues()
         << " Forward_Distance_Inch: " << m_Forward_Distance_Inch 
         << " Horizontal_Angle " << m_Horizontal_Angle_Degree 
         << endl;
+	cout << endl;
 }

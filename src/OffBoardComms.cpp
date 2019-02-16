@@ -7,12 +7,12 @@
 
 #include "OffBoardComms.h"
 #include <iostream>
-#include <unistd.h>
-
+//#include <unistd.h>
 
 OffBoardComms::OffBoardComms()
 {
-    m_nt_Inst = NetworkTableInstance::GetDefault();
+#ifdef USE_OFFBOARD_COMMS
+	m_nt_Inst = NetworkTableInstance::GetDefault();
 	m_nt_Inst.StartClientTeam(1259);
 
 	while (!m_nt_Inst.IsConnected())
@@ -36,13 +36,15 @@ OffBoardComms::OffBoardComms()
 		m_visioncounter = m_ntval->GetDouble();
 		cout << "Retrieving counter value: " << m_visioncounter << endl;
 	}
-	m_counter = m_visioncounter;
+#endif
+	m_counter = (int)m_visioncounter;
 }
 
 void OffBoardComms::Publish()
 {
 	if (m_RetroValues.IsChanged() || m_LineValues.IsChanged() || m_CargoValues.IsChanged() || m_HatchValues.IsChanged())
 	{
+#ifdef USE_OFFBOARD_COMMS
 		m_netTableOpenCV->PutNumber("visioncounter", m_counter);
 
 		m_netTableOpenCV->PutNumber("RetroDistance",  m_RetroValues.GetDistance());
@@ -60,7 +62,7 @@ void OffBoardComms::Publish()
 		m_netTableOpenCV->PutNumber("HatchDistance",  m_HatchValues.GetDistance());
 		m_netTableOpenCV->PutNumber("HatchAngle", m_HatchValues.GetAngle());
 		m_netTableOpenCV->PutNumber("HatchQuality", m_HatchValues.GetQuality());
-
+#endif
 		m_counter++;
 	}
 }
@@ -87,10 +89,18 @@ void OffBoardComms::SetCargo(double distance, double angle, int quality)
 
 double OffBoardComms::GetGyroAngle()
 {
+#ifdef USE_OFFBOARD_COMMS
 	return m_netTableSmartDashboard->GetNumber("GyroFused", 0);
+#else
+	return 0.0;
+#endif
 }
 
 int OffBoardComms::GetState()
 {
+#ifdef USE_OFFBOARD_COMMS
 	return m_netTableOpenCV->GetNumber("SelectedVisionTarget", 0);
+#else
+	return 1;
+#endif
 }

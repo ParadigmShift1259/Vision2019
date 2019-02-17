@@ -10,10 +10,11 @@
 
 #define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
 //#define USE_OFFBOARD_COMMS				// Uncomment if you want to use it
-#define TEST_GAFFER_TAPE_ALIGNMENT_IMGS		// Use this when testing hatch vision targets made with white gaffer's tape
+//#define TEST_GAFFER_TAPE_ALIGNMENT_IMGS		// Use this when testing hatch vision targets made with white gaffer's tape
 
 #include <math.h>
 #include <opencv2/opencv.hpp>
+#include <vector>
 
 #ifdef BUILD_ON_WINDOWS
 const double PI = 4.0 * atan(1.0);
@@ -33,5 +34,11 @@ constexpr double m_DEFAULT_FOV_ROW_NUM = 960.0;			   //!< [pixel] Height in pixe
 
 static cv::Scalar c_contourColor = { 231, 96, 97 };        //!< [HSV triplet] We will draw a contour of specific color
 static cv::Scalar c_centerColor = { 231, 96, 97 };         //!< [HSV triplet] Color for center marking for both image and cube
+
+constexpr int c_loopCountToSaveDiagImage = 0;//10;
+
+extern int loopCounter;
+extern std::vector<std::string> testFiles;
+extern std::vector<float> testDist;
 
 #endif // CONST_H

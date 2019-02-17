@@ -69,7 +69,7 @@ protected:
 	static constexpr double m_radiansTodegrees = 180.0 / PI;	//!< Angle units converison factor
 #endif
 
-    static constexpr bool m_bFishEyeCorrection = true;			//!< Set to true if using a wide angle camera
+    static constexpr bool m_bFishEyeCorrection = false;			//!< Set to true if using a wide angle camera
     
     OutputValues m_OutputValues;                                //!< Values to send to the Robot
 
@@ -107,7 +107,6 @@ protected:
 	int m_biggestContourLocation = 0;							//!< Index into m_contours of the biggest contor
     int m_cube_contour_max_index = 0;							//!< Index into m_contours of the max Y coord
     int m_cube_contour_min_index = 0;							//!< Index into m_contours of the min Y coord
-    int m_calibImageCount = 0;									//!< Free running contour to count the number of processing cycles
 
     vector<Vec4i> m_hierarchy;									//!< Output from OpenCV findCountours (not used; holds info on nested objects)
     vector<vector<Point>> m_contours;							//!< Output from OpenCV findCountours (as applied to in range image)

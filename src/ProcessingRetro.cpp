@@ -15,7 +15,7 @@ ProcessingRetro::ProcessingRetro()
 			 		 { 0,  0, 180 })     // White gaffer tape test
 #else
     : ProcessingBase(   { 90, 255, 255 }, 
-                        { 65,  90,  90 } )     // Colors for Retro reflective tape
+                        { 65,  90,  90 } )     // Colors for Retro reflective tape with green lighting
 #endif
 {
 }

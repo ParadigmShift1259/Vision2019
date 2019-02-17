@@ -21,8 +21,12 @@
 
 using namespace std;
 
+int loopCounter = 0;
+
 int main()
 {
+	cout << "Vision has Started" << endl;
+
 	CameraWrapper camera;
 	ProcessingCargo cargo;
 	ProcessingHatch hatch;
@@ -44,11 +48,7 @@ int main()
 
 	cout << "Starting main loop" << endl;
 	// TODO while (true)
-#ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
-	for (int i = 0; i < 34; i++)
-#else
-	for (int i = 0; i < 18; i++)
-#endif
+	for (int i = 0; i < testFiles.size(); i++)
 	{
 		camera.AcquireImage();
 		
@@ -82,6 +82,7 @@ int main()
 
 		offBoardComms.Publish();
 
+		loopCounter++;
 	}  //end of while
 
 	return 0;

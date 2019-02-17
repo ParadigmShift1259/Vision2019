@@ -24,6 +24,14 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
     : m_upper(upper) 
     , m_lower(lower)
 {
+	cout << "Loop,"
+		<< "Dist,"
+		<< "Area,"
+		<< "ShortSide,"
+		<< "LongSide,"
+		<< "AspectRatio,"
+		<< "Angle"
+		<< endl;
 }
 
 ProcessingBase::~ProcessingBase()
@@ -39,7 +47,7 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
     
     if (c_bUseLastDiagImage)
 	{
-        // if (m_calibImageCount == 0)
+        // if (loopCounter == 0)
         // {
         //     char buf[30];
         //     for (int i = 0; i < 11; i++)
@@ -51,22 +59,25 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
         //         imwrite(buf, m_inrange);
         //     }
         // }
-        static int count = 0;
-		char fileName[100];
+		if (!bSkipHSVConvert)
+		{
+			char fileName[255];
 #ifdef BUILD_ON_WINDOWS
-		sprintf_s<sizeof(fileName)>(fileName, "%sinrange%d.jpg", c_testOutputPath, count % 34 + 1);
+		int ndx = loopCounter % testFiles.size();
+		sprintf_s<sizeof(fileName)>(fileName, "%s%dinrange_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
 #else
-		sprintf(fileName, "inrange%d.jpg", count % 34 + 1);
+		sprintf(fileName, "inrange%d.jpg", loopCounter % testFiles.size() + 1);
 #endif
-		count++;        
-        imwrite(fileName, m_inrange);
+			imwrite(fileName, m_inrange);
+			imwrite("image.jpg", image);
+		}
     }
     else
     {    
         // Searching for color in the image that has a high of upper scaler and a low of lower scaler. Stores result in inrange
         inRange(m_imageHSV, m_lower, m_upper, m_inrange);	// Identify color per HSV image
 
-        if (m_calibImageCount == 10)
+        if (loopCounter == c_loopCountToSaveDiagImage)
         {
             // For manually calibrating the camera
             imwrite("inrange.jpg", m_inrange);
@@ -94,7 +105,7 @@ void ProcessingBase::FindBiggestContour()
     for (size_t i = 0; i < m_contours.size(); i++)
     {
         currentContourSize = (int)moments(m_contours[i],true).m00;
-        cout << "Contour " << i << " vector size " << m_contours[i].size() << " moment size " << currentContourSize << endl;
+        //cout << "Contour " << i << " vector size " << m_contours[i].size() << " moment size " << currentContourSize << endl;
         if (m_biggestContour < currentContourSize)
         {
             m_biggestContour = currentContourSize;
@@ -116,28 +127,26 @@ void ProcessingBase::FindBiggestContour()
         cout << "Did not find any contour " << endl;
     }
 
-    if (m_calibImageCount == 10 || c_bUseLastDiagImage)
+    if (loopCounter == c_loopCountToSaveDiagImage || c_bUseLastDiagImage)
     {
         // For manually calibrating the camera
-        static int count = 0;
-		char fileName[100];
+		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
-		sprintf_s<sizeof(fileName)>(fileName, "%sdrawing%d.jpg", c_testOutputPath, count % 34 + 1);
+		int ndx = loopCounter % testFiles.size();
+		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
 #else
-		sprintf(fileName, "drawing%d.jpg", count % 34 + 1);
+		sprintf(fileName, "drawing%d.jpg", loopCounter % testFiles.size() + 1);
 #endif
-		count++;        
         imwrite(fileName, m_drawing);
         //imwrite("drawing.bmp", m_drawing);
     }
-    m_calibImageCount++;
 }
 
 void ProcessingBase::RejectSmallContours()
 {
     // Walk through each contour that we found looking for the biggest contour by point count
     size_t maxSize = 0;
-    cout << "Finding max contour size out of " << m_contours.size() << " contours"<< endl;
+    //cout << "Finding max contour size out of " << m_contours.size() << " contours"<< endl;
 	for (size_t i = 0; i < m_contours.size(); i++)
 	{
 		if (m_contours[i].size() < c_maxContourPoints)
@@ -148,7 +157,7 @@ void ProcessingBase::RejectSmallContours()
 
     vector<vector<Point>> contours;
     size_t threshold = (size_t)(c_smallContourPercentOfMax * maxSize);
-    cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
+    //cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
     for (size_t i = 0; i < m_contours.size(); i++)
     {
         if (m_contours[i].size() > threshold)
@@ -156,11 +165,11 @@ void ProcessingBase::RejectSmallContours()
 #ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
 			auto arcLen = arcLength(m_contours[i], true);
 			auto unorientedArea = contourArea(m_contours[i], false);
-			cout << "arcLen " << arcLen << " unorientedArea " << unorientedArea << endl;
+			//cout << "arcLen " << arcLen << " unorientedArea " << unorientedArea << endl;
 			if (arcLen > c_arcLenThreshold && unorientedArea > c_areaThreshold)
 #endif
 			{
-				cout << "Saving contour of size " << m_contours[i].size() << endl;
+				//cout << "Saving contour of size " << m_contours[i].size() << endl;
 				contours.push_back(m_contours[i]);
 			}
 		}
@@ -175,60 +184,175 @@ void ProcessingBase::RejectSmallContours()
 
 void ProcessingBase::FindCornerCoordinates()
 {
-    Mat image(960, 1280, CV_8UC3, Scalar(0));
-    vector<Point> vertVectOut;
-	RotatedRect calculatedRect;
+	if (m_contours.size() == 0)
+	{
+		return;
+	}
 
-    cout << "Approximating polygons for " << m_contours.size() << " contours" << endl;
-    for (size_t i = 0; i < m_contours.size(); i++)
-    {
-        approxPolyDP(m_contours[i], vertVectOut, 5.0, true);
+	Mat image(m_inrange.rows, m_inrange.cols, CV_8UC3, Scalar(0));
+    //vector<Point> vertVectOut;
 
-		if (vertVectOut.size() >= 4)
+  //  cout << "Approximating polygons for " << m_contours.size() << " contours" << endl;
+  //  for (size_t i = 0; i < m_contours.size(); i++)
+  //  {
+  //      approxPolyDP(m_contours[i], vertVectOut, 5.0, true);
+
+		//if (vertVectOut.size() >= 4)
+		//{
+		//	for (int j = 0; j < 4; j++)
+		//	{
+		//		//line(image, vertices[i], vertices[(i+1)%4], Scalar(0, 255, 0));
+		//		//line(image, vertVect[j] + Point2f(200, 0), vertVect[(i+1)%4], Scalar(0, 255, 0));
+		//		line(image, vertVectOut[j], vertVectOut[(j + 1) % 4], Scalar(255, 255, 255));
+		//	}
+		//}
+  //  }
+
+	//cout << "Finding minimum area rotated rectangles for " << m_contours.size() << " contours" << endl;
+	m_minRect.resize(m_contours.size());
+	vector<float> angles(m_contours.size());
+
+	enum ESide
+	{
+		  eUnknown
+		, eLeft
+		, eRight
+	};
+	vector<string> sideStr =
+	{
+		  "Unknown"
+		, "Left"
+		, "Right"
+	};
+	vector<ESide> side(m_contours.size());
+
+	const vector<Scalar> colors =
+	{
+		  {   0,   0, 255 }
+		, {   0, 255,   0 }
+		, { 255,   0,   0 }
+		, { 255, 255,   0 }
+		, { 255,   0, 255 }
+		, {   0, 255, 255 }
+		, { 128, 128, 128 }
+		, { 128,   0,   0 }
+		, {   0, 128,   0 }
+		, {   0,   0, 128 }
+	};
+
+	float maxArea = FLT_MIN;
+	for (size_t i = 0; i < m_contours.size(); i++)
+	{
+		m_minRect[i] = minAreaRect(m_contours[i]);
+		maxArea = max(maxArea, m_minRect[i].size.area());
+
+		if (m_minRect[i].size.width < m_minRect[i].size.height)
 		{
-			for (int j = 0; j < 4; j++)
-			{
-				//line(image, vertices[i], vertices[(i+1)%4], Scalar(0, 255, 0));
-				//line(image, vertVect[j] + Point2f(200, 0), vertVect[(i+1)%4], Scalar(0, 255, 0));
-				line(image, vertVectOut[j], vertVectOut[(j + 1) % 4], Scalar(255, 255, 255));
-			}
+			angles[i] = m_minRect[i].angle + 180;
 		}
-    }
+		else
+		{
+			angles[i] = m_minRect[i].angle + 90;
+		}
 
-    m_minRect.resize(m_contours.size());
-    float angle;
-    Point2f vertices[4];
-    for (size_t i = 0; i < m_contours.size(); i++)
-    {
-        m_minRect[i] = minAreaRect(m_contours[i]);
-        if (m_minRect[i].size.width < m_minRect[i].size.height)
-        {
-            angle = m_minRect[i].angle + 180;
-        }
-        else
-        {
-            angle = m_minRect[i].angle + 90; //
-        }
-        cout << "Angle of minimum area rectangle " << angle << endl;
+		if (angles[i] > 10.0f && angles[i] < 30.0f)	// 20 degrees +/- 10
+		{
+			side[i] = eLeft;
+		}
+		else if (angles[i] > 155.0f && angles[i] < 175.0f)	// 165 degrees +/- 10
+		{
+			side[i] = eRight;
+		}
+		else
+		{
+			side[i] = eUnknown;
+		}
+		//cout << "Minimum area " << m_minRect[i].size.area()
+		//	<< " width " << m_minRect[i].size.width
+		//	<< " height " << m_minRect[i].size.height
+		//	<< " angle " << angles[i]
+		//	<< " side " << sideStr[side[i]]
+		//	<< " aspect ratio 1 " << m_minRect[i].size.width / m_minRect[i].size.height
+		//	<< " aspect ratio 2 " << m_minRect[i].size.height / m_minRect[i].size.width
+		//	<< endl;
+	}
 
+	Point2f vertices[4];
+	char text[255];
+	const float areaThreshold = 0.3f * maxArea;
+	for (size_t i = 0; i < m_contours.size(); i++)
+	{
+		if (m_minRect[i].size.area() < areaThreshold || side[i] == eUnknown)
+		{
+			continue;
+		}
+
+		float longSide = max(m_minRect[i].size.width, m_minRect[i].size.height);
+		float shortSide = min(m_minRect[i].size.width, m_minRect[i].size.height);
+		float aspectRatio = shortSide / longSide;
+		//if (aspectRatio > 0.4f)
+		//{
+		//	cout << " aspect ratio greater than 0.4 may be occluded by hatch " << aspectRatio << endl;
+		//}
+
+		auto color = colors[i % colors.size()];
         m_minRect[i].points(vertices);
-		//m_minRect[i].size.area;
-		//m_minRect[i].size.height;
-		//m_minRect[i].size.width;
 		for (int j = 0; j < 4; j++)
 		{
-			line(image, vertices[i], vertices[(i + 1) % 4], Scalar(0, 255, 0));
+			line(image, vertices[j], vertices[(j + 1) % 4], color);
 		}
-    }
 
-	static int count = 0;
-	char fileName[100];
+		//void putText(InputOutputArray img, const String& text, Point org, int fontFace, double fontScale, Scalar color, int thickness = 1, int lineType = LINE_8, bool bottomLeftOrigin = false)
+		const double fontScale = 0.35;
+		float offset = side[i] == eRight ? 50.f : 0.0f;
+		float y = i * 10.0f;
+		Point2f areaLoc(vertices[0].x - offset, y + 10.0f);
+		Point2f whLoc(vertices[0].x - offset, y + 30.0f);
+		Point2f angleLoc(vertices[0].x - offset, y + 50.0f);
+		Point2f sideLoc(vertices[0].x - offset, y + 70.0f);
 #ifdef BUILD_ON_WINDOWS
-	sprintf_s<sizeof(fileName)>(fileName, "%strapezoid%d.jpg", c_testOutputPath, count % 34 + 1);
+		sprintf_s<sizeof(text)>(text, "Area: %.2f", m_minRect[i].size.area());
+		cv::putText(image, text, areaLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		sprintf_s<sizeof(text)>(text, "width: %.2f height: %.2f", m_minRect[i].size.width, m_minRect[i].size.height);
+		cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		sprintf_s<sizeof(text)>(text, "Angle %.2f", angles[i]);
+		cv::putText(image, text, angleLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		sprintf_s<sizeof(text)>(text, "%s", sideStr[side[i]].c_str());
+		cv::putText(image, text, sideLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		if (aspectRatio > 0.4f)
+		{
+			Point2f loc(vertices[0].x - offset, y + 90.0f);
+			sprintf_s<sizeof(text)>(text, "Occluded - Aspect ratio %.2f", aspectRatio);
+			cv::putText(image, text, loc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		}
 #else
-	sprintf(fileName, "trapezoid%d.jpg", count % 34 + 1);
+		sprintf(text, "Area: %.2f", m_minRect[i].size.area());
+		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		sprintf_s<sizeof(text)>(text, "width: %.2f height: %.2f", m_minRect[i].size.width, m_minRect[i].size.height);
+		cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		sprintf(text, "Angle %.2f", angle);
+		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		sprintf(text, "%s", sideStr[side[i]].c_str());
+		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
 #endif
-	count++;
+
+		cout << loopCounter << ","
+			<< testDist[loopCounter % testFiles.size()] << ","
+			<< m_minRect[i].size.area() << ","
+			<< shortSide << ","
+			<< longSide << ","
+			<< aspectRatio << ","
+			<< angles[i]
+			<< endl;
+	}
+
+	char fileName[255];
+#ifdef BUILD_ON_WINDOWS
+	int ndx = loopCounter % testFiles.size();
+	sprintf_s<sizeof(fileName)>(fileName, "%s%d_trapezoid_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
+#else
+	sprintf(fileName, "trapezoid%d.jpg", loopCounter % testFiles.size() + 1);
+#endif
 	imwrite(fileName, image);
 }
 
@@ -420,11 +544,19 @@ void ProcessingBase::CalcOutputValues()
 
 void ProcessingBase::PrintDebugValues()
 {
-    cout    << "Counter: " << m_calibImageCount 
-        << " Horizontal_Distance_Inch: " << m_Horizontal_Distance_Inch
-        << " Vertical_Distance_Inch " << m_Vertical_Distance_Inch
-        << " Forward_Distance_Inch: " << m_Forward_Distance_Inch 
-        << " Horizontal_Angle " << m_Horizontal_Angle_Degree 
-        << endl;
-	cout << endl;
+//	int ndx = loopCounter % testFiles.size();
+//#ifdef BUILD_ON_WINDOWS
+//	cout << testFiles[ndx] << endl;
+//#else
+//	cout << testFiles[ndx] << endl;
+//#endif
+//
+//	cout    << "Counter: " << loopCounter
+//			<< " Horizontal_Distance_Inch: " << m_Horizontal_Distance_Inch
+//			<< " Vertical_Distance_Inch " << m_Vertical_Distance_Inch
+//			<< " Forward_Distance_Inch: " << m_Forward_Distance_Inch 
+//			<< " Horizontal_Angle " << m_Horizontal_Angle_Degree 
+//			<< endl;
+//
+//	cout << endl;
 }

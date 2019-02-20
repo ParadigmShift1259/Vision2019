@@ -40,7 +40,7 @@ ProcessingBase::~ProcessingBase()
 
 void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false */)
 {
-    if (!bSkipHSVConvert)
+    if (!bSkipHSVConvert && image.rows > 0 && image.cols > 0)
     {
 	    cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
     }
@@ -146,7 +146,7 @@ void ProcessingBase::RejectSmallContours()
 {
     // Walk through each contour that we found looking for the biggest contour by point count
     size_t maxSize = 0;
-    //cout << "Finding max contour size out of " << m_contours.size() << " contours"<< endl;
+    cout << "Finding max contour size out of " << m_contours.size() << " contours"<< endl;
 	for (size_t i = 0; i < m_contours.size(); i++)
 	{
 		if (m_contours[i].size() < c_maxContourPoints)
@@ -157,7 +157,7 @@ void ProcessingBase::RejectSmallContours()
 
     vector<vector<Point>> contours;
     size_t threshold = (size_t)(c_smallContourPercentOfMax * maxSize);
-    //cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
+    cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
     for (size_t i = 0; i < m_contours.size(); i++)
     {
         if (m_contours[i].size() > threshold)
@@ -169,14 +169,14 @@ void ProcessingBase::RejectSmallContours()
 			if (arcLen > c_arcLenThreshold && unorientedArea > c_areaThreshold)
 #endif
 			{
-				//cout << "Saving contour of size " << m_contours[i].size() << endl;
+				cout << "Saving contour of size " << m_contours[i].size() << endl;
 				contours.push_back(m_contours[i]);
 			}
 		}
-        else
-        {
-            //cout << "Rejecting contour of size " << m_contours[i].size() << endl;
-        }
+  //      else
+  //      {
+  //          cout << "Rejecting contour of size " << m_contours[i].size() << endl;
+  //      }
     }
 
     m_contours.swap(contours);
@@ -254,12 +254,13 @@ void ProcessingBase::FindCornerCoordinates()
 		{
 			angles[i] = m_minRect[i].angle + 90;
 		}
-
-		if (angles[i] > 10.0f && angles[i] < 30.0f)	// 20 degrees +/- 10
+		
+		// Is this a left or right leaning retroreflective target 
+		if (angles[i] > c_minLeftAngle && angles[i] < c_maxLeftAngle)
 		{
 			side[i] = eLeft;
 		}
-		else if (angles[i] > 155.0f && angles[i] < 175.0f)	// 165 degrees +/- 10
+		else if (angles[i] > c_minRightAngle && angles[i] < c_maxRightAngle)
 		{
 			side[i] = eRight;
 		}
@@ -267,30 +268,38 @@ void ProcessingBase::FindCornerCoordinates()
 		{
 			side[i] = eUnknown;
 		}
-		//cout << "Minimum area " << m_minRect[i].size.area()
-		//	<< " width " << m_minRect[i].size.width
-		//	<< " height " << m_minRect[i].size.height
-		//	<< " angle " << angles[i]
-		//	<< " side " << sideStr[side[i]]
-		//	<< " aspect ratio 1 " << m_minRect[i].size.width / m_minRect[i].size.height
-		//	<< " aspect ratio 2 " << m_minRect[i].size.height / m_minRect[i].size.width
-		//	<< endl;
+		cout << "Minimum area " << m_minRect[i].size.area()
+			<< " width " << m_minRect[i].size.width
+			<< " height " << m_minRect[i].size.height
+			<< " angle " << angles[i]
+			<< " side " << sideStr[side[i]]
+			<< " aspect ratio 1 " << m_minRect[i].size.width / m_minRect[i].size.height
+			<< " aspect ratio 2 " << m_minRect[i].size.height / m_minRect[i].size.width
+			<< endl;
 	}
 
 	Point2f vertices[4];
 	char text[255];
-	const float areaThreshold = 0.3f * maxArea;
+	const float areaThreshold = c_areaThresholdPercent * maxArea;
 	for (size_t i = 0; i < m_contours.size(); i++)
 	{
 		if (m_minRect[i].size.area() < areaThreshold || side[i] == eUnknown)
 		{
+			if (side[i] == eUnknown)
+			{
+				cout << "Rejecting rectangle of unknown angle " << angles[i] << endl;
+			}
+			else
+			{
+				cout << "Rejecting rectangle with small area " << m_minRect[i].size.area() << endl;
+			}
 			continue;
 		}
 
 		float longSide = max(m_minRect[i].size.width, m_minRect[i].size.height);
 		float shortSide = min(m_minRect[i].size.width, m_minRect[i].size.height);
 		float aspectRatio = shortSide / longSide;
-		//if (aspectRatio > 0.4f)
+		//if (aspectRatio > c_occludedAspectRatio)
 		//{
 		//	cout << " aspect ratio greater than 0.4 may be occluded by hatch " << aspectRatio << endl;
 		//}
@@ -299,11 +308,12 @@ void ProcessingBase::FindCornerCoordinates()
         m_minRect[i].points(vertices);
 		for (int j = 0; j < 4; j++)
 		{
-			line(image, vertices[j], vertices[(j + 1) % 4], color);
+			line(image, vertices[j], vertices[(j + 1) % 4], color, 2, 8);
 		}
 
 		//void putText(InputOutputArray img, const String& text, Point org, int fontFace, double fontScale, Scalar color, int thickness = 1, int lineType = LINE_8, bool bottomLeftOrigin = false)
-		const double fontScale = 0.35;
+		const double fontScale = 0.37;
+		const int textThickness = 1;
 		float offset = side[i] == eRight ? 50.f : 0.0f;
 		float y = i * 10.0f;
 		Point2f areaLoc(vertices[0].x - offset, y + 10.0f);
@@ -312,28 +322,34 @@ void ProcessingBase::FindCornerCoordinates()
 		Point2f sideLoc(vertices[0].x - offset, y + 70.0f);
 #ifdef BUILD_ON_WINDOWS
 		sprintf_s<sizeof(text)>(text, "Area: %.2f", m_minRect[i].size.area());
-		cv::putText(image, text, areaLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		cv::putText(image, text, areaLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 		sprintf_s<sizeof(text)>(text, "width: %.2f height: %.2f", m_minRect[i].size.width, m_minRect[i].size.height);
-		cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 		sprintf_s<sizeof(text)>(text, "Angle %.2f", angles[i]);
-		cv::putText(image, text, angleLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		cv::putText(image, text, angleLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 		sprintf_s<sizeof(text)>(text, "%s", sideStr[side[i]].c_str());
-		cv::putText(image, text, sideLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
-		if (aspectRatio > 0.4f)
+		cv::putText(image, text, sideLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
+		if (aspectRatio > c_occludedAspectRatio)
 		{
 			Point2f loc(vertices[0].x - offset, y + 90.0f);
 			sprintf_s<sizeof(text)>(text, "Occluded - Aspect ratio %.2f", aspectRatio);
-			cv::putText(image, text, loc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+			cv::putText(image, text, loc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 		}
 #else
 		sprintf(text, "Area: %.2f", m_minRect[i].size.area());
-		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 		sprintf_s<sizeof(text)>(text, "width: %.2f height: %.2f", m_minRect[i].size.width, m_minRect[i].size.height);
-		cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 		sprintf(text, "Angle %.2f", angle);
-		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 		sprintf(text, "%s", sideStr[side[i]].c_str());
-		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, 1, LINE_AA);
+		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
+		if (aspectRatio > c_occludedAspectRatio)
+		{
+			Point2f loc(vertices[0].x - offset, y + 90.0f);
+			sprintf(text, "Occluded - Aspect ratio %.2f", aspectRatio);
+			cv::putText(image, text, loc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
+		}
 #endif
 
 		cout << loopCounter << ","
@@ -544,19 +560,19 @@ void ProcessingBase::CalcOutputValues()
 
 void ProcessingBase::PrintDebugValues()
 {
-//	int ndx = loopCounter % testFiles.size();
-//#ifdef BUILD_ON_WINDOWS
-//	cout << testFiles[ndx] << endl;
-//#else
-//	cout << testFiles[ndx] << endl;
-//#endif
-//
-//	cout    << "Counter: " << loopCounter
-//			<< " Horizontal_Distance_Inch: " << m_Horizontal_Distance_Inch
-//			<< " Vertical_Distance_Inch " << m_Vertical_Distance_Inch
-//			<< " Forward_Distance_Inch: " << m_Forward_Distance_Inch 
-//			<< " Horizontal_Angle " << m_Horizontal_Angle_Degree 
-//			<< endl;
-//
-//	cout << endl;
+	int ndx = loopCounter % testFiles.size();
+#ifdef BUILD_ON_WINDOWS
+	cout << testFiles[ndx] << endl;
+#else
+	cout << testFiles[ndx] << endl;
+#endif
+
+	cout    << "Counter: " << loopCounter
+			<< " Horizontal_Distance_Inch: " << m_Horizontal_Distance_Inch
+			<< " Vertical_Distance_Inch " << m_Vertical_Distance_Inch
+			<< " Forward_Distance_Inch: " << m_Forward_Distance_Inch 
+			<< " Horizontal_Angle " << m_Horizontal_Angle_Degree 
+			<< endl;
+
+	cout << endl;
 }

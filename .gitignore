@@ -74,3 +74,5 @@ x64/Release/Vision2019VS.tlog/link.command.1.tlog
 x64/Release/Vision2019VS.tlog/link.read.1.tlog
 x64/Release/Vision2019VS.tlog/link.write.1.tlog
 x64/Release/Vision2019VS.tlog/unsuccessfulbuild
+.vs/Vision 2019/v15/ipch/AutoPCH/f6171ec0f9a92806/PROCESSINGHATCH.ipch
+x64/Debug/Vision2019VS.Build.CppClean.log

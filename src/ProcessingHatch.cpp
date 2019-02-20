@@ -10,7 +10,8 @@
 #include "ProcessingHatch.h"
 
 ProcessingHatch::ProcessingHatch()
-    : ProcessingBase( { 40, 255, 255 }, { 20, 280, 50 } )     // TODO: Pick colors for Hatch game piece
+    //: ProcessingBase( { 40, 255, 255 }, { 20, 280, 50 } )     // TODO: Pick colors for Hatch game piece		if not already picked  HUE: 18-22, SATURATION 8-11, VALUE 77-82	PAINT.NET values
+	: ProcessingBase({ 11, 20, /*148*/ 180 }, { 9, 14, 139 })
 {
 }
 

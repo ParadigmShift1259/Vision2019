@@ -8,30 +8,51 @@
 #include "CameraWrapper.h"
 #include "Const.h"
 
+#ifdef TEST_FILES_LINE
+const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/Input/";
+#endif
+#ifdef TEST_FILES_ROCKET
+const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/";
+#endif
+#ifdef TEST_FILES_CARGO
+const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/";
+#endif
+#ifdef TEST_FILES_NARROW
+const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/narrow_camera_at_top/";
+#endif
+#ifdef TEST_FILES_WIDE
+const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
+#endif
+
 std::vector<std::string> testFiles
 {
-	//  "RocketPanelStraightDark16in.jpg"
-	//, "RocketPanelStraightDark24in.jpg"
-	//, "RocketPanelStraightDark36in.jpg"
-	//, "RocketPanelStraightDark48in.jpg"
-	//, "RocketPanelStraightDark60in.jpg"
-	//, "RocketPanelStraightDark72in.jpg"
-	//, "RocketPanelStraightDark96in.jpg"
-	//, "RocketStraightDark96in.jpg"
-	//, "RocketPanelStraightDark12in.jpg"
-	//, "RocketPanelStraightDark24inLeftOnly.jpg"
-	//, "RocketPanelStraightDark24inRightOnly.jpg"
+#ifdef TEST_FILES_ROCKET
+	  "RocketPanelStraightDark16in.jpg"
+	, "RocketPanelStraightDark24in.jpg"
+	, "RocketPanelStraightDark36in.jpg"
+	, "RocketPanelStraightDark48in.jpg"
+	, "RocketPanelStraightDark60in.jpg"
+	, "RocketPanelStraightDark72in.jpg"
+	, "RocketPanelStraightDark96in.jpg"
+	, "RocketStraightDark96in.jpg"
+	, "RocketPanelStraightDark12in.jpg"
+	, "RocketPanelStraightDark24inLeftOnly.jpg"
+	, "RocketPanelStraightDark24inRightOnly.jpg"
+#endif
 
-	//, "CargoSideStraightDark36in.jpg"
-	//, "CargoSideStraightDark60in.jpg"
-	//, "CargoSideStraightDark72in.jpg"
-	//, "CargoSideStraightPanelDark36in.jpg"
-	//, "CargoStraightDark19in.jpg"
-	//, "CargoStraightDark24in.jpg"
-	//, "CargoStraightDark48in.jpg"
-	//, "CargoStraightDark72in.jpg"
-	//, "CargoStraightDark90in.jpg"
+#ifdef TEST_FILES_CARGO
+	, "CargoSideStraightDark36in.jpg"
+	, "CargoSideStraightDark60in.jpg"
+	, "CargoSideStraightDark72in.jpg"
+	, "CargoSideStraightPanelDark36in.jpg"
+	, "CargoStraightDark19in.jpg"
+	, "CargoStraightDark24in.jpg"
+	, "CargoStraightDark48in.jpg"
+	, "CargoStraightDark72in.jpg"
+	, "CargoStraightDark90in.jpg"
+#endif
 
+#ifdef TEST_FILES_NARROW
 	  "im_12in_l_nlen.jpg"
 	, "im_18in_l_nlen.jpg"
 	, "im_24in_l_nlen.jpg"
@@ -49,33 +70,64 @@ std::vector<std::string> testFiles
 	//, "im_hatch40in_2_l_nlen.jpg"
 	//, "im_hatch60in_1_l_nlen.jpg"
 	//, "im_hatch60in_2_l_nlen.jpg"
+#endif
+
+#ifdef TEST_FILES_WIDE
+	  "im_96in_p_wlen.jpg"
+	, "im_12in_h_wlen_1.jpg"
+	, "im_12in_p_wlen.jpg"
+	, "im_18in_h_wlen_1.jpg"
+	, "im_18in_p_wlen.jpg"
+	, "im_30in_h_wlen_1.jpg"
+	, "im_30in_p_wlen.jpg"
+	, "im_36in_45deg_h_wlen.jpg"
+	, "im_36in_m45deg_h_wlen.jpg"
+	, "im_48in_h_wlen_1.jpg"
+	, "im_48in_p_wlen.jpg"
+	, "im_60in_45deg_h_wlen.jpg"
+	, "im_60in_m45deg_h_wlen.jpg"
+	, "im_72in_h_wlen_1.jpg"
+	, "im_72in_p_wlen.jpg"
+	, "im_96in_h_wlen_1.jpg"
+
+	, "testFishEye.jpg"
+	, "test_horiz30gaff.jpg"
+	, "test_horiz45gaff.jpg"
+	, "test_vertical0gaff.jpg"
+	, "test_vertical45gaff.jpg"
+#endif
 };
 
 std::vector<float> testDist	// Keep in sync with testFile vector
 {
-	//  16.0
-	//, 24.0
-	//, 36.0
-	//, 48.0
-	//, 60.0
-	//, 72.0
-	//, 96.0
-	//, 96.0
-	//, 12.0
-	//, 24.0
-	//, 24.0
+#ifdef TEST_FILES_ROCKET
+	  16.0
+	, 24.0
+	, 36.0
+	, 48.0
+	, 60.0
+	, 72.0
+	, 96.0
+	, 96.0
+	, 12.0
+	, 24.0
+	, 24.0
+#endif
 
-	//, 36.0
-	//, 60.0
-	//, 72.0
-	//, 36.0
-	//, 19.0
-	//, 24.0
-	//, 48.0
-	//, 72.0
-	//, 90.0
+#ifdef TEST_FILES_CARGO
+	  36.0
+	, 60.0
+	, 72.0
+	, 36.0
+	, 19.0
+	, 24.0
+	, 48.0
+	, 72.0
+	, 90.0
+#endif
 
-	  12
+#ifdef TEST_FILES_NARROW
+	  12.0
 	, 18
 	, 24
 	, 30
@@ -92,6 +144,32 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 	//, 40
 	//, 60
 	//, 60
+#endif
+
+#ifdef TEST_FILES_WIDE
+	  96
+	, 12
+	, 12
+	, 18
+	, 18
+	, 30
+	, 30
+	, 36
+	, 36
+	, 48
+	, 48
+	, 60
+	, 60
+	, 72
+	, 72
+	, 96
+	// These are not right, probably angles
+	, 18	//? maybe
+	, 30
+	, 45
+	, 18	// 0
+	, 45
+#endif
 };
 
 CameraWrapper::CameraWrapper()
@@ -137,8 +215,9 @@ void CameraWrapper::AcquireImage()
 #ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
 		char fileName[100];
 #ifdef BUILD_ON_WINDOWS
-		const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/Input/";
+#ifdef TEST_FILES_LINE
 		sprintf_s<sizeof(fileName)>(fileName, "%salignment_line%d.jpg", c_testImagePath, loopCounter % testFiles.size() + 1);
+#endif
 #else
 		sprintf(fileName, "alignment_line%d.jpg", loopCounter % testFiles.size() + 1);
 #endif
@@ -146,8 +225,6 @@ void CameraWrapper::AcquireImage()
 #else	// if TEST_GAFFER_TAPE_ALIGNMENT_IMGS
 
 #ifdef BUILD_ON_WINDOWS
-		//const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/Input/";
-		const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/narrow_camera_at_top/";
 		string fileName = c_testImagePath + testFiles[loopCounter % testFiles.size()];
 #else
 		string fileName = testFiles[loopCounter % (int)testFiles.size()];

@@ -37,6 +37,7 @@ public:
     const OutputValues& GetOutputValues() const { return m_OutputValues; }	//!< Return the output values
     const Mat& GetImageHSV() const { return m_imageHSV; }					//!< Return the converted input image in HSV representation
     void SetImageHSV(const Mat& imageHSV) { m_imageHSV = imageHSV; }		//!< Set the converted input image in HSV representation for later retreival
+	void FishEyeCorrect(double xIn, double yIn, double& xOut, double& yOut);//!< Correct the distortion from the wide angle (fisheye) camera
 
 protected:
 	void Prepare(const Mat& image, bool bSkipHSVConvert = false);			//!< Convert input image to HSV and perform in-range filtering 
@@ -60,6 +61,7 @@ protected:
 	static constexpr double m_ANGLE_THRESHOLD = 60.0;		    //!< [degrees] If we calculate an output angle more than this, do not send it
     static constexpr double m_FORWARD_DIST_THRESHOLD = 240.0;	//!< [inch] 20 feet; if we calculate an output distance more than this, do not send it
 	static constexpr double m_CUBE_CONTOUR_THRESHOLD = 100.0; 	//!< [pixel] If the contour is smaller than this, do not process it
+	static constexpr const double m_k = -0.46;     				//!< Constant value for fisheye lens used by Raspberry pi (determined empirically)
 
 #ifdef BUILD_ON_WINDOWS
 	static double m_degreesToRadians;							//!< Angle units converison factor
@@ -69,7 +71,7 @@ protected:
 	static constexpr double m_radiansTodegrees = 180.0 / PI;	//!< Angle units converison factor
 #endif
 
-    static constexpr bool m_bFishEyeCorrection = false;			//!< Set to true if using a wide angle camera
+    static constexpr bool m_bFishEyeCorrection = true;			//!< Set to true if using a wide angle camera
     
     OutputValues m_OutputValues;                                //!< Values to send to the Robot
 
@@ -90,6 +92,8 @@ protected:
 
     double m_im_center_x = 0.0;									//!< X coord for center of image (drawing)
     double m_im_center_y = 0.0;									//!< Y coord for center of image (drawing)
+	double m_R;													//!< Radius to center of image for fisheye correction
+	double m_borderCorr;										//!< Scaling factor per border for fisheye correction
 
     double m_cube_contour_max_y;								//!< Max Y coord for contour TODO change cube
     double m_cube_contour_min_y;								//!< Min Y coord for contour TODO change cube

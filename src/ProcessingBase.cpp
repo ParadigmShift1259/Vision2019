@@ -9,6 +9,8 @@
 
 #include "ProcessingBase.h"
 
+#include <time.h>	// For clock_gettime()
+
 // 2018 competition cube settings
 //Scalar ProcessingBase::m_upper = { 20, 280, 50 };                  
 //Scalar ProcessingBase::m_lower = { 40, 255, 255 };
@@ -91,6 +93,12 @@ void ProcessingBase::FindContour()
     findContours(m_inrange, m_contours, m_hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
     // creates a drawing matrix with inrange size and fills it with zeroes
     m_drawing = Mat::zeros(m_inrange.size(), CV_8UC3);
+
+	// Find image center coordinate
+	m_im_center_x = m_drawing.size().width / 2;
+	m_im_center_y = m_drawing.size().height / 2;
+	m_R = sqrt(m_im_center_x * m_im_center_x + m_im_center_y * m_im_center_y);	// For fisheye correction
+	m_borderCorr = 1 / (1 + m_k * pow(min(m_im_center_x, m_im_center_y) / m_R, 2.0)); // Scaling factor per border
 
     // Reset the contour values to zero
     m_biggestContour = 0;
@@ -180,6 +188,39 @@ void ProcessingBase::RejectSmallContours()
     }
 
     m_contours.swap(contours);
+
+#ifndef BUILD_ON_WINDOWS
+		long int start_time;
+		long int time_difference;
+		struct timespec gettime_now;
+	
+		clock_gettime(CLOCK_REALTIME, &gettime_now);
+		start_time = gettime_now.tv_nsec;		//Get nS value
+	
+		int count = 0;
+		vector<vector<Point>> corrected(m_contours.size());
+		for (size_t i = 0; i < m_contours.size(); i++)
+		{
+			auto& vIn = m_contours[i];
+			auto& vOut = corrected[i];
+			vOut.resize(vIn.size());
+			for (size_t j = 0; j < vIn.size(); j++)
+			{
+				double xCorrected;
+				double yCorrected;
+				count++;
+				FishEyeCorrect(vIn[j].x, vIn[j].y, xCorrected, yCorrected);
+				vOut[j].x = xCorrected;
+				vOut[j].y = yCorrected;
+			}
+		}
+	
+		clock_gettime(CLOCK_REALTIME, &gettime_now);
+		time_difference = gettime_now.tv_nsec - start_time;
+		if (time_difference < 0)
+			time_difference += 1000000000;				//(Rolls over every 1 second)
+		cout << "Fisheye correction of " << count << " points took " << time_difference << " nanoseconds " << time_difference / count << " nanosec/pt" << endl;
+	#endif
 }
 
 void ProcessingBase::FindCornerCoordinates()
@@ -209,6 +250,11 @@ void ProcessingBase::FindCornerCoordinates()
   //  }
 
 	//cout << "Finding minimum area rotated rectangles for " << m_contours.size() << " contours" << endl;
+
+	{	//new scope for testing fitline function
+//		test;
+	}
+
 	m_minRect.resize(m_contours.size());
 	vector<float> angles(m_contours.size());
 
@@ -226,6 +272,7 @@ void ProcessingBase::FindCornerCoordinates()
 	};
 	vector<ESide> side(m_contours.size());
 
+#ifdef BUILD_ON_WINDOWS
 	const vector<Scalar> colors =
 	{
 		  {   0,   0, 255 }
@@ -239,7 +286,19 @@ void ProcessingBase::FindCornerCoordinates()
 		, {   0, 128,   0 }
 		, {   0,   0, 128 }
 	};
-
+#else
+	vector<Scalar> colors;
+	colors.push_back({ 0,   0, 255 });
+	colors.push_back({   0, 255,   0 });
+	colors.push_back({ 255,   0,   0 });
+	colors.push_back({ 255, 255,   0 });
+	colors.push_back({ 255,   0, 255 });
+	colors.push_back({   0, 255, 255 });
+	colors.push_back({ 128, 128, 128 });
+	colors.push_back({ 128,   0,   0 });
+	colors.push_back({   0, 128,   0 });
+	colors.push_back({   0,   0, 128 });
+#endif
 	float maxArea = FLT_MIN;
 	for (size_t i = 0; i < m_contours.size(); i++)
 	{
@@ -283,6 +342,7 @@ void ProcessingBase::FindCornerCoordinates()
 	const float areaThreshold = c_areaThresholdPercent * maxArea;
 	for (size_t i = 0; i < m_contours.size(); i++)
 	{
+#ifndef TEST_FILES_WIDE
 		if (m_minRect[i].size.area() < areaThreshold || side[i] == eUnknown)
 		{
 			if (side[i] == eUnknown)
@@ -295,6 +355,7 @@ void ProcessingBase::FindCornerCoordinates()
 			}
 			continue;
 		}
+#endif
 
 		float longSide = max(m_minRect[i].size.width, m_minRect[i].size.height);
 		float shortSide = min(m_minRect[i].size.width, m_minRect[i].size.height);
@@ -337,13 +398,13 @@ void ProcessingBase::FindCornerCoordinates()
 		}
 #else
 		sprintf(text, "Area: %.2f", m_minRect[i].size.area());
-		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
-		sprintf_s<sizeof(text)>(text, "width: %.2f height: %.2f", m_minRect[i].size.width, m_minRect[i].size.height);
+		cv::putText(image, text, areaLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
+		sprintf(text, "width: %.2f height: %.2f", m_minRect[i].size.width, m_minRect[i].size.height);
 		cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
-		sprintf(text, "Angle %.2f", angle);
-		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
+		sprintf(text, "Angle %.2f", angles[i]);
+		cv::putText(image, text, angleLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 		sprintf(text, "%s", sideStr[side[i]].c_str());
-		cv::putText(image, text, vertices[0] - offset, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
+		cv::putText(image, text, sideLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 		if (aspectRatio > c_occludedAspectRatio)
 		{
 			Point2f loc(vertices[0].x - offset, y + 90.0f);
@@ -388,9 +449,6 @@ void ProcessingBase::FindCenter()
     m_cube_center_y = m.m01 / m.m00;
     circle(m_drawing, Point((int)m_cube_center_x, (int)m_cube_center_y), 16, c_centerColor, 2);
 
-    // Find image center coordinate
-    m_im_center_x = m_drawing.size().width / 2;
-    m_im_center_y = m_drawing.size().height / 2;
     circle(m_drawing, Point((int)m_im_center_x, (int)m_im_center_y), 1, c_centerColor);    // Replacement for drawMarker since drawMarker didn't work.
 }
 
@@ -443,17 +501,17 @@ void ProcessingBase::CalcCubeHeight()
         double y_original[3];
         double x_corrected[3];
         double y_corrected[3];
-        double xt[3];
-        double yt[3];
-        double ut[3];
-        double vt[3];
-        double r;
-        double R;
-        double theta;
-        double s;
-        double s2;
-        double border_corr;
-        const double k = -0.46;     		// a constant value for fisheye lens used by Raspberry pi
+        //double xt[3];
+        //double yt[3];
+        //double ut[3];
+        //double vt[3];
+        //double r;
+        //double R;
+        //double theta;
+        //double s;
+        //double s2;
+        //double border_corr;
+        //const double k = -0.46;     		// a constant value for fisheye lens used by Raspberry pi
         
         x_original[0] = m_cube_center_x;
         x_original[1] = m_cube_center_x;
@@ -463,48 +521,50 @@ void ProcessingBase::CalcCubeHeight()
         y_original[1] = m_cube_center_y;
         y_original[2] = m_contours[m_biggestContourLocation][m_cube_contour_max_index].y;
 
-        R = sqrt(m_im_center_x * m_im_center_x + m_im_center_y * m_im_center_y);
-        border_corr = 1/(1 + k*pow( min(m_im_center_x, m_im_center_y)/R, 2.0) ); // Scaling factor per border
+        //R = sqrt(m_im_center_x * m_im_center_x + m_im_center_y * m_im_center_y);
+        //border_corr = 1/(1 + k*pow( min(m_im_center_x, m_im_center_y)/R, 2.0) ); // Scaling factor per border
 
         for (int i = 0; i < 3; i++)
         {
-            xt[i] = x_original[i] - m_im_center_x;
-            yt[i] = y_original[i] - m_im_center_y; 
-    
-            r = sqrt(xt[i]*xt[i] + yt[i]*yt[i]);	// Find radius
+			FishEyeCorrect(x_original[i], y_original[i], x_corrected[i], y_corrected[i]);
 
-            theta = atan(yt[i]/xt[i])*180/PI; 	// Find theta for the angle
+			//xt[i] = x_original[i] - m_im_center_x;
+   //         yt[i] = y_original[i] - m_im_center_y; 
+   // 
+   //         r = sqrt(xt[i]*xt[i] + yt[i]*yt[i]);	// Find radius
 
-            if ((yt[i] > 0) && (xt[i] >= 0))
-            {
-                theta = theta;
-            }
-            else if ((yt[i] < 0) && (xt[i] >= 0))
-            {
-                theta = 360 + theta;
-            }
-            else if ((yt[i] >= 0) && (xt[i] <= 0))
-            {
-                theta = 180 + theta;
-            }
-            else if ((yt[i] < 0) && (xt[i] <= 0))
-            {
-                theta = 180 + theta;
-            }
+   //         theta = atan(yt[i]/xt[i])*180/PI; 	// Find theta for the angle
 
-            r = r / R;				// Normalize the polar coordinate r
-    
-            s = r * (1 + k * r);				// Apply r-based transform with k
+   //         if ((yt[i] > 0) && (xt[i] >= 0))
+   //         {
+   //             theta = theta;
+   //         }
+   //         else if ((yt[i] < 0) && (xt[i] >= 0))
+   //         {
+   //             theta = 360 + theta;
+   //         }
+   //         else if ((yt[i] >= 0) && (xt[i] <= 0))
+   //         {
+   //             theta = 180 + theta;
+   //         }
+   //         else if ((yt[i] < 0) && (xt[i] <= 0))
+   //         {
+   //             theta = 180 + theta;
+   //         }
 
-            s2 = s * R;				// Un-normalize s
+   //         r = r / R;				// Normalize the polar coordinate r
+   // 
+   //         s = r * (1 + k * r);				// Apply r-based transform with k
 
-            s2 = s2 * border_corr;			// Scale radius 
+   //         s2 = s * R;				// Un-normalize s
 
-            ut[i] = s2*cos(theta*PI/180);		// Converted back to cartesian coordinates
-            vt[i] = s2*sin(theta*PI/180);
+   //         s2 = s2 * border_corr;			// Scale radius 
 
-            x_corrected[i] = ut[i] + m_im_center_x;	// Add image center back 
-            y_corrected[i] = vt[i] + m_im_center_y;
+   //         ut[i] = s2*cos(theta*PI/180);		// Converted back to cartesian coordinates
+   //         vt[i] = s2*sin(theta*PI/180);
+
+   //         x_corrected[i] = ut[i] + m_im_center_x;	// Add image center back 
+   //         y_corrected[i] = vt[i] + m_im_center_y;
         }
 
         m_cube_height = abs(y_corrected[2] -  y_corrected[0]);
@@ -517,6 +577,71 @@ void ProcessingBase::CalcCubeHeight()
         m_cube_height = 	abs(m_contours[m_biggestContourLocation][m_cube_contour_max_index].y -  
                                 m_contours[m_biggestContourLocation][m_cube_contour_min_index].y);
     }
+}
+
+void ProcessingBase::FishEyeCorrect(double xIn, double yIn, double& xOut, double& yOut)
+{
+	if (m_bFishEyeCorrection)
+	{
+//#ifndef BUILD_ON_WINDOWS
+//		long int start_time;
+//		long int time_difference;
+//		struct timespec gettime_now;
+//
+//		clock_gettime(CLOCK_REALTIME, &gettime_now);
+//		start_time = gettime_now.tv_nsec;		//Get nS value
+//#endif
+		// Apply distortion correction for fisheye camera to three sets of coordinates only to speed up calculation
+		double xt;
+		double yt;
+		double ut;
+		double vt;
+		double r;
+		double theta;
+		double s;
+		double s2;
+
+		xt = xIn - m_im_center_x;
+		yt = yIn - m_im_center_y;
+
+		r = sqrt(xt * xt + yt * yt);					// Find radius
+		theta = atan(yt / xt) * m_radiansTodegrees; 	// Find theta for the angle
+
+		if (yt > 0 && xt >= 0)
+		{
+			//theta = theta;
+		}
+		else if (yt < 0 && xt >= 0)
+		{
+			theta += 360.0;
+		}
+		else if (yt >= 0 && xt <= 0)
+		{
+			theta += 180.0;
+		}
+		else if (yt < 0 && xt <= 0)
+		{
+			theta += 180.0;
+		}
+
+		r = r / m_R;									// Normalize the polar coordinate r
+		s = r * (1 + m_k * r);							// Apply r-based transform with k
+		s2 = s * m_R;									// Un-normalize s
+		s2 = s2 * m_borderCorr;							// Scale radius 
+		ut = s2 * cos(theta * m_degreesToRadians);		// Converted back to cartesian coordinates
+		vt = s2 * sin(theta * m_degreesToRadians);
+
+		xOut = ut + m_im_center_x;						// Add image center back 
+		yOut = vt + m_im_center_y;
+
+//#ifndef BUILD_ON_WINDOWS
+//		clock_gettime(CLOCK_REALTIME, &gettime_now);
+//		time_difference = gettime_now.tv_nsec - start_time;
+//		if (time_difference < 0)
+//			time_difference += 1000000000;				//(Rolls over every 1 second)
+//		cout << "Fisheye correction took " << time_difference << " nanoseconds" << endl;
+//#endif
+	}
 }
 
 void ProcessingBase::CalcOutputValues()

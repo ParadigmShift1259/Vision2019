@@ -8,9 +8,16 @@
 #ifndef CONST_H
 #define CONST_H
 
-#define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
+//#define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
 //#define USE_OFFBOARD_COMMS				// Uncomment if you want to use it
 //#define TEST_GAFFER_TAPE_ALIGNMENT_IMGS		// Use this when testing hatch vision targets made with white gaffer's tape
+
+// Define these one at a time
+//#define TEST_FILES_LINE					// Uncomment to test image files of the alignment (gaffer's tape) lines
+//#define TEST_FILES_ROCKET					// Uncomment to test image files of the rocket
+//#define TEST_FILES_CARGO					// Uncomment to test image files of the cargo ship
+//#define TEST_FILES_NARROW					// Uncomment to test image files of the cargo ship with the narrow field of view camera
+#define TEST_FILES_WIDE						// Uncomment to test image files of the cargo ship with the wide field of view (fish eye) camera
 
 #include <math.h>
 #include <opencv2/opencv.hpp>

@@ -1,5 +1,36 @@
 TODO List
+2019 Feb 26
+	Give yourself enough time each night to push your changes to Github
 
+	In ProcessingBase.cpp: try this code (replace Vec3b with uchar)
+	The m_inrange data is black and white, so each pixel should only be one byte.
+	The Vec3b is for RGB type image data, as in vector of 3 bytes).
+				uchar color = inrangeTemp.at<uchar>(Point(x, y));
+				m_inrange.at<uchar>(Point(col, row)) = color;
+	I wrapped the correction code in a define, so uncomment this in Const.h:
+		#define TEST_FISHEYE_CORRECTION_BY_LUT
+
+	Copy the backed up Pi OS image to another SD card and see if the other Pi will come up.
+	I could not figure out why /boot/frc.json cannot be written.  The file has the same owner (root) and permissions on both Pis.
+
+	Use the compensation_camera_off_center.pdf document to implement the distance calculation with on off center camera.
+	You should be able to adapt the existing calculations in ProcessingBase::CalcOutputValues().
+	We have calibration images that will give us a scaling factor pixels to inches at a known distance to the camera.
+	For the retro vision targets, you can use the long side of the rotated rectangle to set m_DEFAULT_HEIGHT_PIXEL.
+	Rename m_MEAS_CUBE_HEIGHT to m_measuredTargetSizeInch
+    Rename m_DEFAULT_HEIGHT_PIXEL to m_calibTargetSizePixel
+	Rename m_CAL_DISTANCE_INCH to m_calibCameraDistInch
+	Set appropriate values, maybe from a 18 inch camera distance image?
+	    static constexpr double m_calibTargetSizePixel = 510.0?;	    //!< [pixel] Size in pixels of vision target placed m_calibCameraDist inches from the camera
+		static constexpr double m_calibCameraDistInch = 12.0?;  		//!< [inch] Calibration distance from camera to vision target
+		static constexpr double m_measuredTargetSizeInch = 5.5?; 		//!< [inch] Size of vision target in inches; used a tape measure in the real world
+
+	We could think about adding poles/mounts to the Woody robot that approximates the position of the top and botoom cameras.
+	A cardbord mock up of the cargo/hatch handler might be neccessary later on.
+	Or you could see if we could mount to last years bot.
+
+	I will try to check Discord, but I will be at another meeting, so no guarantees.
+	
 2019 Feb 15
 	Push the code on Wisdom that builds in Windows up to Github
 	Re-add the OpenCV fitLine call to ProcessingBase::FindBiggestContour()

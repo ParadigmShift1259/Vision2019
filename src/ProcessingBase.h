@@ -119,6 +119,9 @@ protected:
     Mat m_inrange;												//!< A black and white image that contains regions for the colors searched for
     Mat m_imageHSV;												//!< Converted input image BGR->HSV
     Mat m_drawing;												//!< An output image to draw contours
+
+	char* m_pXfisheyeData;
+	char* m_pYfisheyeData;
 };
 
 

@@ -34,22 +34,73 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 		<< "AspectRatio,"
 		<< "Angle"
 		<< endl;
+
+#ifdef BUILD_ON_WINDOWS
+	string fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/x_index_960x1280_uint16.img";
+#else
+	string fileName = "x_index_960x1280_uint16.img";
+#endif
+	m_pXfisheyeData = new char[1280 * 960];
+	m_pYfisheyeData = new char[1280 * 960];
+	ifstream in(fileName, ios::in || ios::binary);
+	while (!in.eof())
+	{
+		in.read(m_pXfisheyeData, 1280 * 960);
+	}
+	in.close();
+
+#ifdef BUILD_ON_WINDOWS
+	fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/y_index_960x1280_uint16.img";
+#else
+	fileName = "y_index_960x1280_uint16.img";
+#endif
+	in.open(fileName, ios::in || ios::binary);
+	while (!in.eof())
+	{
+		in.read(m_pYfisheyeData, 1280 * 960);
+	}
+	in.close();
 }
 
 ProcessingBase::~ProcessingBase()
 {
+	if (m_pXfisheyeData)
+		delete [] m_pXfisheyeData;
+	if (m_pYfisheyeData)
+		delete [] m_pYfisheyeData;
 }
 
 void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false */)
 {
-    if (!bSkipHSVConvert && image.rows > 0 && image.cols > 0)
+	if (!bSkipHSVConvert && image.rows > 0 && image.cols > 0)
     {
 	    cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
     }
     
     if (c_bUseLastDiagImage)
 	{
-        // if (loopCounter == 0)
+#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
+		Mat inrangeTemp;
+		inRange(m_imageHSV, m_lower, m_upper, inrangeTemp);	// Identify color per HSV image
+//		cv::CV_8UC
+
+		//m_inrange.copySize(inrangeTemp);	// Get the output size right
+		m_inrange = inrangeTemp;	// Get the output size right
+		for (int row = 0; row < 960; row++)
+		{
+			for (int col = 0; col < 1280; col++)
+			{
+				uchar x = (uchar)m_pXfisheyeData[1280 * row + col]; // [row][col] if 2D array
+				uchar y = (uchar)m_pYfisheyeData[1280 * row + col];
+
+				Vec3b color = inrangeTemp.at<Vec3b>(Point(x, y));
+				m_inrange.at<Vec3b>(Point(col, row)) = color;
+			}
+		}
+		imwrite("imageInRange.jpg", inrangeTemp);
+		imwrite("imageCorrected.jpg", m_inrange);
+#else
+		// if (loopCounter == 0)
         // {
         //     char buf[30];
         //     for (int i = 0; i < 11; i++)
@@ -61,6 +112,8 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
         //         imwrite(buf, m_inrange);
         //     }
         // }
+#endif
+
 		if (!bSkipHSVConvert)
 		{
 			char fileName[255];
@@ -77,7 +130,22 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
     else
     {    
         // Searching for color in the image that has a high of upper scaler and a low of lower scaler. Stores result in inrange
-        inRange(m_imageHSV, m_lower, m_upper, m_inrange);	// Identify color per HSV image
+		Mat inrangeTemp;
+		inRange(m_imageHSV, m_lower, m_upper, inrangeTemp);	// Identify color per HSV image
+
+		m_inrange.copySize(inrangeTemp);	// Get the output size right
+		for (int row = 0; row < 960; row++)
+		{
+			for (int col = 0; col < 1280; col++)
+			{
+				int x = m_pXfisheyeData[1280 * row + col]; // [row][col] if 2D array
+				int y = m_pYfisheyeData[1280 * row + col];
+
+				Vec3b color = inrangeTemp.at<Vec3b>(Point(x, y));
+				m_inrange.at<Vec3b>(Point(col, row)) = color;
+			}
+		}
+		imwrite("imageCorrected.jpg", image);
 
         if (loopCounter == c_loopCountToSaveDiagImage)
         {
@@ -250,9 +318,23 @@ void ProcessingBase::FindCornerCoordinates()
   //  }
 
 	//cout << "Finding minimum area rotated rectangles for " << m_contours.size() << " contours" << endl;
+	
+	Vec4f lineOutput;
 
-	{	//new scope for testing fitline function
-//		test;
+	for (int i = 0; i < m_contours.size(); i++)
+	{
+		
+		fitLine(m_contours[i], lineOutput, 2, 0, 0.01, 0.01);	// Third arg: DIST_L2 = 2 is the fastest least squares method
+		auto vx = lineOutput[0];
+		auto vy = lineOutput[1];
+		auto x = lineOutput[2];
+		auto y = lineOutput[3];
+		auto lefty = round((-x * vy / vx) + y);
+		auto righty = round(((m_drawing.cols - x) * vy / vx) + y);
+		Point point1(m_drawing.cols - 1, (int)righty);
+		Point point2(0, (int)lefty);
+		Scalar lineColor(0, 255, 0);
+		line(m_drawing, point1, point2, lineColor, 2, 4, 0);	// Sixth arg LINE_4 = 4 px wide line
 	}
 
 	m_minRect.resize(m_contours.size());

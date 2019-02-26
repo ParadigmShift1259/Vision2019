@@ -21,7 +21,11 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/";
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/narrow_camera_at_top/";
 #endif
 #ifdef TEST_FILES_WIDE
+#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
+const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/";
+#else
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
+#endif
 #endif
 
 std::vector<std::string> testFiles
@@ -73,6 +77,9 @@ std::vector<std::string> testFiles
 #endif
 
 #ifdef TEST_FILES_WIDE
+#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
+	  "cam6.jpg"
+#else
 	  "im_96in_p_wlen.jpg"
 	, "im_12in_h_wlen_1.jpg"
 	, "im_12in_p_wlen.jpg"
@@ -95,6 +102,44 @@ std::vector<std::string> testFiles
 	, "test_horiz45gaff.jpg"
 	, "test_vertical0gaff.jpg"
 	, "test_vertical45gaff.jpg"
+#endif
+#endif
+
+#ifdef TEST_FILES_LINE
+	  "alignment_line1.jpg"
+	, "alignment_line2.jpg"
+	, "alignment_line3.jpg"
+	, "alignment_line4.jpg"
+	, "alignment_line5.jpg"
+	, "alignment_line6.jpg"
+	, "alignment_line7.jpg"
+	, "alignment_line8.jpg"
+	, "alignment_line9.jpg"
+	, "alignment_line10.jpg"
+	, "alignment_line11.jpg"
+	, "alignment_line12.jpg"
+	, "alignment_line13.jpg"
+	, "alignment_line14.jpg"
+	, "alignment_line15.jpg"
+	, "alignment_line16.jpg"
+	, "alignment_line17.jpg"
+	, "alignment_line18.jpg"
+	, "alignment_line19.jpg"
+	, "alignment_line20.jpg"
+	, "alignment_line21.jpg"
+	, "alignment_line22.jpg"
+	, "alignment_line23.jpg"
+	, "alignment_line24.jpg"
+	, "alignment_line25.jpg"
+	, "alignment_line26.jpg"
+	, "alignment_line27.jpg"
+	, "alignment_line28.jpg"
+	, "alignment_line29.jpg"
+	, "alignment_line30.jpg"
+	, "alignment_line31.jpg"
+	, "alignment_line32.jpg"
+	, "alignment_line33.jpg"
+	, "alignment_line34.jpg"
 #endif
 };
 
@@ -147,6 +192,9 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 #endif
 
 #ifdef TEST_FILES_WIDE
+#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
+	  12	//?
+#else
 	  96
 	, 12
 	, 12
@@ -169,6 +217,44 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 	, 45
 	, 18	// 0
 	, 45
+#endif
+#endif
+
+#ifdef TEST_FILES_LINE
+	  1
+	, 2
+	, 3
+	, 4
+	, 5
+	, 6
+	, 7
+	, 8
+	, 9
+	, 10
+	, 11
+	, 12
+	, 13
+	, 14
+	, 15
+	, 16
+	, 17
+	, 18
+	, 19
+	, 20
+	, 21
+	, 22
+	, 23
+	, 24
+	, 25
+	, 26
+	, 27
+	, 28
+	, 29
+	, 30
+	, 31
+	, 32
+	, 33
+	, 34
 #endif
 };
 
@@ -212,25 +298,11 @@ void CameraWrapper::AcquireImage()
 	if (c_bUseLastDiagImage)
 	{
 		// Reread the previously saved image to consistently process the same image
-#ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
-		char fileName[100];
-#ifdef BUILD_ON_WINDOWS
-#ifdef TEST_FILES_LINE
-		sprintf_s<sizeof(fileName)>(fileName, "%salignment_line%d.jpg", c_testImagePath, loopCounter % testFiles.size() + 1);
-#endif
-#else
-		sprintf(fileName, "alignment_line%d.jpg", loopCounter % testFiles.size() + 1);
-#endif
-
-#else	// if TEST_GAFFER_TAPE_ALIGNMENT_IMGS
-
 #ifdef BUILD_ON_WINDOWS
 		string fileName = c_testImagePath + testFiles[loopCounter % testFiles.size()];
 #else
 		string fileName = testFiles[loopCounter % (int)testFiles.size()];
 #endif
-
-#endif	// if TEST_GAFFER_TAPE_ALIGNMENT_IMGS
 
 		m_image = imread(fileName, CV_LOAD_IMAGE_COLOR);
 

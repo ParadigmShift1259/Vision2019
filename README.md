@@ -47,10 +47,5 @@ Prerequisites:
 			the promt should now end with (rw):
 			
 	Avoid corrupting the SD card; before powering down the Pi, halt the OS with sudo shutdown -h now
-	
-	The OpenCvConfig.cmake file will be missing. This is how you add is
-		On a browser visit: https://github.com/opencv/opencv/blob/master/cmake/templates/OpenCVConfig.cmake.in 
-		Copy the config file
-		TODO: Finish this instruction part
 		
 

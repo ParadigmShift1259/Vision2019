@@ -47,5 +47,14 @@ Prerequisites:
 			the promt should now end with (rw):
 			
 	Avoid corrupting the SD card; before powering down the Pi, halt the OS with sudo shutdown -h now
+	
+	If you need to edit frc.json file:
+		Login to Putty and sign in as pi
+		Type the command: sudo su #to become the superuser permanently until exit command is typed in 
+		Create a copy of the file and store in the home/pi directory by the following command: cp frc.json /home/pi/
+		Go to /home/pi/ and run the following command to check ownership of the copied file: ls -l
+		If root owns it, change ownership by the following command: chown pi:pi frc.json
+		Edit the file
+		After editing, move the file to the boot directory through the following command: sudo mv frc.json /boot/ # sudo in case 		you may not have permission to transfer
 		
 

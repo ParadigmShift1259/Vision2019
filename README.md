@@ -55,6 +55,6 @@ Prerequisites:
 		Go to /home/pi/ and run the following command to check ownership of the copied file: ls -l
 		If root owns it, change ownership by the following command: chown pi:pi frc.json
 		Edit the file
-		After editing, move the file to the boot directory through the following command: sudo mv frc.json /boot/ # sudo in case 		you may not have permission to transfer
+		After editing, move the file to the boot directory through the following command: sudo mv frc.json /boot/ # sudo in case you may not have permission to transfer
 		
 

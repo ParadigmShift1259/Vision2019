@@ -11,7 +11,7 @@
 #define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
 //#define USE_OFFBOARD_COMMS				// Uncomment if you want to use it
 //#define TEST_GAFFER_TAPE_ALIGNMENT_IMGS		// Use this when testing hatch vision targets made with white gaffer's tape
-//#define TEST_FISHEYE_CORRECTION_BY_LUT
+#define TEST_FISHEYE_CORRECTION_BY_LUT
 
 // Define these one at a time
 //#define TEST_FILES_LINE					// Uncomment to test image files of the alignment (gaffer's tape) lines

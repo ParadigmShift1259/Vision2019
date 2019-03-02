@@ -44,31 +44,30 @@ protected:
 	void FindContour();														//!< Process the in-range image to get object contours (outlines)
 	void FindVerticalRange();												//!< Old function for cube; finds the min and max Y coordinates of the biggest contour
 	void RejectSmallContours();												//!< Process the contours to reject very small and very large contours by point count
+	void FishEyeCorrectContours();
 	void FindCornerCoordinates();											//!< Find corner coordinates by finding minimum area rectange and/or approximating a polygon
 	void FindCenter();														//!< Find center of biggest contour and center of drawing
-	void CalcCubeHeight();													//!< Old function for cube; calculate Cube with/without Fish Eye correction based on vertical range
+	void CalcObjectHeight();													//!< Old function for cube; calculate Cube with/without Fish Eye correction based on vertical range
 	void FindBiggestContour();												//!< Process the contours to find the largest contours by moment and draw the contour found TODO split
 	void CalcOutputValues();												//!< Calculate the values that will be sent to the robot
-	void PrintDebugValues();												//!< Print the output values to the Pi console
+	void PrintDebugValues(double horzDistInch, double vertDistInch);		//!< Print the output values to the Pi console
 	
 	// Following settings is for camera calibrated value
-    static constexpr double m_DEFAULT_FOV_ROW_NUM = 960.0;		//!< [pixel] Height in pixels of image captured by camera
-    static constexpr double m_DEFAULT_HEIGHT_PIXEL = 510.0;	    //!< [pixel] Height in pixels of a cube placed 12 inches from the camer
-    static constexpr double m_CAL_DISTANCE_INCH = 12.0;  		//!< [inch] Calibration distance from camera to cube
-	static constexpr double m_MEAS_CUBE_HEIGHT = 12.3;  		//!< [inch] Height of cube in inches; used a tape measure in the real world
-	static constexpr double m_DEFAULT_PIXEL_PER_INCH = m_DEFAULT_HEIGHT_PIXEL / m_MEAS_CUBE_HEIGHT;	// [pxiel/inch] ~41.463
+    static constexpr double m_calibTargetSizePixel = 155.0;	    //!< [pixel] Height in pixels of a cube placed 12 inches from the camer
+    static constexpr double m_calibCameraDistInch = 18.0;  		//!< [inch] Calibration distance from camera to cube
+	static constexpr double m_measuredObjectHeight = 5.5;  		//!< [inch] Height of cube in inches; used a tape measure in the real world
+	static constexpr double m_defaultPixelPerInch = m_calibTargetSizePixel / m_measuredObjectHeight;	// [pixel/inch] ~25
 	// Output value bounds
-	static constexpr double m_ANGLE_THRESHOLD = 60.0;		    //!< [degrees] If we calculate an output angle more than this, do not send it
-    static constexpr double m_FORWARD_DIST_THRESHOLD = 240.0;	//!< [inch] 20 feet; if we calculate an output distance more than this, do not send it
-	static constexpr double m_CUBE_CONTOUR_THRESHOLD = 100.0; 	//!< [pixel] If the contour is smaller than this, do not process it
+	static constexpr double m_maxAngle = 60.0;					//!< [degrees] If we calculate an output angle more than this, do not send it
+    static constexpr double m_maxActualDist = 240.0;			//!< [inch] 20 feet; if we calculate an output distance more than this, do not send it
 	static constexpr const double m_k = -0.46;     				//!< Constant value for fisheye lens used by Raspberry pi (determined empirically)
 
 #ifdef BUILD_ON_WINDOWS
 	static double m_degreesToRadians;							//!< Angle units converison factor
-	static double m_radiansTodegrees;							//!< Angle units converison factor
+	static double m_radiansToDegrees;							//!< Angle units converison factor
 #else
-	static constexpr double m_degreesToRadians = PI / 180.0;	//!< Angle units converison factor
-	static constexpr double m_radiansTodegrees = 180.0 / PI;	//!< Angle units converison factor
+	static constexpr double m_degreesToRadians = m_degreesToRadians.0;	//!< Angle units converison factor
+	static constexpr double m_radiansToDegrees = 180.0 / PI;	//!< Angle units converison factor
 #endif
 
     static constexpr bool m_bFishEyeCorrection = true;			//!< Set to true if using a wide angle camera
@@ -78,39 +77,26 @@ protected:
     Scalar m_upper;                                             //!< [HSV triplet] Upper color bound
     Scalar m_lower;                                             //!< [HSV triplet]Lower color bound
 
-    double m_standard_height_p = 0.0;							//!< [dimensionless] Scaled height of cube
-    double m_pixel_per_in = 0.0;								//!< [pixel/inch] calculated from scaled height
-    // TODO not used needed? double m_pixel_per_degree = 0.0;							//!< [pixel/degree]		NOT USED ANYWHERE IN THE FILE
-    double m_Horizontal_Distance_Pixel = 0.0;					//!< [pixel] Estimated distance from camera to target
-    double m_Vertical_Distance_Pixel = 0.0;						//!< [pixel] Estimated distance from floor to target
-    double m_Horizontal_Distance_Inch = 0.0;					//!< [inch] Estimated distance from camera to target
-	double m_Vertical_Distance_Inch = 0.0;						//!< [inch] Estimated distance from floor to target
-    double m_Forward_Distance_Inch = 0.0;						//!< [inch] Estimated distance to command the robot forward
-    double m_Total_Distance_Inch = 0.0;							//!< [inch] Estimated total distance as the crow flies from robot to target
     double m_Horizontal_Angle_Degree = 0.0;						//!< [inch] Estimated angle in the plane of the floor from robot to target
-    double m_Vertical_Angle_Degree = 0.0;						//!< [inch] Estimated angle in the vertical plane from robot to target
+	double m_Actual_Distance_Inch = 0.0;						//!< [inch] Estimated total distance as the crow flies from robot to target with compensation for offset camera
 
     double m_im_center_x = 0.0;									//!< X coord for center of image (drawing)
     double m_im_center_y = 0.0;									//!< Y coord for center of image (drawing)
 	double m_R;													//!< Radius to center of image for fisheye correction
 	double m_borderCorr;										//!< Scaling factor per border for fisheye correction
 
-    double m_cube_contour_max_y;								//!< Max Y coord for contour TODO change cube
-    double m_cube_contour_min_y;								//!< Min Y coord for contour TODO change cube
+    double m_object_contour_max_y;								//!< Max Y coord for contour of object
+    double m_object_contour_min_y;								//!< Min Y coord for contour of object
 
-    double m_cube_center_x = 0.0;								//!< X coord for center of cube TODO change cube
-    double m_cube_center_y = 0.0;								//!< Y coord for center of cube TODO change cube
-    double m_cube_height = 0.0;    								//!< [units??] Vision target height on image 
-
-	double m_dx = 0.0;											//!< X coord for 3D distance between camera and target
-    double m_dy = 0.0;											//!< Y coord for 3D distance between camera and target
-    double m_dz = 0.0;											//!< Z coord for 3D distance between camera and target
+    double m_object_center_x = 0.0;								//!< X coord for center of object
+    double m_object_center_y = 0.0;								//!< Y coord for center of object 
+    double m_object_height = 0.0;    							//!< [units??] Vision target height on image 
 
     // Contour variables to give contour location. Countour is outline points of the object you are trying to identify
 	int m_biggestContour = 0;									//!< Size of biggest contour based on moments
 	int m_biggestContourLocation = 0;							//!< Index into m_contours of the biggest contor
-    int m_cube_contour_max_index = 0;							//!< Index into m_contours of the max Y coord
-    int m_cube_contour_min_index = 0;							//!< Index into m_contours of the min Y coord
+    int m_object_contour_max_index = 0;							//!< Index into m_contours of the max Y coord
+    int m_object_contour_min_index = 0;							//!< Index into m_contours of the min Y coord
 
     vector<Vec4i> m_hierarchy;									//!< Output from OpenCV findCountours (not used; holds info on nested objects)
     vector<vector<Point>> m_contours;							//!< Output from OpenCV findCountours (as applied to in range image)
@@ -120,11 +106,8 @@ protected:
     Mat m_imageHSV;												//!< Converted input image BGR->HSV
     Mat m_drawing;												//!< An output image to draw contours
 
-	//char* m_pXfisheyeData;
-	//char* m_pYfisheyeData;
-
-	uint16_t* m_pXfisheyeData;//[1280 * 960];
-	uint16_t* m_pYfisheyeData;//[1280 * 960];
+	uint16_t* m_pXfisheyeData;//[c_imageWidthPixel * c_imageHeightPixel];
+	uint16_t* m_pYfisheyeData;//[c_imageWidthPixel * c_imageHeightPixel];
 };
 
 

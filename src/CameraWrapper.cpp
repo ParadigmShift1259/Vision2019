@@ -21,7 +21,7 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/";
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/narrow_camera_at_top/";
 #endif
 #ifdef TEST_FILES_WIDE
-#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
+#ifdef TEST_CHECKERBOARD_CALIB
 const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/";
 #else
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
@@ -77,31 +77,33 @@ std::vector<std::string> testFiles
 #endif
 
 #ifdef TEST_FILES_WIDE
-#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
+#ifdef TEST_CHECKERBOARD_CALIB
 	  "cam6.jpg"
 #else
-	  "im_96in_p_wlen.jpg"
-	, "im_12in_h_wlen_1.jpg"
-	, "im_12in_p_wlen.jpg"
+	//  "im_96in_p_wlen.jpg"
+	//, "im_12in_p_wlen.jpg"
+	//, "im_18in_p_wlen.jpg"
+	//, "im_30in_p_wlen.jpg"
+	//, "im_48in_p_wlen.jpg"
+	//, "im_72in_p_wlen.jpg"
+
+	  "im_12in_h_wlen_1.jpg"
 	, "im_18in_h_wlen_1.jpg"
-	, "im_18in_p_wlen.jpg"
 	, "im_30in_h_wlen_1.jpg"
-	, "im_30in_p_wlen.jpg"
-	, "im_36in_45deg_h_wlen.jpg"
-	, "im_36in_m45deg_h_wlen.jpg"
 	, "im_48in_h_wlen_1.jpg"
-	, "im_48in_p_wlen.jpg"
-	, "im_60in_45deg_h_wlen.jpg"
-	, "im_60in_m45deg_h_wlen.jpg"
 	, "im_72in_h_wlen_1.jpg"
-	, "im_72in_p_wlen.jpg"
 	, "im_96in_h_wlen_1.jpg"
 
-	, "testFishEye.jpg"
-	, "test_horiz30gaff.jpg"
-	, "test_horiz45gaff.jpg"
-	, "test_vertical0gaff.jpg"
-	, "test_vertical45gaff.jpg"
+	, "im_36in_45deg_h_wlen.jpg"
+	, "im_36in_m45deg_h_wlen.jpg"
+	, "im_60in_45deg_h_wlen.jpg"
+	, "im_60in_m45deg_h_wlen.jpg"
+
+	//, "testFishEye.jpg"
+	//, "test_horiz30gaff.jpg"
+	//, "test_horiz45gaff.jpg"
+	//, "test_vertical0gaff.jpg"
+	//, "test_vertical45gaff.jpg"
 #endif
 #endif
 
@@ -192,31 +194,35 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 #endif
 
 #ifdef TEST_FILES_WIDE
-#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
+#ifdef TEST_CHECKERBOARD_CALIB
 	  12	//?
 #else
-	  96
-	, 12
-	, 12
-	, 18
+	// Portrait
+	//  12
+	//, 18
+	//, 30
+	//, 48
+	//, 72
+	//, 96
+
+	// Horizontal (landscape)
+	  12
 	, 18
 	, 30
-	, 30
-	, 36
-	, 36
 	, 48
-	, 48
-	, 60
-	, 60
-	, 72
 	, 72
 	, 96
-	// These are not right, probably angles
-	, 18	//? maybe
-	, 30
-	, 45
-	, 18	// 0
-	, 45
+
+	, 36	//, "im_36in_45deg_h_wlen.jpg"
+	, 36	//, "im_36in_m45deg_h_wlen.jpg"
+	, 60	//, "im_60in_45deg_h_wlen.jpg"
+	, 60	//, "im_60in_m45deg_h_wlen.jpg"
+
+	//, 18	//, "testFishEye.jpg"
+	//, 30	//, "test_horiz30gaff.jpg"
+	//, 45	//, "test_horiz45gaff.jpg"
+	//, 18	//, "test_vertical0gaff.jpg"
+	//, 45	//, "test_vertical45gaff.jpg"
 #endif
 #endif
 

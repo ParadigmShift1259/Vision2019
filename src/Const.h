@@ -11,7 +11,12 @@
 #define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
 //#define USE_OFFBOARD_COMMS				// Uncomment if you want to use it
 //#define TEST_GAFFER_TAPE_ALIGNMENT_IMGS		// Use this when testing hatch vision targets made with white gaffer's tape
-#define TEST_FISHEYE_CORRECTION_BY_LUT
+//#define TEST_FISHEYE_CORRECTION_BY_LUT
+//#define TEST_CHECKERBOARD_CALIB
+
+#ifndef TEST_CHECKERBOARD_CALIB
+#define USE_OPENCV_FIT_LINE
+#endif
 
 // Define these one at a time
 //#define TEST_FILES_LINE					// Uncomment to test image files of the alignment (gaffer's tape) lines
@@ -45,10 +50,14 @@ constexpr float c_maxLeftAngle = 30.0f;						//!< [degrees] Upper bound for dete
 constexpr float c_minRightAngle = 155.0f;					//!< [degrees] Lower bound for determining right leaning retroreflective target
 constexpr float c_maxRightAngle = 177.0f;					//!< [degrees] Upper bound for determining right leaning retroreflective target
 
-constexpr double m_DEFAULT_FOV_ROW_NUM = 960.0;			    //!< [pixel] Height in pixels of image captured by camera
+constexpr int c_imageHeightPixel = 960;						//!< [pixel] Height in pixels of image captured by camera
+constexpr int c_imageWidthPixel = 1280;						//!< [pixel] Height in pixels of image captured by camera
+constexpr double c_camera_offset_x0 = 7.0;					//!< [inch] Camera offset from center of the robot
 
 static cv::Scalar c_contourColor = { 231, 96, 97 };         //!< [HSV triplet] We will draw a contour of specific color
 static cv::Scalar c_centerColor = { 231, 96, 97 };          //!< [HSV triplet] Color for center marking for both image and cube
+static cv::Scalar c_upperCheckerBoard = { 180, 255, 255 };	//!< [HSV triplet] Upper color range for fisheye calibration checker board
+static cv::Scalar c_lowerCheckerBoard = { 1, 1, 50 };		//!< [HSV triplet] Lower color range for fisheye calibration checker board
 
 constexpr int c_loopCountToSaveDiagImage = 0;//10;
 

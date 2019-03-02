@@ -32,10 +32,11 @@ void ProcessingRetro::ProcessImage(const Mat& image)
 	Prepare(image);
 	FindContour();
 	RejectSmallContours();
+#ifndef TEST_FISHEYE_CORRECTION_BY_LUT
+	FishEyeCorrectContours();
+#endif
 	FindCornerCoordinates();
-	//FindCenter();
 	FindBiggestContour();
-	//CalcCubeHeight();
+	FindVerticalRange();
 	CalcOutputValues();
-	PrintDebugValues();
 }

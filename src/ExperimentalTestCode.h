@@ -70,7 +70,7 @@ void TestAngleConversion()
 void TestMinAreaRectOnTrapezoid()
 {
     float angle = 0;
-    Mat image(960, 1280, CV_8UC3, Scalar(0));
+    Mat image(c_imageHeightPixel, c_imageWidthPixel, CV_8UC3, Scalar(0));
     vector<Point2f> vertVect;
     vector<Point2f> vertVectOut;
     RotatedRect calculatedRect;

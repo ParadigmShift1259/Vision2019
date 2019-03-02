@@ -19,13 +19,18 @@ const char* c_testOutputPath = "C:/Users/Developer/Documents/TestData/Output/";
 
 #ifdef BUILD_ON_WINDOWS
 double ProcessingBase::m_degreesToRadians = PI / 180.0;
-double ProcessingBase::m_radiansTodegrees = 180.0 / PI;
+double ProcessingBase::m_radiansToDegrees = 180.0 / PI;
 #endif
 
 ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
-	: m_upper(/*upper*/{180, 255, 255})
-	, m_lower(/*lower*/{1, 1, 50})
+	: m_upper(upper)
+	, m_lower(lower)
 {
+#ifdef TEST_CHECKERBOARD_CALIB
+	m_upper = c_upperCheckerBoard;
+	m_lower = c_lowerCheckerBoard;
+#endif
+
 	cout << "Loop,"
 		<< "Dist,"
 		<< "Area,"
@@ -36,38 +41,56 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 		<< endl;
 
 #ifdef BUILD_ON_WINDOWS
+#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
 	string fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/x_index_960x1280_uint16.img";
 #else
-	string fileName = "x_index_960x1280_uint16.img";
+	string fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/c_index_960x1280_uint16.img";
 #endif
-	m_pXfisheyeData = new uint16_t [1280 * 960]; /*new int[1280 * 960]*/
-	m_pYfisheyeData = new uint16_t [1280 * 960]; /*new int[1280 * 960]*/
+#else
+#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
+	string fileName = "x_index_960x1280_uint16.img";
+#else
+	string fileName = "c_index_960x1280_uint16.img";
+#endif
+#endif
+	m_pXfisheyeData = new uint16_t[c_imageWidthPixel * c_imageHeightPixel];
+	m_pYfisheyeData = new uint16_t[c_imageWidthPixel * c_imageHeightPixel];
+	memset(m_pXfisheyeData, 0, sizeof(uint16_t) * c_imageWidthPixel * c_imageHeightPixel);
+	memset(m_pYfisheyeData, 0, sizeof(uint16_t) * c_imageWidthPixel * c_imageHeightPixel);
 	ifstream in(fileName, ios::in || ios::binary);
 	while (!in.eof())
 	{
-		in.read((char *)m_pXfisheyeData, 2 * 1280 * 960);
+		in.read((char *)m_pXfisheyeData, sizeof(uint16_t) * c_imageWidthPixel * c_imageHeightPixel);
 	}
 	in.close();
 
 #ifdef BUILD_ON_WINDOWS
+#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
 	fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/y_index_960x1280_uint16.img";
 #else
+	fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/r_index_960x1280_uint16.img";
+#endif
+#else
+#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
 	fileName = "y_index_960x1280_uint16.img";
+#else
+	fileName = "r_index_960x1280_uint16.img";
+#endif
 #endif
 	in.open(fileName, ios::in || ios::binary);
 	while (!in.eof())
 	{
-		in.read((char *)m_pYfisheyeData, 2 * 1280 * 960);
+		in.read((char *)m_pYfisheyeData, sizeof(uint16_t) * c_imageWidthPixel * c_imageHeightPixel);
 	}
 	in.close();
 }
 
 ProcessingBase::~ProcessingBase()
 {
-	/*if (m_pXfisheyeData)
+	if (m_pXfisheyeData)
 		delete [] m_pXfisheyeData;
 	if (m_pYfisheyeData)
-		delete [] m_pYfisheyeData;*/
+		delete [] m_pYfisheyeData;
 }
 
 void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false */)
@@ -83,20 +106,34 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
 #ifdef TEST_FISHEYE_CORRECTION_BY_LUT
 		Mat inrangeTemp;
 		cv::inRange(m_imageHSV, m_lower, m_upper, inrangeTemp);	// Identify color per HSV image
-//		cv::CV_8UC
 
-		//m_inrange.copySize(inrangeTemp);	// Get the output size right
 		m_inrange = inrangeTemp.clone();	// Get the output size right
 		imwrite("inrangeTemp.jpg", inrangeTemp);
 
-		for (int row = 0; row < 960; row++)
+		for (int row = 0; row < c_imageHeightPixel; row++)
 		{
-			for (int col = 0; col < 1280; col++)
+			for (int col = 0; col < c_imageWidthPixel; col++)
 			{
-				uint16_t x = /*(uchar)*/m_pXfisheyeData[(1280 * row) + col]; // [row][col] if 2D array
-				uint16_t y = /*(uchar)*/m_pYfisheyeData[(1280 * row) + col];
+				int ndx = (int)((c_imageWidthPixel * row) + col);		// [y][x] if 2D array
+				uint16_t c = 0;
+				uint16_t r = 0;
+				if (ndx < c_imageWidthPixel * c_imageHeightPixel)
+				{
+					c = m_pXfisheyeData[ndx];
+					r = m_pYfisheyeData[ndx];
+				}
 
-				uchar color = inrangeTemp.at<uchar>(Point(x, y));	// TODO do these have to be unsigned characters too?
+				if (r != 0)
+				{
+					r--;
+				}
+
+				if (c != 0)
+				{
+					c--;
+				}
+
+				uchar color = inrangeTemp.at<uchar>(Point(c, r));
 				m_inrange.at<uchar>(Point(col, row)) = color;
 			}
 		}
@@ -133,22 +170,7 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
     else
     {    
         // Searching for color in the image that has a high of upper scaler and a low of lower scaler. Stores result in inrange
-		Mat inrangeTemp;
-		inRange(m_imageHSV, m_lower, m_upper, inrangeTemp);	// Identify color per HSV image
-
-		m_inrange.copySize(inrangeTemp);	// Get the output size right
-		for (int row = 0; row < 960; row++)
-		{
-			for (int col = 0; col < 1280; col++)
-			{
-				uint16_t x = m_pXfisheyeData[1280 * row + col]; // [row][col] if 2D array
-				uint16_t y = m_pYfisheyeData[1280 * row + col];
-
-				uchar color = inrangeTemp.at<uchar>(Point(x, y));
-				m_inrange.at<uchar>(Point(col, row)) = color;
-			} 
-		}
-		imwrite("imageCorrected.jpg", image);
+		inRange(m_imageHSV, m_lower, m_upper, m_inrange);	// Identify color per HSV image
 
         if (loopCounter == c_loopCountToSaveDiagImage)
         {
@@ -294,6 +316,25 @@ void ProcessingBase::RejectSmallContours()
 	#endif
 }
 
+void ProcessingBase::FishEyeCorrectContours()
+{
+	for (size_t i = 0; i < m_contours.size(); i++)
+	{
+		for (size_t j = 0; j < m_contours[i].size(); j++)
+		{
+			double uncorrectedX = m_contours[i][j].x;
+			double uncorrectedY = m_contours[i][j].y;
+			double correctedX;
+			double correctedY;
+
+			FishEyeCorrect(uncorrectedX, uncorrectedY, correctedX, correctedY);
+
+			m_contours[i][j].x = (int)correctedX;
+			m_contours[i][j].y = (int)correctedY;
+		}
+	}
+}
+
 void ProcessingBase::FindCornerCoordinates()
 {
 	if (m_contours.size() == 0)
@@ -324,6 +365,7 @@ void ProcessingBase::FindCornerCoordinates()
 	
 	Vec4f lineOutput;
 
+#ifdef USE_OPENCV_FIT_LINE
 	for (int i = 0; i < m_contours.size(); i++)
 	{
 		
@@ -339,6 +381,7 @@ void ProcessingBase::FindCornerCoordinates()
 		Scalar lineColor(0, 255, 0);
 		line(m_drawing, point1, point2, lineColor, 2, 4, 0);	// Sixth arg LINE_4 = 4 px wide line
 	}
+#endif
 
 	m_minRect.resize(m_contours.size());
 	vector<float> angles(m_contours.size());
@@ -425,6 +468,7 @@ void ProcessingBase::FindCornerCoordinates()
 	Point2f vertices[4];
 	char text[255];
 	const float areaThreshold = c_areaThresholdPercent * maxArea;
+	m_object_height = 0.0;
 	for (size_t i = 0; i < m_contours.size(); i++)
 	{
 #ifndef TEST_FILES_WIDE
@@ -443,6 +487,14 @@ void ProcessingBase::FindCornerCoordinates()
 #endif
 
 		float longSide = max(m_minRect[i].size.width, m_minRect[i].size.height);
+
+		if (m_object_height < (double)longSide && side[i] == eLeft)	// TODO choose only left?
+		{
+			m_object_height = (double)longSide;
+			m_object_center_x = m_minRect[i].center.x;
+			m_object_center_y = m_minRect[i].center.y;
+		}
+
 		float shortSide = min(m_minRect[i].size.width, m_minRect[i].size.height);
 		float aspectRatio = shortSide / longSide;
 		//if (aspectRatio > c_occludedAspectRatio)
@@ -530,9 +582,9 @@ void ProcessingBase::FindCenter()
     Moments m = moments(m_contours[m_biggestContourLocation], true);		// TODO we should save the moments calculated in FindBiggestContour
 
     // Find cube center coordinate and draw a circle at that point
-    m_cube_center_x = m.m10 / m.m00;
-    m_cube_center_y = m.m01 / m.m00;
-    circle(m_drawing, Point((int)m_cube_center_x, (int)m_cube_center_y), 16, c_centerColor, 2);
+    m_object_center_x = m.m10 / m.m00;
+    m_object_center_y = m.m01 / m.m00;
+    circle(m_drawing, Point((int)m_object_center_x, (int)m_object_center_y), 16, c_centerColor, 2);
 
     circle(m_drawing, Point((int)m_im_center_x, (int)m_im_center_y), 1, c_centerColor);    // Replacement for drawMarker since drawMarker didn't work.
 }
@@ -545,34 +597,34 @@ void ProcessingBase::FindVerticalRange()
     }
 
     // Find cube height per center coordinate of the cube and contour info
-    m_cube_contour_max_y = 10000;   // assign a big value
-    m_cube_contour_min_y = 10000;   // assign a big value
+    m_object_contour_max_y = 10000;   // assign a big value
+    m_object_contour_min_y = 10000;   // assign a big value
 	double im_actual_dist;
 
     for (size_t i = 0; i < m_contours[m_biggestContourLocation].size(); i++)
     {
-        im_actual_dist = abs(m_cube_center_x - m_contours[m_biggestContourLocation][i].x);
-        if (m_cube_contour_max_y > im_actual_dist)
+        im_actual_dist = abs(m_object_center_x - m_contours[m_biggestContourLocation][i].x);
+        if (m_object_contour_max_y > im_actual_dist)
         {
-            if (m_contours[m_biggestContourLocation][i].y > m_cube_center_y) // Find coordinate > object center
+            if (m_contours[m_biggestContourLocation][i].y > m_object_center_y) // Find coordinate > object center
             {
-                m_cube_contour_max_index = (int)i;
-                m_cube_contour_max_y = im_actual_dist;
+                m_object_contour_max_index = (int)i;
+                m_object_contour_max_y = im_actual_dist;
             }
         }
 
-        if (m_cube_contour_min_y > im_actual_dist)
+        if (m_object_contour_min_y > im_actual_dist)
         {
-            if (m_contours[m_biggestContourLocation][i].y <= m_cube_center_y) // Find coordinate <= object center
+            if (m_contours[m_biggestContourLocation][i].y <= m_object_center_y) // Find coordinate <= object center
             {
-                m_cube_contour_min_index = (int)i;
-                m_cube_contour_min_y = im_actual_dist;
+                m_object_contour_min_index = (int)i;
+                m_object_contour_min_y = im_actual_dist;
             }
         }
     }
 }
 
-void ProcessingBase::CalcCubeHeight()
+void ProcessingBase::CalcObjectHeight()
 {
     if (m_contours.size() == 0)
     { 
@@ -586,81 +638,29 @@ void ProcessingBase::CalcCubeHeight()
         double y_original[3];
         double x_corrected[3];
         double y_corrected[3];
-        //double xt[3];
-        //double yt[3];
-        //double ut[3];
-        //double vt[3];
-        //double r;
-        //double R;
-        //double theta;
-        //double s;
-        //double s2;
-        //double border_corr;
-        //const double k = -0.46;     		// a constant value for fisheye lens used by Raspberry pi
-        
-        x_original[0] = m_cube_center_x;
-        x_original[1] = m_cube_center_x;
-        x_original[2] = m_cube_center_x;
-    
-        y_original[0] = m_contours[m_biggestContourLocation][m_cube_contour_min_index].y;
-        y_original[1] = m_cube_center_y;
-        y_original[2] = m_contours[m_biggestContourLocation][m_cube_contour_max_index].y;
 
-        //R = sqrt(m_im_center_x * m_im_center_x + m_im_center_y * m_im_center_y);
-        //border_corr = 1/(1 + k*pow( min(m_im_center_x, m_im_center_y)/R, 2.0) ); // Scaling factor per border
+        x_original[0] = m_object_center_x;
+        x_original[1] = m_object_center_x;
+        x_original[2] = m_object_center_x;
+    
+        y_original[0] = m_contours[m_biggestContourLocation][m_object_contour_min_index].y;
+        y_original[1] = m_object_center_y;
+        y_original[2] = m_contours[m_biggestContourLocation][m_object_contour_max_index].y;
 
         for (int i = 0; i < 3; i++)
         {
 			FishEyeCorrect(x_original[i], y_original[i], x_corrected[i], y_corrected[i]);
-
-			//xt[i] = x_original[i] - m_im_center_x;
-   //         yt[i] = y_original[i] - m_im_center_y; 
-   // 
-   //         r = sqrt(xt[i]*xt[i] + yt[i]*yt[i]);	// Find radius
-
-   //         theta = atan(yt[i]/xt[i])*180/PI; 	// Find theta for the angle
-
-   //         if ((yt[i] > 0) && (xt[i] >= 0))
-   //         {
-   //             theta = theta;
-   //         }
-   //         else if ((yt[i] < 0) && (xt[i] >= 0))
-   //         {
-   //             theta = 360 + theta;
-   //         }
-   //         else if ((yt[i] >= 0) && (xt[i] <= 0))
-   //         {
-   //             theta = 180 + theta;
-   //         }
-   //         else if ((yt[i] < 0) && (xt[i] <= 0))
-   //         {
-   //             theta = 180 + theta;
-   //         }
-
-   //         r = r / R;				// Normalize the polar coordinate r
-   // 
-   //         s = r * (1 + k * r);				// Apply r-based transform with k
-
-   //         s2 = s * R;				// Un-normalize s
-
-   //         s2 = s2 * border_corr;			// Scale radius 
-
-   //         ut[i] = s2*cos(theta*PI/180);		// Converted back to cartesian coordinates
-   //         vt[i] = s2*sin(theta*PI/180);
-
-   //         x_corrected[i] = ut[i] + m_im_center_x;	// Add image center back 
-   //         y_corrected[i] = vt[i] + m_im_center_y;
         }
 
-        m_cube_height = abs(y_corrected[2] -  y_corrected[0]);
-        m_cube_center_x = x_corrected[1];
-        m_cube_center_y = y_corrected[1];
+        m_object_height = abs(y_corrected[2] -  y_corrected[0]);
+        m_object_center_x = x_corrected[1];
+        m_object_center_y = y_corrected[1];
     }
     else   
     {
         // Return the cube height with Fish Eye correction
-        m_cube_height = 	abs(m_contours[m_biggestContourLocation][m_cube_contour_max_index].y -  
-                                m_contours[m_biggestContourLocation][m_cube_contour_min_index].y);
+        m_object_height = 	abs(m_contours[m_biggestContourLocation][m_object_contour_max_index].y -  
+                                m_contours[m_biggestContourLocation][m_object_contour_min_index].y);
     }
 }
 
@@ -668,14 +668,43 @@ void ProcessingBase::FishEyeCorrect(double xIn, double yIn, double& xOut, double
 {
 	if (m_bFishEyeCorrection)
 	{
-//#ifndef BUILD_ON_WINDOWS
-//		long int start_time;
-//		long int time_difference;
-//		struct timespec gettime_now;
-//
-//		clock_gettime(CLOCK_REALTIME, &gettime_now);
-//		start_time = gettime_now.tv_nsec;		//Get nS value
-//#endif
+#ifndef BUILD_ON_WINDOWS
+		long int start_time;
+		long int time_difference;
+		struct timespec gettime_now;
+
+		clock_gettime(CLOCK_REALTIME, &gettime_now);
+		start_time = gettime_now.tv_nsec;		//Get nS value
+#endif
+
+		int ndx = (int)((c_imageWidthPixel * yIn) + xIn);		// [y][x] if 2D array
+		uint16_t col = 0;
+		uint16_t row = 0;
+		if (ndx < c_imageWidthPixel * c_imageHeightPixel)
+		{
+			col = m_pXfisheyeData[ndx];
+			row = m_pYfisheyeData[ndx];
+        }
+
+		if (row == 0)
+		{
+			yOut = yIn;
+		}
+		else   
+		{
+			yOut = row - 1;
+		}
+
+		if (col == 0)
+		{
+			xOut = xIn;
+		}
+		else
+		{
+			xOut = col - 1;
+		}
+
+#if TEST_TRIG_FISHEYE_CONVERSION
 		// Apply distortion correction for fisheye camera to three sets of coordinates only to speed up calculation
 		double xt;
 		double yt;
@@ -690,7 +719,7 @@ void ProcessingBase::FishEyeCorrect(double xIn, double yIn, double& xOut, double
 		yt = yIn - m_im_center_y;
 
 		r = sqrt(xt * xt + yt * yt);					// Find radius
-		theta = atan(yt / xt) * m_radiansTodegrees; 	// Find theta for the angle
+		theta = atan(yt / xt) * m_radiansToDegrees; 	// Find theta for the angle
 
 		if (yt > 0 && xt >= 0)
 		{
@@ -718,14 +747,14 @@ void ProcessingBase::FishEyeCorrect(double xIn, double yIn, double& xOut, double
 
 		xOut = ut + m_im_center_x;						// Add image center back 
 		yOut = vt + m_im_center_y;
-
-//#ifndef BUILD_ON_WINDOWS
-//		clock_gettime(CLOCK_REALTIME, &gettime_now);
-//		time_difference = gettime_now.tv_nsec - start_time;
-//		if (time_difference < 0)
-//			time_difference += 1000000000;				//(Rolls over every 1 second)
-//		cout << "Fisheye correction took " << time_difference << " nanoseconds" << endl;
-//#endif
+#endif
+#ifndef BUILD_ON_WINDOWS
+		clock_gettime(CLOCK_REALTIME, &gettime_now);
+		time_difference = gettime_now.tv_nsec - start_time;
+		if (time_difference < 0)
+			time_difference += 1000000000;				//(Rolls over every 1 second)
+		cout << "Fisheye correction took " << time_difference << " nanoseconds" << endl;
+#endif
 	}
 }
 
@@ -736,39 +765,48 @@ void ProcessingBase::CalcOutputValues()
         return;
     }
     
-    m_standard_height_p = m_DEFAULT_HEIGHT_PIXEL / (m_DEFAULT_FOV_ROW_NUM / m_drawing.size().height);
-    m_pixel_per_in = m_DEFAULT_PIXEL_PER_INCH/(m_DEFAULT_FOV_ROW_NUM / m_drawing.size().height);
+	double total_Distance_Inch = 0.0;							//!< [inch] Estimated total distance as the crow flies from robot to target
+	double vertical_Distance_Pixel = 0.0;						//!< [pixel] Estimated distance from floor to target
+	double vertical_Distance_Inch = 0.0;						//!< [inch] Estimated distance from floor to target
+	double vertical_Angle_Degree = 0.0;							//!< [inch] Estimated angle in the vertical plane from robot to target
+	double horizontal_Distance_Pixel = 0.0;						//!< [pixel] Estimated distance from camera to target
+	double horizontal_Distance_Inch = 0.0;						//!< [inch] Estimated distance from camera to target
+	double comp_Horizontal_Distance_Inch = 0.0;					//!< [inch] Estimated distance from camera to target with compensation for offset camera
+	//double forward_Distance_Inch = 0.0;						//!< [inch] Estimated distance to command the robot forward
+	
+	double scaledHeightPixel = c_imageHeightPixel / (double)m_drawing.size().height;
+	double standard_height_p = m_calibTargetSizePixel / scaledHeightPixel;
+	double pixel_per_in = m_defaultPixelPerInch / scaledHeightPixel;
 
-    m_Total_Distance_Inch = ((m_standard_height_p/m_cube_height) * m_CAL_DISTANCE_INCH);
-    m_Horizontal_Distance_Pixel = m_cube_center_x - m_im_center_x;
-    m_Vertical_Distance_Pixel = m_im_center_y - m_cube_center_y;	// Switch due to (0,0) at the top left to convert to bottom left
-    m_Horizontal_Angle_Degree = atan(m_Horizontal_Distance_Pixel/(m_pixel_per_in*m_CAL_DISTANCE_INCH))*180/PI;
-    m_Vertical_Angle_Degree = atan(m_Vertical_Distance_Pixel/(m_pixel_per_in*m_CAL_DISTANCE_INCH))*180/PI;
-
-    // Output values given to Network Table
-    m_Horizontal_Distance_Inch = m_Total_Distance_Inch * sin(m_Horizontal_Angle_Degree*PI/180);
-    m_Vertical_Distance_Inch = m_Total_Distance_Inch * sin(m_Vertical_Angle_Degree*PI/180);
-    m_Forward_Distance_Inch = m_Total_Distance_Inch*cos(m_Vertical_Angle_Degree*PI/180)*cos(m_Horizontal_Angle_Degree*PI/180);
+	total_Distance_Inch = ((standard_height_p / m_object_height) * m_calibCameraDistInch);
+	horizontal_Distance_Inch = (m_object_center_x - m_im_center_x) / pixel_per_in;	// Convert horizontal pixel offset to inches @ 18 camera dist
+	comp_Horizontal_Distance_Inch = horizontal_Distance_Inch + c_camera_offset_x0;	// because camera at right side of robot when facing to object 
+	vertical_Distance_Pixel = m_im_center_y - m_object_center_y;
+	vertical_Distance_Inch = vertical_Distance_Pixel / pixel_per_in;				// Convert vertical pixel offset to inches @ 18 camera dist
+	m_Horizontal_Angle_Degree = atan(comp_Horizontal_Distance_Inch / m_calibCameraDistInch) * m_radiansToDegrees;
+	vertical_Angle_Degree = atan(vertical_Distance_Pixel / (pixel_per_in * m_calibCameraDistInch)) * m_radiansToDegrees;
+	//forward_Distance_Inch = total_Distance_Inch * cos(m_Vertical_Angle_Degree * m_degreesToRadians) * cos(m_Horizontal_Angle_Degree * m_degreesToRadians);
+	m_Actual_Distance_Inch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians);
 
     // Add constraints for cube distance and angle
-    if ((abs(m_Horizontal_Angle_Degree ) > m_ANGLE_THRESHOLD ) ||
-        (abs(m_Vertical_Angle_Degree) > m_ANGLE_THRESHOLD ) ||
-        (m_Forward_Distance_Inch < 0) || (m_Forward_Distance_Inch > m_FORWARD_DIST_THRESHOLD ) ||
-        (m_contours[m_biggestContourLocation].size() < m_CUBE_CONTOUR_THRESHOLD ))
-    {
-        m_Horizontal_Distance_Inch = 0;
-        m_Vertical_Distance_Inch=0;
-        m_Forward_Distance_Inch =0;
-    }
+  //  if ((abs(m_Horizontal_Angle_Degree ) > m_maxAngle) ||
+  //      (abs(vertical_Angle_Degree) > m_maxAngle) ||
+  //      (m_Actual_Distance_Inch < 0) || (m_Actual_Distance_Inch > m_maxActualDist ))
+  //  {
+		//m_Horizontal_Angle_Degree = 0.0;
+		//m_Actual_Distance_Inch = 0.0;
+  //  }
 
     int quality = eYellowTrackingObjects; // TODO: Calculate this
 
-    m_OutputValues.SetDistance(m_Forward_Distance_Inch);
+    m_OutputValues.SetDistance(m_Actual_Distance_Inch);
     m_OutputValues.SetAngle(m_Horizontal_Angle_Degree);
     m_OutputValues.SetQuality(quality);
+
+	PrintDebugValues(comp_Horizontal_Distance_Inch, vertical_Distance_Inch);
 }
 
-void ProcessingBase::PrintDebugValues()
+void ProcessingBase::PrintDebugValues(double horzDistInch, double vertDistInch)
 {
 	int ndx = loopCounter % testFiles.size();
 #ifdef BUILD_ON_WINDOWS
@@ -778,9 +816,9 @@ void ProcessingBase::PrintDebugValues()
 #endif
 
 	cout    << "Counter: " << loopCounter
-			<< " Horizontal_Distance_Inch: " << m_Horizontal_Distance_Inch
-			<< " Vertical_Distance_Inch " << m_Vertical_Distance_Inch
-			<< " Forward_Distance_Inch: " << m_Forward_Distance_Inch 
+			<< " Horizontal_Distance_Inch: " << horzDistInch
+			<< " Vertical_Distance_Inch " << vertDistInch
+			<< " Actual_Distance_Inch: " << m_Actual_Distance_Inch
 			<< " Horizontal_Angle " << m_Horizontal_Angle_Degree 
 			<< endl;
 

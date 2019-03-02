@@ -27,7 +27,6 @@ void ProcessingLine::ProcessImage(const Mat& image)
 	//FindCornerCoordinates();
 	//FindCenter();
 	//FindBiggestContour();
-	//CalcCubeHeight();
+	//CalcObjectHeight();
 	//CalcOutputValues();
-	//PrintDebugValues();
 }

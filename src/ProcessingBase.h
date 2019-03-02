@@ -80,7 +80,7 @@ protected:
 
     double m_standard_height_p = 0.0;							//!< [dimensionless] Scaled height of cube
     double m_pixel_per_in = 0.0;								//!< [pixel/inch] calculated from scaled height
-    // TODO not used needed? double m_pixel_per_degree = 0.0;							//!< [pixel/degree] 
+    // TODO not used needed? double m_pixel_per_degree = 0.0;							//!< [pixel/degree]		NOT USED ANYWHERE IN THE FILE
     double m_Horizontal_Distance_Pixel = 0.0;					//!< [pixel] Estimated distance from camera to target
     double m_Vertical_Distance_Pixel = 0.0;						//!< [pixel] Estimated distance from floor to target
     double m_Horizontal_Distance_Inch = 0.0;					//!< [inch] Estimated distance from camera to target
@@ -120,8 +120,11 @@ protected:
     Mat m_imageHSV;												//!< Converted input image BGR->HSV
     Mat m_drawing;												//!< An output image to draw contours
 
-	char* m_pXfisheyeData;
-	char* m_pYfisheyeData;
+	//char* m_pXfisheyeData;
+	//char* m_pYfisheyeData;
+
+	uint16_t* m_pXfisheyeData;//[1280 * 960];
+	uint16_t* m_pYfisheyeData;//[1280 * 960];
 };
 
 

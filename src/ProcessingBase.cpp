@@ -23,8 +23,8 @@ double ProcessingBase::m_radiansTodegrees = 180.0 / PI;
 #endif
 
 ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
-    : m_upper(upper) 
-    , m_lower(lower)
+	: m_upper(/*upper*/{180, 255, 255})
+	, m_lower(/*lower*/{1, 1, 50})
 {
 	cout << "Loop,"
 		<< "Dist,"
@@ -40,12 +40,12 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 #else
 	string fileName = "x_index_960x1280_uint16.img";
 #endif
-	m_pXfisheyeData = new char[1280 * 960];
-	m_pYfisheyeData = new char[1280 * 960];
+	m_pXfisheyeData = new uint16_t [1280 * 960]; /*new int[1280 * 960]*/
+	m_pYfisheyeData = new uint16_t [1280 * 960]; /*new int[1280 * 960]*/
 	ifstream in(fileName, ios::in || ios::binary);
 	while (!in.eof())
 	{
-		in.read(m_pXfisheyeData, 1280 * 960);
+		in.read((char *)m_pXfisheyeData, 2 * 1280 * 960);
 	}
 	in.close();
 
@@ -57,17 +57,17 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 	in.open(fileName, ios::in || ios::binary);
 	while (!in.eof())
 	{
-		in.read(m_pYfisheyeData, 1280 * 960);
+		in.read((char *)m_pYfisheyeData, 2 * 1280 * 960);
 	}
 	in.close();
 }
 
 ProcessingBase::~ProcessingBase()
 {
-	if (m_pXfisheyeData)
+	/*if (m_pXfisheyeData)
 		delete [] m_pXfisheyeData;
 	if (m_pYfisheyeData)
-		delete [] m_pYfisheyeData;
+		delete [] m_pYfisheyeData;*/
 }
 
 void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false */)
@@ -75,26 +75,29 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
 	if (!bSkipHSVConvert && image.rows > 0 && image.cols > 0)
     {
 	    cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
+		imwrite("OriginalImage.jpg", image);
     }
     
     if (c_bUseLastDiagImage)
 	{
 #ifdef TEST_FISHEYE_CORRECTION_BY_LUT
 		Mat inrangeTemp;
-		inRange(m_imageHSV, m_lower, m_upper, inrangeTemp);	// Identify color per HSV image
+		cv::inRange(m_imageHSV, m_lower, m_upper, inrangeTemp);	// Identify color per HSV image
 //		cv::CV_8UC
 
 		//m_inrange.copySize(inrangeTemp);	// Get the output size right
-		m_inrange = inrangeTemp;	// Get the output size right
+		m_inrange = inrangeTemp.clone();	// Get the output size right
+		imwrite("inrangeTemp.jpg", inrangeTemp);
+
 		for (int row = 0; row < 960; row++)
 		{
 			for (int col = 0; col < 1280; col++)
 			{
-				uchar x = (uchar)m_pXfisheyeData[1280 * row + col]; // [row][col] if 2D array
-				uchar y = (uchar)m_pYfisheyeData[1280 * row + col];
+				uint16_t x = /*(uchar)*/m_pXfisheyeData[(1280 * row) + col]; // [row][col] if 2D array
+				uint16_t y = /*(uchar)*/m_pYfisheyeData[(1280 * row) + col];
 
-				Vec3b color = inrangeTemp.at<Vec3b>(Point(x, y));
-				m_inrange.at<Vec3b>(Point(col, row)) = color;
+				uchar color = inrangeTemp.at<uchar>(Point(x, y));	// TODO do these have to be unsigned characters too?
+				m_inrange.at<uchar>(Point(col, row)) = color;
 			}
 		}
 		imwrite("imageInRange.jpg", inrangeTemp);
@@ -138,12 +141,12 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
 		{
 			for (int col = 0; col < 1280; col++)
 			{
-				int x = m_pXfisheyeData[1280 * row + col]; // [row][col] if 2D array
-				int y = m_pYfisheyeData[1280 * row + col];
+				uint16_t x = m_pXfisheyeData[1280 * row + col]; // [row][col] if 2D array
+				uint16_t y = m_pYfisheyeData[1280 * row + col];
 
-				Vec3b color = inrangeTemp.at<Vec3b>(Point(x, y));
-				m_inrange.at<Vec3b>(Point(col, row)) = color;
-			}
+				uchar color = inrangeTemp.at<uchar>(Point(x, y));
+				m_inrange.at<uchar>(Point(col, row)) = color;
+			} 
 		}
 		imwrite("imageCorrected.jpg", image);
 

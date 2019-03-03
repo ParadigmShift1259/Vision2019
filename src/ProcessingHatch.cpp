@@ -22,7 +22,7 @@ ProcessingHatch::~ProcessingHatch()
 void ProcessingHatch::ProcessImage(const Mat& image)
 {
 	Prepare(image);
-	FindContour();
+	FindContours();
 	FindVerticalRange();
 	FindCenter();
 	FindBiggestContour();

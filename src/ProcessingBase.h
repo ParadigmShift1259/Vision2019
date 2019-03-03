@@ -26,6 +26,13 @@
 using namespace cv;
 using namespace std;
 
+struct RectDescr
+{
+	RotatedRect m_minRect;
+	float m_slope;
+	Point m_yIntercept;
+};
+
 class ProcessingBase
 {
 public:
@@ -37,36 +44,41 @@ public:
     const OutputValues& GetOutputValues() const { return m_OutputValues; }	//!< Return the output values
     const Mat& GetImageHSV() const { return m_imageHSV; }					//!< Return the converted input image in HSV representation
     void SetImageHSV(const Mat& imageHSV) { m_imageHSV = imageHSV; }		//!< Set the converted input image in HSV representation for later retreival
-	void FishEyeCorrect(double xIn, double yIn, double& xOut, double& yOut);//!< Correct the distortion from the wide angle (fisheye) camera
 
 protected:
 	void Prepare(const Mat& image, bool bSkipHSVConvert = false);			//!< Convert input image to HSV and perform in-range filtering 
-	void FindContour();														//!< Process the in-range image to get object contours (outlines)
-	void FindVerticalRange();												//!< Old function for cube; finds the min and max Y coordinates of the biggest contour
+	void FindContours();													//!< Process the in-range image to get object contours (outlines)
+	//void SortContours();													//!< Sort all contours by the x coordinate
+	void FitLinesToContours();												//!< Best fit of a straight line through all contours
+	void ApproximatePolygons();												//!< Fit polygons to all contours
+	void FindVerticalRange();												//!< Finds the min and max Y coordinates of the biggest contour
 	void RejectSmallContours();												//!< Process the contours to reject very small and very large contours by point count
-	void FishEyeCorrectContours();
+	void FishEyeCorrectContours();											//!< Iterate through all contours and correct each point
+	void FishEyeCorrectContour(size_t index);								//!< Iterate through all points in specified contour and correct each point
+	void FishEyeCorrectPoint(int xIn, int yIn, int& xOut, int& yOut);		//!< Correct the distortion from the wide angle (fisheye) camera
+	void FishEyeCorrectPoint(double xIn, double yIn, double& xOut, double& yOut);//!< Correct the distortion from the wide angle (fisheye) camera
 	void FindCornerCoordinates();											//!< Find corner coordinates by finding minimum area rectange and/or approximating a polygon
 	void FindCenter();														//!< Find center of biggest contour and center of drawing
-	void CalcObjectHeight();													//!< Old function for cube; calculate Cube with/without Fish Eye correction based on vertical range
+	void CalcObjectHeight();												//!< Calculate object height with/without Fish Eye correction based on vertical range
 	void FindBiggestContour();												//!< Process the contours to find the largest contours by moment and draw the contour found TODO split
 	void CalcOutputValues();												//!< Calculate the values that will be sent to the robot
 	void PrintDebugValues(double horzDistInch, double vertDistInch);		//!< Print the output values to the Pi console
 	
 	// Following settings is for camera calibrated value
-    static constexpr double m_calibTargetSizePixel = 155.0;	    //!< [pixel] Height in pixels of a cube placed 12 inches from the camer
-    static constexpr double m_calibCameraDistInch = 18.0;  		//!< [inch] Calibration distance from camera to cube
-	static constexpr double m_measuredObjectHeight = 5.5;  		//!< [inch] Height of cube in inches; used a tape measure in the real world
+    static constexpr double m_calibTargetSizePixel = 176.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
+    static constexpr double m_calibCameraDistInch = 18.0;  					//!< [inch] Calibration distance from camera to object
+	static constexpr double m_measuredObjectHeight = 5.5;  					//!< [inch] Height of object in inches; used a tape measure in the real world
 	static constexpr double m_defaultPixelPerInch = m_calibTargetSizePixel / m_measuredObjectHeight;	// [pixel/inch] ~25
 	// Output value bounds
-	static constexpr double m_maxAngle = 60.0;					//!< [degrees] If we calculate an output angle more than this, do not send it
-    static constexpr double m_maxActualDist = 240.0;			//!< [inch] 20 feet; if we calculate an output distance more than this, do not send it
-	static constexpr const double m_k = -0.46;     				//!< Constant value for fisheye lens used by Raspberry pi (determined empirically)
+	static constexpr double m_maxAngle = 60.0;								//!< [degrees] If we calculate an output angle more than this, do not send it
+    static constexpr double m_maxActualDist = 10.0 * 12.0;					//!< [inch] 10 feet; if we calculate an output distance more than this, do not send it
+	static constexpr const double m_k = -0.46;     							//!< Constant value for fisheye lens used by Raspberry pi (determined empirically)
 
 #ifdef BUILD_ON_WINDOWS
 	static double m_degreesToRadians;							//!< Angle units converison factor
 	static double m_radiansToDegrees;							//!< Angle units converison factor
 #else
-	static constexpr double m_degreesToRadians = m_degreesToRadians.0;	//!< Angle units converison factor
+	static constexpr double m_degreesToRadians = PI / 180.0;	//!< Angle units converison factor
 	static constexpr double m_radiansToDegrees = 180.0 / PI;	//!< Angle units converison factor
 #endif
 
@@ -100,7 +112,13 @@ protected:
 
     vector<Vec4i> m_hierarchy;									//!< Output from OpenCV findCountours (not used; holds info on nested objects)
     vector<vector<Point>> m_contours;							//!< Output from OpenCV findCountours (as applied to in range image)
-    vector<RotatedRect> m_minRect;                              //!< minimum area rectangle for contours
+    //vector<RotatedRect> m_minRect;                              //!< Minimum area rectangle for contours
+	//using RectTuple = tuple<RotatedRect, float, Point, Point>;
+	vector<RectDescr> m_rectDescr;								//!< Minimum area rectangle for contours, line slope and y intercept
+	Vec4f m_lineOutput;											//!< Collection of lines fit to all contours
+	vector<pair<Point, Point>> m_linePoints;					//!< End points of lines fit to all contours
+	//vector<float> m_lineSlopes;									//!< Slopes of lines fit to all contours
+	//vector<Point> m_lineYintercept;								//!< Y axis intercept of lines fit to all contours							
 
     Mat m_inrange;												//!< A black and white image that contains regions for the colors searched for
     Mat m_imageHSV;												//!< Converted input image BGR->HSV

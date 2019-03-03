@@ -24,7 +24,11 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/narrow_c
 #ifdef TEST_CHECKERBOARD_CALIB
 const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/";
 #else
+#ifdef PORTRAIT_IMAGE
+const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/Portrait/";
+#else
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
+#endif
 #endif
 #endif
 
@@ -80,30 +84,26 @@ std::vector<std::string> testFiles
 #ifdef TEST_CHECKERBOARD_CALIB
 	  "cam6.jpg"
 #else
-	//  "im_96in_p_wlen.jpg"
-	//, "im_12in_p_wlen.jpg"
-	//, "im_18in_p_wlen.jpg"
-	//, "im_30in_p_wlen.jpg"
-	//, "im_48in_p_wlen.jpg"
-	//, "im_72in_p_wlen.jpg"
 
-	  "im_12in_h_wlen_1.jpg"
-	, "im_18in_h_wlen_1.jpg"
-	, "im_30in_h_wlen_1.jpg"
-	, "im_48in_h_wlen_1.jpg"
-	, "im_72in_h_wlen_1.jpg"
-	, "im_96in_h_wlen_1.jpg"
+#ifdef PORTRAIT_IMAGE
+	  "im_12in_p_wlen.jpg"
+	, "im_18in_p_wlen.jpg"
+	, "im_30in_p_wlen.jpg"
+	, "im_48in_p_wlen.jpg"
+	, "im_72in_p_wlen.jpg"
+	, "im_96in_p_wlen.jpg"
+#else
 
 	, "im_36in_45deg_h_wlen.jpg"
 	, "im_36in_m45deg_h_wlen.jpg"
 	, "im_60in_45deg_h_wlen.jpg"
 	, "im_60in_m45deg_h_wlen.jpg"
+#endif
 
-	//, "testFishEye.jpg"
-	//, "test_horiz30gaff.jpg"
-	//, "test_horiz45gaff.jpg"
-	//, "test_vertical0gaff.jpg"
-	//, "test_vertical45gaff.jpg"
+	, "im_36in_45deg_h_wlen.jpg"
+	, "im_36in_m45deg_h_wlen.jpg"
+	, "im_60in_45deg_h_wlen.jpg"
+	, "im_60in_m45deg_h_wlen.jpg"
 #endif
 #endif
 
@@ -197,6 +197,7 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 #ifdef TEST_CHECKERBOARD_CALIB
 	  12	//?
 #else
+#ifdef PORTRAIT_IMAGE
 	// Portrait
 	//  12
 	//, 18
@@ -205,6 +206,8 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 	//, 72
 	//, 96
 
+	// Horizontal (landscape)
+#else
 	// Horizontal (landscape)
 	  12
 	, 18
@@ -217,8 +220,9 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 	, 36	//, "im_36in_m45deg_h_wlen.jpg"
 	, 60	//, "im_60in_45deg_h_wlen.jpg"
 	, 60	//, "im_60in_m45deg_h_wlen.jpg"
+#endif
 
-	//, 18	//, "testFishEye.jpg"
+  //, 18	//, "testFishEye.jpg"
 	//, 30	//, "test_horiz30gaff.jpg"
 	//, 45	//, "test_horiz45gaff.jpg"
 	//, 18	//, "test_vertical0gaff.jpg"

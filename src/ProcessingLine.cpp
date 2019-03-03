@@ -22,7 +22,7 @@ ProcessingLine::~ProcessingLine()
 void ProcessingLine::ProcessImage(const Mat& image)
 {
 	Prepare(image, true);	// We can skip HSV conversion since the retro object already did it
-	//FindContour();
+	//FindContours();
 	//RejectSmallContours();
 	//FindCornerCoordinates();
 	//FindCenter();

@@ -84,6 +84,7 @@ std::vector<std::string> testFiles
 #ifdef TEST_CHECKERBOARD_CALIB
 	  "cam6.jpg"
 #else
+
 #ifdef PORTRAIT_IMAGE
 	  "im_12in_p_wlen.jpg"
 	, "im_18in_p_wlen.jpg"
@@ -92,23 +93,17 @@ std::vector<std::string> testFiles
 	, "im_72in_p_wlen.jpg"
 	, "im_96in_p_wlen.jpg"
 #else
-	  "im_12in_h_wlen_1.jpg"
-	, "im_18in_h_wlen_1.jpg"
-	, "im_30in_h_wlen_1.jpg"
-	, "im_48in_h_wlen_1.jpg"
-	, "im_72in_h_wlen_1.jpg"
-	, "im_96in_h_wlen_1.jpg"
 
 	, "im_36in_45deg_h_wlen.jpg"
 	, "im_36in_m45deg_h_wlen.jpg"
 	, "im_60in_45deg_h_wlen.jpg"
 	, "im_60in_m45deg_h_wlen.jpg"
 #endif
-	//, "testFishEye.jpg"
-	//, "test_horiz30gaff.jpg"
-	//, "test_horiz45gaff.jpg"
-	//, "test_vertical0gaff.jpg"
-	//, "test_vertical45gaff.jpg"
+
+	, "im_36in_45deg_h_wlen.jpg"
+	, "im_36in_m45deg_h_wlen.jpg"
+	, "im_60in_45deg_h_wlen.jpg"
+	, "im_60in_m45deg_h_wlen.jpg"
 #endif
 #endif
 
@@ -203,12 +198,15 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 	  12	//?
 #else
 #ifdef PORTRAIT_IMAGE
-	  12
-	, 18
-	, 30
-	, 48
-	, 72
-	, 96
+	// Portrait
+	//  12
+	//, 18
+	//, 30
+	//, 48
+	//, 72
+	//, 96
+
+	// Horizontal (landscape)
 #else
 	// Horizontal (landscape)
 	  12
@@ -224,7 +222,7 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 	, 60	//, "im_60in_m45deg_h_wlen.jpg"
 #endif
 
-	//, 18	//, "testFishEye.jpg"
+  //, 18	//, "testFishEye.jpg"
 	//, 30	//, "test_horiz30gaff.jpg"
 	//, 45	//, "test_horiz45gaff.jpg"
 	//, 18	//, "test_vertical0gaff.jpg"

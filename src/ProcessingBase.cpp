@@ -506,6 +506,7 @@ void ProcessingBase::FindCornerCoordinates()
 		//cout << __func__ << " end no countours" << endl;
 		return;
 	}
+#endif
 
 	Mat image(m_inrange.rows, m_inrange.cols, CV_8UC3, Scalar(0));
 	//cout << "Finding minimum area rotated rectangles for " << m_contours.size() << " contours" << endl;

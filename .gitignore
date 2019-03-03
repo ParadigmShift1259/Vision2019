@@ -1,5 +1,6 @@
 # Prerequisites
 *.d
+*.enc
 
 # Compiled Object files
 *.slo
@@ -10,6 +11,7 @@
 # Precompiled Headers
 *.gch
 *.pch
+*.ipch
 
 # Compiled Dynamic libraries
 *.so
@@ -77,3 +79,5 @@ x64/Release/Vision2019VS.tlog/unsuccessfulbuild
 .vs/Vision 2019/v15/ipch/AutoPCH/f6171ec0f9a92806/PROCESSINGHATCH.ipch
 x64/Debug/Vision2019VS.Build.CppClean.log
 .vs/Vision 2019/v15/ipch/AutoPCH/f93a45b0f155bb58/PROCESSINGCARGO.ipch
+.vs/Vision 2019/v15/ipch/AutoPCH/2a184c36a6c1d011/OFFBOARDCOMMS.ipch
+.vs/Vision 2019/v15/ipch/AutoPCH/d77c556c1c5b0306/PROCESSINGLINE.ipch

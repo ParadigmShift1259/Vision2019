@@ -21,7 +21,7 @@ ProcessingCargo::~ProcessingCargo()
 void ProcessingCargo::ProcessImage(const Mat& image)
 {
 	Prepare(image);
-	FindContour();
+	FindContours();
 	FindVerticalRange();
 	FindCenter();
 	FindBiggestContour();

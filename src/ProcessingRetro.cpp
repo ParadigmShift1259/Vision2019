@@ -30,9 +30,12 @@ ProcessingRetro::~ProcessingRetro()
 void ProcessingRetro::ProcessImage(const Mat& image)
 {
 	Prepare(image);
-	FindContour();
+	FindContours();
 	RejectSmallContours();
+	FitLinesToContours();
+	//SelectCenterRetroPairs();
 #ifndef TEST_FISHEYE_CORRECTION_BY_LUT
+	//FishEyeCorrectContour(m_selectedPairIndex);
 	FishEyeCorrectContours();
 #endif
 	FindCornerCoordinates();

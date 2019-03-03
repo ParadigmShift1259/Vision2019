@@ -15,6 +15,7 @@
 OffBoardComms::OffBoardComms()
 {
 #ifdef USE_OFFBOARD_COMMS
+	cout << "Initializing off board comms" << endl;
 	m_nt_Inst = NetworkTableInstance::GetDefault();
 	m_nt_Inst.StartClientTeam(1259);
 

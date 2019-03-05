@@ -302,13 +302,22 @@ void ProcessingBase::RejectSmallContours()
 		}
     }
 
-    vector<vector<Point>> contours;
+	m_linePoints.clear();
+	m_rectDescr.clear();
+	vector<vector<Point>> contours;
     size_t threshold = (size_t)(c_smallContourPercentOfMax * maxSize);
     cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
     for (size_t i = 0; i < m_contours.size(); i++)
     {
-        if (m_contours[i].size() > threshold)
+		LineDescr ld = FitLineToContour(m_contours[i]);
+
+        if (m_contours[i].size() > threshold && abs(ld.m_slope) > 1.0f)
         {
+			m_linePoints.push_back(make_pair(ld.m_point1, ld.m_point2));
+			RectDescr rd;
+			rd.m_slope = ld.m_slope;
+			m_rectDescr.push_back(rd);
+
 #ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
 			auto arcLen = arcLength(m_contours[i], true);
 			auto unorientedArea = contourArea(m_contours[i], false);
@@ -318,6 +327,10 @@ void ProcessingBase::RejectSmallContours()
 			{
 				//cout << "Saving contour of size " << m_contours[i].size() << endl;
 				contours.push_back(m_contours[i]);
+				if (c_bDrawAllContours)
+				{
+					drawContours(m_drawing, m_contours, (int)i, c_contourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
+				}
 			}
 		}
   //      else
@@ -360,6 +373,32 @@ void ProcessingBase::RejectSmallContours()
 			time_difference += 1000000000;				//(Rolls over every 1 second)
 		cout << "Fisheye correction of " << count << " points took " << time_difference << " nanoseconds " << time_difference / count << " nanosec/pt" << endl;
 	#endif
+
+#ifdef DRAW_OPENCV_FIT_LINE
+	for (auto& it : m_linePoints)
+	{
+		line(m_drawing, it.first, it.second, c_lineColor, 2, 4, 0);	// Sixth arg LINE_4 = 4 px wide line
+	}
+#endif
+	//if (loopCounter == c_loopCountToSaveDiagImage || c_bUseLastDiagImage)
+	{
+		// For manually calibrating the camera
+		char fileName[255];
+#ifdef BUILD_ON_WINDOWS
+		int ndx = loopCounter % testFiles.size();
+		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
+#else
+		if (c_bUseLastDiagImage)
+		{
+			sprintf(fileName, "drawing%d.jpg", loopCounter % testFiles.size() + 1);
+		}
+		else
+		{
+			sprintf(fileName, "drawing.jpg");
+		}
+#endif
+		imwrite(fileName, m_drawing);
+	}
 }
 
 void ProcessingBase::FishEyeCorrectContours()
@@ -432,10 +471,8 @@ void ProcessingBase::FitLinesToContours()
 			}
 			RectDescr rd;
 			rd.m_slope = slope;
-			rd.m_yIntercept = Point((int)x, (int)y);
 			m_rectDescr.push_back(rd);
 			//m_rectDescr[i].m_slope = slope;
-			//m_rectDescr[i].m_yIntercept = Point((int)x, (int)y);
 			//cout << "slope  " << slope << endl;
 		}
 
@@ -451,6 +488,42 @@ void ProcessingBase::FitLinesToContours()
 		line(m_drawing, it.first, it.second, c_lineColor, 2, 4, 0);	// Sixth arg LINE_4 = 4 px wide line
 	}
 #endif
+}
+
+LineDescr ProcessingBase::FitLineToContour(const vector<Point>& contour)
+{
+	LineDescr ld;
+	ld.m_slope = 0.0f;
+	ld.m_point1.x = 0;
+	ld.m_point1.y = 0;
+	ld.m_point2.x = 0;
+	ld.m_point2.y = 0;
+
+	Vec4f lineOutput;
+	fitLine(contour, lineOutput, 2, 0, 0.01, 0.01);	// Third arg: DIST_L2 = 2 is the fastest least squares method
+
+	// Output line parameters.
+	// A vector of 4 elements (vx, vy, x0, y0), where(vx, vy) is a normalized vector collinear to the line and (x0, y0) is a point on the line.
+	float vx = lineOutput[0];
+	if (vx != 0.0f)
+	{
+		float vy = lineOutput[1];
+		float x = lineOutput[2];
+		float y = lineOutput[3];
+
+		float  lefty = round((-x * vy / vx) + y);
+		float  righty = round(((m_drawing.cols - x) * vy / vx) + y);
+		ld.m_point1.x = m_drawing.cols - 1;
+		ld.m_point1.y = (int)righty;
+		ld.m_point2.y = (int)lefty;
+
+		if (vx != 0.0f)
+		{
+			ld.m_slope = vy / vx;
+		}
+	}
+
+	return ld;
 }
 
 void ProcessingBase::ApproximatePolygons()
@@ -506,7 +579,6 @@ void ProcessingBase::FindCornerCoordinates()
 		//cout << __func__ << " end no countours" << endl;
 		return;
 	}
-#endif
 
 	Mat image(m_inrange.rows, m_inrange.cols, CV_8UC3, Scalar(0));
 	//cout << "Finding minimum area rotated rectangles for " << m_contours.size() << " contours" << endl;
@@ -566,6 +638,15 @@ void ProcessingBase::FindCornerCoordinates()
 			continue;
 		}
 
+		double contour_area = contourArea(m_contours[i]);
+		cout << "contour_area " << contour_area << endl;
+		cout << "min rect area " << m_rectDescr[i].m_minRect.size.area() << endl;
+		cout << "95% of min rect area " << 0.95 * m_rectDescr[i].m_minRect.size.area() << endl;
+		if (contour_area < 0.95 * m_rectDescr[i].m_minRect.size.area())
+		{
+			continue;
+		}
+
 		maxArea = max(maxArea, m_rectDescr[i].m_minRect.size.area());
 
 		//cout << "Correct angle" << endl;
@@ -618,6 +699,9 @@ void ProcessingBase::FindCornerCoordinates()
 	{
 		return rd1.m_minRect.center.x < rd2.m_minRect.center.x;
 	});
+	//-------------------------------------------------------------
+	// NOTE: m_rectDescr is not in the same order as m_contours now
+	//-------------------------------------------------------------
 
 	float maxXdiff = 0;
 	size_t maxPairIndex = 0;
@@ -659,7 +743,8 @@ void ProcessingBase::FindCornerCoordinates()
 	char text[255];
 	const float areaThreshold = c_areaThresholdPercent * maxArea;
 	m_object_height = 0.0;
-	for (size_t i = maxPairIndex; i < maxPairIndex + 2; i++)			// TODO this is kind of hacky
+	size_t endIndex = min(maxPairIndex + 2, m_rectDescr.size());
+	for (size_t i = maxPairIndex; i < endIndex; i++)			// TODO this is kind of hacky
 	{
 //#ifndef TEST_FILES_WIDE
 //		if (m_minRect[i].size.area() < areaThreshold || side[i] == eUnknown)
@@ -682,7 +767,7 @@ void ProcessingBase::FindCornerCoordinates()
 		cout << "longSide " << longSide << endl;
 		if (longSide > 0.0f)
 		{
-			if (m_object_height < (double)longSide && side[i] == eLeft)	// TODO choose only left?
+			if (m_object_height < (double)longSide && side[i] == eLeft)
 			{
 				m_object_height = (double)longSide;
 				m_object_center_x = (m_rectDescr[i].m_minRect.center.x + m_rectDescr[i + 1].m_minRect.center.x) / 2.0f;

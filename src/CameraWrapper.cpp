@@ -27,7 +27,9 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/FishEyeCorr
 #ifdef PORTRAIT_IMAGE
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/Portrait/";
 #else
-const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
+//const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
+const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
+#endif
 #endif
 #endif
 #endif
@@ -93,6 +95,32 @@ std::vector<std::string> testFiles
 	, "im_72in_p_wlen.jpg"
 	, "im_96in_p_wlen.jpg"
 #else
+	//  "im_12in_h_wlen_1.jpg"
+	//, "im_18in_h_wlen_1.jpg"
+	//, "im_18in_h_wlen_1.jpg"
+	//, "im_18in_p_wlen.jpg"
+	//, "im_30in_h_wlen_1.jpg"
+	//, "im_30in_h_wlen_1.jpg"
+	//, "im_30in_p_wlen.jpg"
+	//, "im_48in_h_wlen_1.jpg"
+	//, "im_72in_h_wlen_1.jpg"
+	//, "im_96in_h_wlen_1.jpg"
+
+	//, "im_36in_45deg_h_wlen.jpg"
+	//, "im_36in_m45deg_h_wlen.jpg"
+	//, "im_60in_45deg_h_wlen.jpg"
+	//, "im_60in_m45deg_h_wlen.jpg"
+
+	  "im_394_1p5ft_contact.jpg"
+	, "im_405_1p5ft_contact.jpg"
+	, "im_301_4ft.jpg"
+	, "im_347_3ft.jpg"
+	, "im_367_2ft.jpg"
+
+#endif	// PORTRAIT_IMAGE
+#endif	// TEST_CHECKERBOARD_CALIB
+#endif	// TEST_FILES_WIDE
+=======
 
 	, "im_36in_45deg_h_wlen.jpg"
 	, "im_36in_m45deg_h_wlen.jpg"
@@ -209,20 +237,26 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 	// Horizontal (landscape)
 #else
 	// Horizontal (landscape)
-	  12
-	, 18
-	, 30
-	, 48
-	, 72
-	, 96
+	//  12
+	//, 18
+	//, 30
+	//, 48
+	//, 72
+	//, 96
 
-	, 36	//, "im_36in_45deg_h_wlen.jpg"
-	, 36	//, "im_36in_m45deg_h_wlen.jpg"
-	, 60	//, "im_60in_45deg_h_wlen.jpg"
-	, 60	//, "im_60in_m45deg_h_wlen.jpg"
+	//, 36	//, "im_36in_45deg_h_wlen.jpg"
+	//, 36	//, "im_36in_m45deg_h_wlen.jpg"
+	//, 60	//, "im_60in_45deg_h_wlen.jpg"
+	//, 60	//, "im_60in_m45deg_h_wlen.jpg"
+
+	  18	//im_394_1p5ft_contact.jpg
+	, 18	//im_405_1p5ft_contact.jpg
+	, 48	//im_301_4ft.jpg
+	, 36	//im_347_3ft.jpg
+	, 24	//im_367_2ft.jpg
 #endif
 
-  //, 18	//, "testFishEye.jpg"
+	//, 18	//, "testFishEye.jpg"
 	//, 30	//, "test_horiz30gaff.jpg"
 	//, 45	//, "test_horiz45gaff.jpg"
 	//, 18	//, "test_vertical0gaff.jpg"

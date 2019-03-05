@@ -38,7 +38,7 @@ Prerequisites:
 		Set the file system to read/write if the promt ends with (ro):
 			become the super user withsudo -s
 			cd etc
-			remount the file system with mount -o remount rw root
+			remount the file system with mount -o remount rw /
 			edit the fstab file with nano fstab
 				change ...defaults.ro.noatime
 				to           ...defaults.rw.noatime

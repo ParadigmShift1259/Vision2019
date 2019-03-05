@@ -32,6 +32,7 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOn
 #endif
 #endif
 #endif
+#endif
 
 std::vector<std::string> testFiles
 {
@@ -85,6 +86,7 @@ std::vector<std::string> testFiles
 #ifdef TEST_CHECKERBOARD_CALIB
 	  "cam6.jpg"
 #else
+
 #ifdef PORTRAIT_IMAGE
 	  "im_12in_p_wlen.jpg"
 	, "im_18in_p_wlen.jpg"
@@ -118,6 +120,20 @@ std::vector<std::string> testFiles
 #endif	// PORTRAIT_IMAGE
 #endif	// TEST_CHECKERBOARD_CALIB
 #endif	// TEST_FILES_WIDE
+=======
+
+	, "im_36in_45deg_h_wlen.jpg"
+	, "im_36in_m45deg_h_wlen.jpg"
+	, "im_60in_45deg_h_wlen.jpg"
+	, "im_60in_m45deg_h_wlen.jpg"
+#endif
+
+	, "im_36in_45deg_h_wlen.jpg"
+	, "im_36in_m45deg_h_wlen.jpg"
+	, "im_60in_45deg_h_wlen.jpg"
+	, "im_60in_m45deg_h_wlen.jpg"
+#endif
+#endif
 
 #ifdef TEST_FILES_LINE
 	  "alignment_line1.jpg"

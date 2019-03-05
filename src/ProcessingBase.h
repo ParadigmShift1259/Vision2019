@@ -30,7 +30,13 @@ struct RectDescr
 {
 	RotatedRect m_minRect;
 	float m_slope;
-	Point m_yIntercept;
+};
+
+struct LineDescr
+{
+	float m_slope;
+	Point m_point1;
+	Point m_point2;
 };
 
 class ProcessingBase
@@ -50,6 +56,7 @@ protected:
 	void FindContours();													//!< Process the in-range image to get object contours (outlines)
 	//void SortContours();													//!< Sort all contours by the x coordinate
 	void FitLinesToContours();												//!< Best fit of a straight line through all contours
+	LineDescr FitLineToContour(const vector<Point>& coutour);				//!< Fit line to single contour and return slope
 	void ApproximatePolygons();												//!< Fit polygons to all contours
 	void FindVerticalRange();												//!< Finds the min and max Y coordinates of the biggest contour
 	void RejectSmallContours();												//!< Process the contours to reject very small and very large contours by point count

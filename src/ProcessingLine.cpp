@@ -22,11 +22,17 @@ ProcessingLine::~ProcessingLine()
 void ProcessingLine::ProcessImage(const Mat& image)
 {
 	Prepare(image, true);	// We can skip HSV conversion since the retro object already did it
-	//FindContours();
-	//RejectSmallContours();
-	//FindCornerCoordinates();
-	//FindCenter();
+	FindContours();
+	RejectSmallContours();
+	//FitLinesToContours();
+	//SelectCenterRetroPairs();
+#ifndef TEST_FISHEYE_CORRECTION_BY_LUT
+	//FishEyeCorrectContour(m_selectedPairIndex);
+	FishEyeCorrectContours();
+#endif
+	FindCornerCoordinates();
 	//FindBiggestContour();
-	//CalcObjectHeight();
-	//CalcOutputValues();
+	//FindVerticalRange();
+	CalcOutputValues();
+
 }

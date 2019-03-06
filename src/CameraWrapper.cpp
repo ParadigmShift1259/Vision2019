@@ -29,10 +29,10 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_
 #else
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
-#endif
-#endif
-#endif
-#endif
+//const char* c_testImagePath = "C:/Users/212036134/Documents/Personal/FIRST Robotics/ImagingData/FromCafeteriaMar2/";
+#endif	// PORTRAIT_IMAGE
+#endif	// TEST_CHECKERBOARD_CALIB
+#endif	// TEST_FILES_WIDE
 
 std::vector<std::string> testFiles
 {
@@ -116,24 +116,31 @@ std::vector<std::string> testFiles
 	, "im_301_4ft.jpg"
 	, "im_347_3ft.jpg"
 	, "im_367_2ft.jpg"
+	, "im_298_error_handling.jpg"
+	, "im_296.jpg"
+	, "im_837_w_hatch.jpg"
+	, "im_840_w_hatch.jpg"
+	, "im_426_5ft.jpg"
+	, "im_429_5ft.jpg"
+	, "im_450_5ft.jpg"
+	, "im_455_5ft_angled.jpg"
+	, "im_479_5ft.jpg"
+	, "im_495_4ft.jpg"
+	, "im_508_3ft.jpg"
+	, "im_512_2ft.jpg"
+	, "im_520_1p5ft_contact.jpg"
+	, "im_527_1p5ft_contact.jpg"
+	, "im_577_5ft_2line_start.jpg"
+	, "im_586_5ft_2line_start_tilted.jpg"
+	, "im_603_5ft_2line_start_titled.jpg"
+	, "im_633_4ft_2line_start_titled.jpg"
+	, "im_658_3ft_2line_start_titled.jpg"
+	, "im_667_2ft_2line_start_titled.jpg"
+	, "im_674_1ft_2line_start_titled.jpg.jpg"
 
 #endif	// PORTRAIT_IMAGE
 #endif	// TEST_CHECKERBOARD_CALIB
 #endif	// TEST_FILES_WIDE
-=======
-
-	, "im_36in_45deg_h_wlen.jpg"
-	, "im_36in_m45deg_h_wlen.jpg"
-	, "im_60in_45deg_h_wlen.jpg"
-	, "im_60in_m45deg_h_wlen.jpg"
-#endif
-
-	, "im_36in_45deg_h_wlen.jpg"
-	, "im_36in_m45deg_h_wlen.jpg"
-	, "im_60in_45deg_h_wlen.jpg"
-	, "im_60in_m45deg_h_wlen.jpg"
-#endif
-#endif
 
 #ifdef TEST_FILES_LINE
 	  "alignment_line1.jpg"
@@ -173,7 +180,7 @@ std::vector<std::string> testFiles
 #endif
 };
 
-std::vector<float> testDist	// Keep in sync with testFile vector
+std::vector<double> testDist	// Keep in sync with testFile vector
 {
 #ifdef TEST_FILES_ROCKET
 	  16.0
@@ -203,102 +210,124 @@ std::vector<float> testDist	// Keep in sync with testFile vector
 
 #ifdef TEST_FILES_NARROW
 	  12.0
-	, 18
-	, 24
-	, 30
-	, 36
-	, 36
-	, 48
-	, 60
-	, 60
-	, 72
-	, 96
-	//, 40
-	//, 60
-	//, 40
-	//, 40
-	//, 60
-	//, 60
+	, 18.0
+	, 24.0
+	, 30.0
+	, 36.0
+	, 36.0
+	, 48.0
+	, 60.0
+	, 60.0
+	, 72.0
+	, 96.0
+	//, 40.0
+	//, 60.0
+	//, 40.0
+	//, 40.0
+	//, 60.0
+	//, 60.0
 #endif
 
 #ifdef TEST_FILES_WIDE
 #ifdef TEST_CHECKERBOARD_CALIB
-	  12	//?
+	  12.0	//?
 #else
 #ifdef PORTRAIT_IMAGE
 	// Portrait
-	//  12
-	//, 18
-	//, 30
-	//, 48
-	//, 72
-	//, 96
+	//  12.0
+	//, 18.0
+	//, 30.0
+	//, 48.0
+	//, 72.0
+	//, 96.0
 
 	// Horizontal (landscape)
 #else
 	// Horizontal (landscape)
-	//  12
-	//, 18
-	//, 30
-	//, 48
-	//, 72
-	//, 96
+	//  12.0
+	//, 18.0
+	//, 30.0
+	//, 48.0
+	//, 72.0
+	//, 96.0
 
-	//, 36	//, "im_36in_45deg_h_wlen.jpg"
-	//, 36	//, "im_36in_m45deg_h_wlen.jpg"
-	//, 60	//, "im_60in_45deg_h_wlen.jpg"
-	//, 60	//, "im_60in_m45deg_h_wlen.jpg"
+	//, 36.0	//, "im_36in_45deg_h_wlen.jpg"
+	//, 36.0	//, "im_36in_m45deg_h_wlen.jpg"
+	//, 60.0	//, "im_60in_45deg_h_wlen.jpg"
+	//, 60.0	//, "im_60in_m45deg_h_wlen.jpg"
 
-	  18	//im_394_1p5ft_contact.jpg
-	, 18	//im_405_1p5ft_contact.jpg
-	, 48	//im_301_4ft.jpg
-	, 36	//im_347_3ft.jpg
-	, 24	//im_367_2ft.jpg
+	  18.0	//im_394_1p5ft_contact.jpg
+	, 18.0	//im_405_1p5ft_contact.jpg
+	, 48.0	//im_301_4ft.jpg
+	, 36.0	//im_347_3ft.jpg
+	, 24.0	//im_367_2ft.jpg
+	, 48.0	//im_298_error_handling.jpg
+	, 48.0	//im_296.jpg
+	, 60.0	//im_837_w_hatch.jpg
+	, 60.0	//im_840_w_hatch.jpg
+	, 60.0	//im_426_5ft.jpg
+	, 60.0	//im_429_5ft.jpg
+	, 60.0	//im_450_5ft.jpg
+	, 60.0	//im_455_5ft_angled.jpg
+	, 60.0	//im_479_5ft.jpg
+	, 48.0	//im_495_4ft.jpg
+	, 36.0	//im_508_3ft.jpg
+	, 24.0	//im_512_2ft.jpg
+	, 18.0	//im_520_1p5ft_contact.jpg
+	, 18.0	//im_527_1p5ft_contact.jpg
+	, 60.0	//im_577_5ft_2line_start.jpg
+	, 60.0	//im_586_5ft_2line_start_tilted.jpg
+	, 60.0	//im_603_5ft_2line_start_titled.jpg
+	, 48.0	//im_633_4ft_2line_start_titled.jpg
+	, 36.0	//im_658_3ft_2line_start_titled.jpg
+	, 24.0	//im_667_2ft_2line_start_titled.jpg
+	, 12.0	//im_674_1ft_2line_start_titled.jpg.jpg
+
 #endif
 
-	//, 18	//, "testFishEye.jpg"
-	//, 30	//, "test_horiz30gaff.jpg"
-	//, 45	//, "test_horiz45gaff.jpg"
-	//, 18	//, "test_vertical0gaff.jpg"
-	//, 45	//, "test_vertical45gaff.jpg"
+	//, 18.0	//, "testFishEye.jpg"
+	//, 30.0	//, "test_horiz30gaff.jpg"
+	//, 45.0	//, "test_horiz45gaff.jpg"
+	//, 18.0	//, "test_vertical0gaff.jpg"
+	//, 45.0	//, "test_vertical45gaff.jpg"
 #endif
 #endif
 
 #ifdef TEST_FILES_LINE
-	  1
-	, 2
-	, 3
-	, 4
-	, 5
-	, 6
-	, 7
-	, 8
-	, 9
-	, 10
-	, 11
-	, 12
-	, 13
-	, 14
-	, 15
-	, 16
-	, 17
-	, 18
-	, 19
-	, 20
-	, 21
-	, 22
-	, 23
-	, 24
-	, 25
-	, 26
-	, 27
-	, 28
-	, 29
-	, 30
-	, 31
-	, 32
-	, 33
-	, 34
+	  1.0
+	, 2.0
+	, 3.0
+	, 4.0
+	, 5.0
+	, 6.0
+	, 7.0
+	, 8.0
+	, 9.0
+	, 10.0
+	, 11.0
+	, 12.0
+	, 13.0
+	, 14.0
+	, 15.0
+	, 16.0
+	, 17.0
+	, 18.0
+	, 19.0
+	, 20.0
+	, 21.0
+	, 22.0
+	, 23.0
+	, 24.0
+	, 25.0
+	, 26.0
+	, 27.0
+	, 28.0
+	, 29.0
+	, 30.0
+	, 31.0
+	, 32.0
+	, 33.0
+	, 34.0
 #endif
 };
 
@@ -324,7 +353,11 @@ CameraWrapper::CameraWrapper()
 	m_Camera.set(CV_CAP_PROP_WHITE_BALANCE_RED_V, 1000.0);		// Default 1000
 
 	// Warm up camera for 60 frames to stabilize image brightness
-	for (int loop = 0; loop < 60 ; loop++)
+	int warmUpLoops = 60;
+#ifdef BUILD_ON_WINDOWS
+	warmUpLoops = 1;
+#endif
+	for (int loop = 0; loop < warmUpLoops; loop++)
 	{
 		m_Camera.grab();
 	}

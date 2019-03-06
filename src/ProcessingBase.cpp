@@ -18,6 +18,7 @@
 //Scalar ProcessingBase::m_lower = { 40, 255, 255 };
 
 const char* c_testOutputPath = "C:/Users/Developer/Documents/TestData/Output/";
+//const char* c_testOutputPath = "C:/Users/212036134/Documents/Personal/FIRST Robotics/TestData/Output/";
 
 #ifdef BUILD_ON_WINDOWS
 double ProcessingBase::m_degreesToRadians = PI / 180.0;
@@ -54,6 +55,7 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 	string fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/c_index_960x1280_Portrait_uint16.img";
 #else
 	string fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/c_index_960x1280_Landscape_uint16.img";
+	//string fileName = "C:/Users/212036134/Documents/Personal/FIRST Robotics/TestData/FishEyeCorrected/c_index_960x1280_Landscape_uint16.img";
 #endif
 #endif
 #else
@@ -97,6 +99,7 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 	fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/r_index_960x1280_Portrait_uint16.img";
 #else
 	fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/r_index_960x1280_Landscape_uint16.img";
+	//fileName = "C:/Users/212036134/Documents/Personal/FIRST Robotics/TestData/FishEyeCorrected/r_index_960x1280_Landscape_uint16.img";
 #endif
 #endif
 #else
@@ -179,16 +182,25 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
 #else
 		// if (loopCounter == 0)
         // {
-        //     char buf[30];
-        //     for (int i = 0; i < 11; i++)
-        //     {
-        //         m_lower = Scalar(i, 50, 30);
-        //         //m_upper  = Scalar(16, 255, 255);
-                 inRange(m_imageHSV, m_lower, m_upper, m_inrange);
+//             char buf[300];
+//			 int s = 110;
+//			 int v = 110;
+//			 int span = 5;
+//			 for (int h = 65; h < 74; h++)
+//			 {
+//				Scalar lower = Scalar(h, s, v);
+//				Scalar upper  = Scalar(h + span, 255, 255);
+//				inRange(m_imageHSV, lower, upper, m_inrange);
+//#ifdef BUILD_ON_WINDOWS
+//				sprintf_s<sizeof(buf)>(buf, "%sinrange_H%d-%d_S%d_V%d.bmp", c_testOutputPath, h, h + span, s, v);
+//#else
         //         sprintf(buf, "inrange%d.bmp", i);
+//#endif
         //         imwrite(buf, m_inrange);
         //     }
         // }
+
+		inRange(m_imageHSV, m_lower, m_upper, m_inrange);
 #endif
 
 		if (!bSkipHSVConvert)
@@ -293,7 +305,7 @@ void ProcessingBase::RejectSmallContours()
 {
     // Walk through each contour that we found looking for the biggest contour by point count
     size_t maxSize = 0;
-    cout << "Finding max contour size out of " << m_contours.size() << " contours"<< endl;
+    //cout << "Finding max contour size out of " << m_contours.size() << " contours"<< endl;
 	for (size_t i = 0; i < m_contours.size(); i++)
 	{
 		if (m_contours[i].size() < c_maxContourPoints)
@@ -305,18 +317,16 @@ void ProcessingBase::RejectSmallContours()
 	m_linePoints.clear();
 	m_rectDescr.clear();
 	vector<vector<Point>> contours;
-    size_t threshold = (size_t)(c_smallContourPercentOfMax * maxSize);
-    cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
+    size_t threshold = max(c_minContourPoints, (size_t)c_smallContourPercentOfMax * maxSize);
+    //cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
     for (size_t i = 0; i < m_contours.size(); i++)
     {
-		LineDescr ld = FitLineToContour(m_contours[i]);
+		RectDescr rd;
+		rd.m_minRect = minAreaRect(m_contours[i]);
 
-        if (m_contours[i].size() > threshold && abs(ld.m_slope) > 1.0f)
+		//if (m_contours[i].size() > threshold && abs(ld.m_slope) > 1.0f)
+		if (m_contours[i].size() > threshold && rd.m_minRect.size.area() > 0.0f && m_contours[i].at(0).y < 860)
         {
-			m_linePoints.push_back(make_pair(ld.m_point1, ld.m_point2));
-			RectDescr rd;
-			rd.m_slope = ld.m_slope;
-			m_rectDescr.push_back(rd);
 
 #ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
 			auto arcLen = arcLength(m_contours[i], true);
@@ -326,10 +336,33 @@ void ProcessingBase::RejectSmallContours()
 #endif
 			{
 				//cout << "Saving contour of size " << m_contours[i].size() << endl;
+				LineDescr ld = FitLineToContour(m_contours[i]);
+				rd.m_originalContourIndex = i;
+				rd.m_slope = ld.m_slope;
+				if (rd.m_minRect.size.width < rd.m_minRect.size.height)
+				{
+					rd.m_angle = rd.m_minRect.angle + 180.0f;
+				}
+				else
+				{
+					rd.m_angle = rd.m_minRect.angle + 90.0f;
+				}
+				rd.m_side = eUnknownSide;
+				m_rectDescr.push_back(rd);
+				m_linePoints.push_back(make_pair(ld.m_point1, ld.m_point2));
 				contours.push_back(m_contours[i]);
 				if (c_bDrawAllContours)
 				{
 					drawContours(m_drawing, m_contours, (int)i, c_contourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
+					//char buf[500];
+					//sprintf_s<sizeof(buf)>(buf, "Contour index %zu  x     y", i);
+					//cout << buf << endl;
+					//for (auto& pt : m_contours[i])
+					//{
+					//	//sprintf_s<sizeof(buf)>(buf, "Contour index %d  x     y", i);
+					//	sprintf_s<sizeof(buf)>(buf,   "                  %4d   %4d", pt.x, pt.y);
+					//	cout << buf << endl;
+					//}
 				}
 			}
 		}
@@ -583,22 +616,6 @@ void ProcessingBase::FindCornerCoordinates()
 	Mat image(m_inrange.rows, m_inrange.cols, CV_8UC3, Scalar(0));
 	//cout << "Finding minimum area rotated rectangles for " << m_contours.size() << " contours" << endl;
 
-	vector<float> angles(m_contours.size());
-
-	enum ESide
-	{
-		  eUnknown
-		, eLeft
-		, eRight
-	};
-	vector<string> sideStr =
-	{
-		  "Unknown"
-		, "Left"
-		, "Right"
-	};
-	vector<ESide> side(m_contours.size());
-
 #ifdef BUILD_ON_WINDOWS
 	const vector<Scalar> colors =
 	{
@@ -627,72 +644,43 @@ void ProcessingBase::FindCornerCoordinates()
 	colors.push_back({   0,   0, 128 });
 #endif
 
+	// TODO We do not need this loop anymore if we are not screening out by area
 	//cout << "Find minimum area rectangles" << endl;
-	float maxArea = FLT_MIN;
+	//float maxArea = FLT_MIN;
 	size_t numContours = m_contours.size();
-	for (size_t i = 0; i < numContours; i++)
-	{
-		m_rectDescr[i].m_minRect = minAreaRect(m_contours[i]);
-		if (m_rectDescr[i].m_minRect.size.area() == 0.0f)
-		{
-			continue;
-		}
-
-		double contour_area = contourArea(m_contours[i]);
-		cout << "contour_area " << contour_area << endl;
-		cout << "min rect area " << m_rectDescr[i].m_minRect.size.area() << endl;
-		cout << "95% of min rect area " << 0.95 * m_rectDescr[i].m_minRect.size.area() << endl;
-		if (contour_area < 0.95 * m_rectDescr[i].m_minRect.size.area())
-		{
-			continue;
-		}
-
-		maxArea = max(maxArea, m_rectDescr[i].m_minRect.size.area());
-
-		//cout << "Correct angle" << endl;
-		if (m_rectDescr[i].m_minRect.size.width < m_rectDescr[i].m_minRect.size.height)
-		{
-			angles[i] = m_rectDescr[i].m_minRect.angle + 180.0f;
-		}
-		else
-		{
-			angles[i] = m_rectDescr[i].m_minRect.angle + 90.0f;
-		}
-
-		//if (angles[i] > c_minLeftAngle && angles[i] < c_maxLeftAngle)
+	//for (size_t i = 0; i < numContours; i++)
 		//{
-		//	side[i] = eLeft;
-		//}
-		//else if (angles[i] > c_minRightAngle && angles[i] < c_maxRightAngle)
-		//{
-		//	side[i] = eRight;
-		//}
-		//else
-		//{
-		//	side[i] = eUnknown;
-		//}
+	//	//double contour_area = contourArea(m_contours[i]);
+	//	//cout << "contour_area " << contour_area << endl;
+	//	//cout << "min rect area " << m_rectDescr[i].m_minRect.size.area() << endl;
+	//	//cout << "95% of min rect area " << 0.95 * m_rectDescr[i].m_minRect.size.area() << endl;
+	//	//if (contour_area < 0.95 * m_rectDescr[i].m_minRect.size.area())
+	//	//{
+	//	//	continue;
+	//	//}
 
-		//cout << "Calc aspect ratio" << endl;
-		float aspectRatio1 = 0.0f;
-		float aspectRatio2 = 0.0f;
-		if (m_rectDescr[i].m_minRect.size.height > 0.0f)
-		{
-			aspectRatio1 = m_rectDescr[i].m_minRect.size.width / m_rectDescr[i].m_minRect.size.height;
-		}
-		if (m_rectDescr[i].m_minRect.size.width > 0.0f)
-		{
-			aspectRatio2 = m_rectDescr[i].m_minRect.size.height / m_rectDescr[i].m_minRect.size.width;
-		}
+	//	maxArea = max(maxArea, m_rectDescr[i].m_minRect.size.area());
 
-		cout << "Minimum area " << m_rectDescr[i].m_minRect.size.area()
-			<< " width " << m_rectDescr[i].m_minRect.size.width
-			<< " height " << m_rectDescr[i].m_minRect.size.height
-			<< " angle " << angles[i]
-			<< " side " << sideStr[side[i]]
-			<< " aspect ratio 1 " << aspectRatio1
-			<< " aspect ratio 2 " << aspectRatio1
-			<< endl;
-	}
+	//	//cout << "Calc aspect ratio" << endl;
+	//	float aspectRatio1 = 0.0f;
+	//	float aspectRatio2 = 0.0f;
+	//	if (m_rectDescr[i].m_minRect.size.height > 0.0f)
+	//	{
+	//		aspectRatio1 = m_rectDescr[i].m_minRect.size.width / m_rectDescr[i].m_minRect.size.height;
+	//	}
+	//	if (m_rectDescr[i].m_minRect.size.width > 0.0f)
+	//	{
+	//		aspectRatio2 = m_rectDescr[i].m_minRect.size.height / m_rectDescr[i].m_minRect.size.width;
+	//	}
+
+	//	cout << "Minimum area " << m_rectDescr[i].m_minRect.size.area()
+	//		<< " width " << m_rectDescr[i].m_minRect.size.width
+	//		<< " height " << m_rectDescr[i].m_minRect.size.height
+	//		<< " angle " << m_rectDescr[i].m_angle
+	//		<< " aspect ratio 1 " << aspectRatio1
+	//		<< " aspect ratio 2 " << aspectRatio1
+	//		<< endl;
+		//}
 
 	// Sort by x coord of minimum area rect
 	std::sort(m_rectDescr.begin(), m_rectDescr.end(), [](RectDescr& rd1, RectDescr& rd2)
@@ -719,9 +707,9 @@ void ProcessingBase::FindCornerCoordinates()
 
 			if (bSameSignTwoGtOne || bChangeSign)
 			{
-				cout << "Intersection above" << endl;
-				side[i] = eLeft;
-				side[i + 1] = eRight;
+				//cout << "Intersection above" << endl;
+				m_rectDescr[i].m_side = eLeft;
+				m_rectDescr[i + 1].m_side = eRight;
 				float xDiff = m_rectDescr[i + 1].m_minRect.center.x - m_rectDescr[i].m_minRect.center.x;
 				if (maxXdiff < xDiff)
 				{
@@ -732,24 +720,30 @@ void ProcessingBase::FindCornerCoordinates()
 			}
 			else
 			{
-				cout << "Intersection below" << endl;
-				side[i] = eRight;
+				//cout << "Intersection below" << endl;
+				m_rectDescr[i].m_side = eRight;
 			}
 		}
 	}
 
+	const vector<string> sideStr =
+	{
+		  "Unknown"
+		, "Left"
+		, "Right"
+	};
 	//cout << "Screen out bad rectangles" << endl;
 	Point2f vertices[4];
 	char text[255];
-	const float areaThreshold = c_areaThresholdPercent * maxArea;
+	//const float areaThreshold = c_areaThresholdPercent * maxArea;
 	m_object_height = 0.0;
 	size_t endIndex = min(maxPairIndex + 2, m_rectDescr.size());
 	for (size_t i = maxPairIndex; i < endIndex; i++)			// TODO this is kind of hacky
 	{
 //#ifndef TEST_FILES_WIDE
-//		if (m_minRect[i].size.area() < areaThreshold || side[i] == eUnknown)
+//		if (m_minRect[i].size.area() < areaThreshold || side[i] == eUnknownSide)
 //		{
-//			if (side[i] == eUnknown)
+//			if (side[i] == eUnknownSide)
 //			{
 //				cout << "Rejecting rectangle of unknown angle " << angles[i] << endl;
 //			}
@@ -764,14 +758,15 @@ void ProcessingBase::FindCornerCoordinates()
 		float longSide = max(m_rectDescr[i].m_minRect.size.width, m_rectDescr[i].m_minRect.size.height);
 		float shortSide = 0.0f;
 		float aspectRatio = 0.0f;
-		cout << "longSide " << longSide << endl;
+		//cout << "longSide " << longSide << endl;
 		if (longSide > 0.0f)
 		{
-			if (m_object_height < (double)longSide && side[i] == eLeft)
+			if (m_object_height < (double)longSide && m_rectDescr[i].m_side == eLeft)
 			{
 				m_object_height = (double)longSide;
 				m_object_center_x = (m_rectDescr[i].m_minRect.center.x + m_rectDescr[i + 1].m_minRect.center.x) / 2.0f;
 				m_object_center_y = m_rectDescr[i].m_minRect.center.y;
+				circle(image, Point((int)m_object_center_x, (int)m_object_center_y), 16, c_centerColor, 2);
 			}
 
 			shortSide = min(m_rectDescr[i].m_minRect.size.width, m_rectDescr[i].m_minRect.size.height);
@@ -797,7 +792,7 @@ void ProcessingBase::FindCornerCoordinates()
 				//void putText(InputOutputArray img, const String& text, Point org, int fontFace, double fontScale, Scalar color, int thickness = 1, int lineType = LINE_8, bool bottomLeftOrigin = false)
 				const double fontScale = 0.37;
 				const int textThickness = 1;
-				float offset = side[i] == eRight ? 50.f : 0.0f;
+				float offset = m_rectDescr[i].m_side == eRight ? 50.f : 0.0f;
 				float y = i * 10.0f;
 				Point2f areaLoc(vertices[0].x - offset, y + 10.0f);
 				Point2f whLoc(vertices[0].x - offset, y + 30.0f);
@@ -809,9 +804,9 @@ void ProcessingBase::FindCornerCoordinates()
 				cv::putText(image, text, areaLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 				sprintf_s<sizeof(text)>(text, "width: %.2f height: %.2f", m_rectDescr[i].m_minRect.size.width, m_rectDescr[i].m_minRect.size.height);
 				cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
-				sprintf_s<sizeof(text)>(text, "Angle %.2f", angles[i]);
+				sprintf_s<sizeof(text)>(text, "Angle %.2f", m_rectDescr[i].m_angle);
 				cv::putText(image, text, angleLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
-				sprintf_s<sizeof(text)>(text, "%s", sideStr[side[i]].c_str());
+				sprintf_s<sizeof(text)>(text, "%s", sideStr[m_rectDescr[i].m_side].c_str());
 				cv::putText(image, text, sideLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 				sprintf_s<sizeof(text)>(text, "Slope %.3f index %zu", m_rectDescr[i].m_slope, i);
 				cv::putText(image, text, slopeLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
@@ -826,9 +821,9 @@ void ProcessingBase::FindCornerCoordinates()
 				cv::putText(image, text, areaLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 				sprintf(text, "width: %.2f height: %.2f", m_minRect[i].size.width, m_rectDescr[i].m_minRect.size.height);
 				cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
-				sprintf(text, "Angle %.2f", angles[i]);
+				sprintf(text, "Angle %.2f", m_rectDescr[i].m_angle);
 				cv::putText(image, text, angleLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
-				sprintf(text, "%s", sideStr[side[i]].c_str());
+				sprintf(text, "%s", sideStr[m_rectDescr[i].m_side].c_str());
 				cv::putText(image, text, sideLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 				sprintf(text, "Slope %.3f", m_rectDescr[i].m_slope);
 				cv::putText(image, text, slopeLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
@@ -842,15 +837,6 @@ void ProcessingBase::FindCornerCoordinates()
 #endif	// WRITE_OPENCV_TEXT_ON_IMAGES
 			}
 		}
-
-		cout << loopCounter << ","
-	//		<< testDist[loopCounter % testFiles.size()] << ","
-			<< m_rectDescr[i].m_minRect.size.area() << ","
-			<< shortSide << ","
-			<< longSide << ","
-			<< aspectRatio << ","
-			<< angles[i]
-			<< endl;
 	}
 
 	char fileName[255];
@@ -1075,10 +1061,11 @@ void ProcessingBase::CalcOutputValues()
 		return;
     }
 
-	cout << "m_object_height " << m_object_height << endl;
+	//cout << "m_object_height " << m_object_height << endl;
 	if (m_object_height == 0.0)
 	{
 		//cout << __func__ << " end no object height" << endl;
+		m_OutputValues.SetQuality(eRedNoData);
 		return;
 	}
 
@@ -1117,7 +1104,7 @@ void ProcessingBase::CalcOutputValues()
 	m_Actual_Distance_Inch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians);
 	//cout << "m_Actual_Distance_Inch: " << m_Actual_Distance_Inch << endl;
 
-	int quality = eYellowTrackingObjects; // TODO: Calculate this
+	int quality = eYellowTrackingObjects;
 
 	// Constraint output values
     if ((abs(m_Horizontal_Angle_Degree) > m_maxAngle) ||
@@ -1151,16 +1138,38 @@ void ProcessingBase::PrintDebugValues(double horzDistInch, double vertDistInch)
 #ifdef BUILD_ON_WINDOWS
 	int ndx = loopCounter % testFiles.size();
 	cout << testFiles[ndx] << endl;
+	double camDist = testDist[loopCounter % testFiles.size()];
 //#else
 //	cout << testFiles[ndx] << endl;
 #endif
 
+//#define CSV_OUTPUT
+#ifdef CSV_OUTPUT
+	// For comma separated value (CSV) output
+	if (loopCounter == 0)
+	{
+		cout << "Counter,ObjHeight,Horizontal_Distance_Inch,Vertical_Distance_Inch,CamDist,EstActualDist,Horizontal_Angle,TestFile" << endl;
+	}
+
+	cout << loopCounter << ","
+		<< m_object_height << ","
+		<< horzDistInch << ","
+		<< vertDistInch << ","
+		<< camDist << ","
+		<< m_Actual_Distance_Inch << ","
+		<< m_Horizontal_Angle_Degree << ","
+		<< testFiles[ndx]
+		<< endl;
+#else
 	cout    << "Counter: " << loopCounter
 			<< " Horizontal_Distance_Inch: " << horzDistInch
 			<< " Vertical_Distance_Inch " << vertDistInch
 			<< " Actual_Distance_Inch: " << m_Actual_Distance_Inch
-			<< " Horizontal_Angle " << m_Horizontal_Angle_Degree 
+			<< " Test Image Camera dist: " << camDist
+			<< " Diff from actual: " << m_Actual_Distance_Inch - camDist
+			<< " Horizontal_Angle " << m_Horizontal_Angle_Degree
 			<< endl;
 
-	cout << endl;
+	//cout << endl;
+#endif
 }

@@ -49,6 +49,7 @@ constexpr double PI = 4.0 * atan(1.0);
 constexpr double c_smallContourPercentOfMax = 0.30;         //!< Reject contours that are less than this % of max countour point count
 constexpr double c_arcLenThreshold = 750;				    //!< Reject contours that have an arc length less than this
 constexpr double c_areaThreshold = 4500;                    //!< Reject contours that have an controur area less than this
+constexpr size_t c_minContourPoints = 100;					//!< Reject contours that have less points than this
 constexpr size_t c_maxContourPoints = 2000;                 //!< Reject contours that have more points than this
 
 constexpr bool c_bDrawAllContours = true;                   //!< If true, draw every countour found
@@ -77,6 +78,6 @@ static cv::Scalar c_lowerCheckerBoard = { 1, 1, 50 };		//!< [HSV triplet] Lower 
 
 extern int loopCounter;
 extern std::vector<std::string> testFiles;
-extern std::vector<float> testDist;
+extern std::vector<double> testDist;
 
 #endif // CONST_H

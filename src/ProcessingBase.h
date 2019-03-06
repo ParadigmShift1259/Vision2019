@@ -26,10 +26,20 @@
 using namespace cv;
 using namespace std;
 
+enum ESide
+{
+	  eUnknownSide
+	, eLeft
+	, eRight
+};
+
 struct RectDescr
 {
+	size_t m_originalContourIndex;
 	RotatedRect m_minRect;
 	float m_slope;
+	float m_angle;
+	ESide m_side;
 };
 
 struct LineDescr
@@ -56,7 +66,7 @@ protected:
 	void FindContours();													//!< Process the in-range image to get object contours (outlines)
 	//void SortContours();													//!< Sort all contours by the x coordinate
 	void FitLinesToContours();												//!< Best fit of a straight line through all contours
-	LineDescr FitLineToContour(const vector<Point>& coutour);				//!< Fit line to single contour and return slope
+	LineDescr FitLineToContour(const vector<Point>& contour);				//!< Fit line to single contour and return slope
 	void ApproximatePolygons();												//!< Fit polygons to all contours
 	void FindVerticalRange();												//!< Finds the min and max Y coordinates of the biggest contour
 	void RejectSmallContours();												//!< Process the contours to reject very small and very large contours by point count
@@ -73,7 +83,8 @@ protected:
 	
 	// Following settings is for camera calibrated value
     static constexpr double m_calibTargetSizePixel = 176.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
-    static constexpr double m_calibCameraDistInch = 18.0;  					//!< [inch] Calibration distance from camera to object
+	//static constexpr double m_calibTargetSizePixel = 150.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
+	static constexpr double m_calibCameraDistInch = 18.0;  					//!< [inch] Calibration distance from camera to object
 	static constexpr double m_measuredObjectHeight = 5.5;  					//!< [inch] Height of object in inches; used a tape measure in the real world
 	static constexpr double m_defaultPixelPerInch = m_calibTargetSizePixel / m_measuredObjectHeight;	// [pixel/inch] ~25
 	// Output value bounds

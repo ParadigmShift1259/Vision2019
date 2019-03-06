@@ -1,6 +1,21 @@
 # Prerequisites
 *.d
-*.enc
+
+# Visual Studio detritus
+*.dylib
+*.ipch
+*.log
+*.ilk
+*.idb
+*.tlog
+*.lastbuildstate
+*.iobj
+*.ipdb
+*.pdb
+*.db
+vc41.pdb
+*.suo
+*.bak
 
 # Compiled Object files
 *.slo
@@ -11,7 +26,6 @@
 # Precompiled Headers
 *.gch
 *.pch
-*.ipch
 
 # Compiled Dynamic libraries
 *.so
@@ -37,47 +51,3 @@ src/.vscode/c_cpp_properties.json
 src/.vscode/tasks.json
 src/moveOutputImages.cmd
 Vision2019.code-workspace
-.vs/Vision 2019/v15/ipch/AutoPCH/c0f35a67c22403c/VISIONPROCESSING.ipch
-.vs/Vision 2019/v15/.suo
-.vs/Vision 2019/v15/Browse.VC.db
-.vs/Vision 2019/v15/ipch/AutoPCH/3a14769348f83969/CAMERAWRAPPER.ipch
-.vs/Vision 2019/v15/ipch/AutoPCH/5044045c2f4b7106/PROCESSINGRETRO.ipch
-.vs/Vision 2019/v15/ipch/AutoPCH/52bcb51c93126c7d/PROCESSINGBASE.ipch
-.vs/Vision 2019/v15/ipch/AutoPCH/54218c300fc1ccbc/VISIONPROCESSING.ipch
-.vs/Vision 2019/v15/ipch/AutoPCH/57152d3636a1df91/OFFBOARDCOMMS.ipch
-.vs/Vision 2019/v15/ipch/AutoPCH/9c63ad5d6e163886/PROCESSINGRETRO.ipch
-.vs/Vision 2019/v15/ipch/AutoPCH/d179593b91829e9/CAMERAWRAPPER.ipch
-.vs/Vision 2019/v15/ipch/AutoPCH/f96b7a5e6ab367fd/PROCESSINGBASE.ipch
-x64/Release/Vision2019VS.tlog/Vision2019VS.write.1u.tlog
-x64/Debug/Vision 2019.log
-x64/Debug/Vision2019VS.ilk
-x64/Debug/Vision2019VS.pdb
-x64/Debug/opencv_world345d.pdb
-x64/Debug/vc141.idb
-x64/Debug/vc141.pdb
-x64/Debug/Vision2019VS.tlog/CL.command.1.tlog
-x64/Debug/Vision2019VS.tlog/CL.read.1.tlog
-x64/Debug/Vision2019VS.tlog/CL.write.1.tlog
-x64/Debug/Vision2019VS.tlog/Vision2019VS.lastbuildstate
-x64/Debug/Vision2019VS.tlog/link.command.1.tlog
-x64/Debug/Vision2019VS.tlog/link.read.1.tlog
-x64/Debug/Vision2019VS.tlog/link.write.1.tlog
-x64/Release/Vision 2019.log
-x64/Release/Vision2019VS.iobj
-x64/Release/Vision2019VS.ipdb
-x64/Release/Vision2019VS.pdb
-x64/Release/opencv_world345.pdb
-x64/Release/vc141.pdb
-x64/Release/Vision2019VS.tlog/CL.command.1.tlog
-x64/Release/Vision2019VS.tlog/CL.read.1.tlog
-x64/Release/Vision2019VS.tlog/CL.write.1.tlog
-x64/Release/Vision2019VS.tlog/Vision2019VS.lastbuildstate
-x64/Release/Vision2019VS.tlog/link.command.1.tlog
-x64/Release/Vision2019VS.tlog/link.read.1.tlog
-x64/Release/Vision2019VS.tlog/link.write.1.tlog
-x64/Release/Vision2019VS.tlog/unsuccessfulbuild
-.vs/Vision 2019/v15/ipch/AutoPCH/f6171ec0f9a92806/PROCESSINGHATCH.ipch
-x64/Debug/Vision2019VS.Build.CppClean.log
-.vs/Vision 2019/v15/ipch/AutoPCH/f93a45b0f155bb58/PROCESSINGCARGO.ipch
-.vs/Vision 2019/v15/ipch/AutoPCH/2a184c36a6c1d011/OFFBOARDCOMMS.ipch
-.vs/Vision 2019/v15/ipch/AutoPCH/d77c556c1c5b0306/PROCESSINGLINE.ipch

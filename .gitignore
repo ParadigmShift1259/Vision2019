@@ -52,5 +52,4 @@ src/launch.json
 src/.vscode/c_cpp_properties.json
 src/.vscode/tasks.json
 src/moveOutputImages.cmd
-Vision2019.code-workspace
-.vs/Vision 2019/v15/Browse.VC.opendb
+*.code-workspace

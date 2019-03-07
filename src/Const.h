@@ -8,12 +8,12 @@
 #ifndef CONST_H
 #define CONST_H
 
-#define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
+//#define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
 //#define PI_TIMING
-//#define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
+#define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
 //#define PORTRAIT_IMAGE
-constexpr bool c_bUseLastDiagImage = true;                  //!< If true, read a previously saved image than getting one from camera
-constexpr int c_loopCountToSaveDiagImage = 0;// 10;
+constexpr bool c_bUseLastDiagImage = false;                  //!< If true, read a previously saved image than getting one from camera
+constexpr int c_loopCountToSaveDiagImage = 10;
 constexpr double c_camera_offset_x0 = 8.5;					//!< [inch] Camera offset from center of the robot
 
 //-------------------------------------------------------------------------------------------------------------------------

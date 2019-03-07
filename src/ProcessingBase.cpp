@@ -140,7 +140,7 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
     {
 	    cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
     }
-    
+
     if (c_bUseLastDiagImage)
 	{
 #ifdef TEST_FISHEYE_CORRECTION_BY_LUT
@@ -180,25 +180,29 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
 		imwrite("imageInRange.jpg", inrangeTemp);
 		imwrite("imageCorrected.jpg", m_inrange);
 #else
-		// if (loopCounter == 0)
-        // {
-//             char buf[300];
-//			 int s = 110;
-//			 int v = 110;
-//			 int span = 5;
-//			 for (int h = 65; h < 74; h++)
-//			 {
-//				Scalar lower = Scalar(h, s, v);
-//				Scalar upper  = Scalar(h + span, 255, 255);
-//				inRange(m_imageHSV, lower, upper, m_inrange);
-//#ifdef BUILD_ON_WINDOWS
-//				sprintf_s<sizeof(buf)>(buf, "%sinrange_H%d-%d_S%d_V%d.bmp", c_testOutputPath, h, h + span, s, v);
-//#else
-        //         sprintf(buf, "inrange%d.bmp", i);
-//#endif
-        //         imwrite(buf, m_inrange);
-        //     }
-        // }
+		if (loopCounter == 0)
+        {
+             char buf[300];
+			 int span = 5;
+			 for (int h = 65; h < 91; h++)
+			 {
+				 for (int s = 50; s < 256; s += 5)
+				 {
+					 for (int v = 50; v < 256; v += 5)
+					 {
+						 Scalar lower = Scalar(h, s, v);
+						 Scalar upper = Scalar(h + span, 255, 255);
+						 inRange(m_imageHSV, lower, upper, m_inrange);
+#ifdef BUILD_ON_WINDOWS
+						 sprintf_s<sizeof(buf)>(buf, "%sinrange_H%d-%d_S%d_V%d.jpg", c_testOutputPath, h, h + span, s, v);
+#else
+						 sprintf(buf, "inrange_H%d-%d_S%d_V%d.jpg", c_testOutputPath, h, h + span, s, v);
+#endif
+						 imwrite(buf, m_inrange);
+					 }
+				 }
+             }
+         }
 
 		inRange(m_imageHSV, m_lower, m_upper, m_inrange);
 #endif
@@ -228,11 +232,14 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
         // Searching for color in the image that has a high of upper scaler and a low of lower scaler. Stores result in inrange
 		inRange(m_imageHSV, m_lower, m_upper, m_inrange);	// Identify color per HSV image
 
-        //if (loopCounter == c_loopCountToSaveDiagImage)
+        if (loopCounter <= c_loopCountToSaveDiagImage)
         {
             // For manually calibrating the camera
-            imwrite("inrange.jpg", m_inrange);
-            imwrite("image.jpg", image);
+			char fileName[255];
+			sprintf(fileName, "inrange%d.jpg", loopCounter);
+			imwrite(fileName, m_inrange);
+			sprintf(fileName, "image%d.jpg", loopCounter);
+			imwrite(fileName, image);
         }
     }
 }
@@ -819,7 +826,7 @@ void ProcessingBase::FindCornerCoordinates()
 #else
 				sprintf(text, "Area: %.2f", m_rectDescr[i].m_minRect.size.area());
 				cv::putText(image, text, areaLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
-				sprintf(text, "width: %.2f height: %.2f", m_minRect[i].size.width, m_rectDescr[i].m_minRect.size.height);
+				sprintf(text, "width: %.2f height: %.2f", m_rectDescr[i].m_minRect.size.width, m_rectDescr[i].m_minRect.size.height);
 				cv::putText(image, text, whLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
 				sprintf(text, "Angle %.2f", m_rectDescr[i].m_angle);
 				cv::putText(image, text, angleLoc, FONT_HERSHEY_SIMPLEX, fontScale, color, textThickness, LINE_AA);
@@ -1135,13 +1142,20 @@ void ProcessingBase::CalcOutputValues()
 
 void ProcessingBase::PrintDebugValues(double horzDistInch, double vertDistInch)
 {
-#ifdef BUILD_ON_WINDOWS
-	int ndx = loopCounter % testFiles.size();
-	cout << testFiles[ndx] << endl;
-	double camDist = testDist[loopCounter % testFiles.size()];
-//#else
-//	cout << testFiles[ndx] << endl;
-#endif
+	int ndx;
+	double camDist;
+	
+	if (c_bUseLastDiagImage)
+	{
+		ndx = loopCounter % testFiles.size();
+		camDist = testDist[loopCounter % testFiles.size()];
+		cout << testFiles[ndx] << endl;
+	}
+	else
+	{
+		ndx = 0;
+		camDist = 0.0;
+	}
 
 //#define CSV_OUTPUT
 #ifdef CSV_OUTPUT

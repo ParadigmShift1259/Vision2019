@@ -16,6 +16,8 @@
 vc41.pdb
 *.suo
 *.bak
+*.opendb
+*.jpg
 
 # Compiled Object files
 *.slo
@@ -50,4 +52,4 @@ src/launch.json
 src/.vscode/c_cpp_properties.json
 src/.vscode/tasks.json
 src/moveOutputImages.cmd
-Vision2019.code-workspace
+*.code-workspace

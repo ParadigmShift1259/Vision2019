@@ -77,7 +77,7 @@ int main()
 	ProcessingRetro retro;
 	OffBoardComms offBoardComms;
 
-	EVisionTarget state = offBoardComms.GetState();
+	EVisionTarget state = eLoadingStation;	// offBoardComms.GetState();
 
 #ifdef TEST_ANGLE_CONV
 	TestAngleConversion();

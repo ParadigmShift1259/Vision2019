@@ -50,7 +50,7 @@ OffBoardComms::OffBoardComms()
 
 void OffBoardComms::Publish()
 {
-	if (m_RetroValues.IsChanged() || m_LineValues.IsChanged() || m_CargoValues.IsChanged() || m_HatchValues.IsChanged())
+	//if (m_RetroValues.IsChanged() || m_LineValues.IsChanged() || m_CargoValues.IsChanged() || m_HatchValues.IsChanged())
 	{
 #ifdef USE_OFFBOARD_COMMS
 		m_netTableOpenCV->PutNumber("visioncounter", m_counter);
@@ -106,9 +106,9 @@ double OffBoardComms::GetGyroAngle()
 
 EVisionTarget OffBoardComms::GetState()
 {
-#ifdef USE_OFFBOARD_COMMS
-	return (EVisionTarget)(int)m_netTableOpenCV->GetNumber("SelectedVisionTarget", 0);
-#else
+//#ifdef USE_OFFBOARD_COMMS
+//	return (EVisionTarget)(int)m_netTableOpenCV->GetNumber("SelectedVisionTarget", 0);
+//#else
 	return eLoadingStation;
-#endif
+//#endif
 }

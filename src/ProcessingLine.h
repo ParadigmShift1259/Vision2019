@@ -17,9 +17,14 @@ public:
     ~ProcessingLine();
 
 	void ProcessImage(const Mat& image) override;
+	void SetRetroCoords(const RectDescr& leftTarget, const RectDescr& rightTarget)
+	{
+		m_leftTarget = leftTarget;
+		m_rightTarget = rightTarget;
+	}
 
 private:
-    
+	void RejectSmallContours();												//!< Process the contours to reject very small and very large contours by point count
 };
 
 

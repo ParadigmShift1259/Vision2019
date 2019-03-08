@@ -16,10 +16,10 @@ ProcessingRetro::ProcessingRetro()
 #else
     //: ProcessingBase(   { 90, 255, 255 }, 
     //                    { 65,  90,  90 } )     // Colors for Retro reflective tape with green lighting (FIRST sample images)
-	//: ProcessingBase({ 74, 255, 255 },
-	//				 { 67, 110, 110 })		// Colors for Retro reflective tape with green lighting (Team 1259 2019 Feb 16)
-	: ProcessingBase({ 90, 255, 255 },
-					 { 85,  90,  90 })		// Colors for Retro reflective tape with 2016 discrete LED green lighting (Team 1259 2019 Mar 6)
+	: ProcessingBase({ 74, 255, 255 },
+					 { 67, 110, 110 })		// Colors for Retro reflective tape with green lighting (Team 1259 2019 Feb 16)
+	//: ProcessingBase({ 90, 255, 255 },
+	//				 { 85,  90,  90 })		// Colors for Retro reflective tape with 2016 discrete LED green lighting (Team 1259 2019 Mar 6)
 #endif
 {
 }

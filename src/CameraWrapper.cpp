@@ -114,7 +114,6 @@ std::vector<std::string> testFiles
 	  "im_394_1p5ft_contact.jpg"
 	, "im_405_1p5ft_contact.jpg"
 	, "im_301_4ft.jpg"
-	, "im_347_3ft.jpg"
 	, "im_367_2ft.jpg"
 	, "im_298_error_handling.jpg"
 	, "im_296.jpg"
@@ -134,6 +133,7 @@ std::vector<std::string> testFiles
 	, "im_586_5ft_2line_start_tilted.jpg"
 	, "im_603_5ft_2line_start_titled.jpg"
 	, "im_633_4ft_2line_start_titled.jpg"
+	, "im_347_3ft.jpg"
 	, "im_658_3ft_2line_start_titled.jpg"
 	, "im_667_2ft_2line_start_titled.jpg"
 	, "im_674_1ft_2line_start_titled.jpg.jpg"
@@ -362,6 +362,10 @@ CameraWrapper::CameraWrapper()
 		m_Camera.grab();
 	}
 	m_Camera.retrieve(m_image);
+	if (m_image.rows > 0 && m_image.cols > 0)
+	{
+		cvtColor(m_image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
+	}
 	cout << "Camera is opened and warmed up" << endl;
 }
 
@@ -392,5 +396,14 @@ void CameraWrapper::AcquireImage()
 	{
 		m_Camera.grab();
     	m_Camera.retrieve(m_image);
+	}
+
+	if (m_image.rows > 0 && m_image.cols > 0)
+	{
+		cvtColor(m_image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
+		if (loopCounter <= c_loopCountToSaveDiagImage)
+		{
+			imwrite("image.jpg", m_image);
+		}
 	}
 }

@@ -58,13 +58,10 @@ public:
 	virtual void ProcessImage(const Mat& image) = 0;						//!< Defer to the derived class to process the input image from the camera
 
     const OutputValues& GetOutputValues() const { return m_OutputValues; }	//!< Return the output values
-    const Mat& GetImageHSV() const { return m_imageHSV; }					//!< Return the converted input image in HSV representation
-    void SetImageHSV(const Mat& imageHSV) { m_imageHSV = imageHSV; }		//!< Set the converted input image in HSV representation for later retreival
 
 protected:
-	void Prepare(const Mat& image, bool bSkipHSVConvert = false);			//!< Convert input image to HSV and perform in-range filtering 
+	void Prepare(const Mat& image);											//!< Perform in-range filtering 
 	void FindContours();													//!< Process the in-range image to get object contours (outlines)
-	//void SortContours();													//!< Sort all contours by the x coordinate
 	void FitLinesToContours();												//!< Best fit of a straight line through all contours
 	LineDescr FitLineToContour(const vector<Point>& contour);				//!< Fit line to single contour and return slope
 	void ApproximatePolygons();												//!< Fit polygons to all contours
@@ -80,7 +77,8 @@ protected:
 	void FindBiggestContour();												//!< Process the contours to find the largest contours by moment and draw the contour found TODO split
 	void CalcOutputValues();												//!< Calculate the values that will be sent to the robot
 	void PrintDebugValues(double horzDistInch, double vertDistInch);		//!< Print the output values to the Pi console
-	
+	void CalibrateHSV(const Mat& imageHsv, int hue1, int hue2, int span, int satValueIncrement);	//!< Loop through hue, saturation, and values to find the best upper and lower bound
+
 	// Following settings is for camera calibrated value
     static constexpr double m_calibTargetSizePixel = 176.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
 	//static constexpr double m_calibTargetSizePixel = 150.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
@@ -130,16 +128,13 @@ protected:
 
     vector<Vec4i> m_hierarchy;									//!< Output from OpenCV findCountours (not used; holds info on nested objects)
     vector<vector<Point>> m_contours;							//!< Output from OpenCV findCountours (as applied to in range image)
-    //vector<RotatedRect> m_minRect;                              //!< Minimum area rectangle for contours
-	//using RectTuple = tuple<RotatedRect, float, Point, Point>;
 	vector<RectDescr> m_rectDescr;								//!< Minimum area rectangle for contours, line slope and y intercept
 	Vec4f m_lineOutput;											//!< Collection of lines fit to all contours
 	vector<pair<Point, Point>> m_linePoints;					//!< End points of lines fit to all contours
-	//vector<float> m_lineSlopes;									//!< Slopes of lines fit to all contours
-	//vector<Point> m_lineYintercept;								//!< Y axis intercept of lines fit to all contours							
+	RectDescr m_leftTarget;
+	RectDescr m_rightTarget;
 
     Mat m_inrange;												//!< A black and white image that contains regions for the colors searched for
-    Mat m_imageHSV;												//!< Converted input image BGR->HSV
     Mat m_drawing;												//!< An output image to draw contours
 
 	uint16_t* m_pXfisheyeData;//[c_imageWidthPixel * c_imageHeightPixel];

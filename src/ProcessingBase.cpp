@@ -134,18 +134,13 @@ ProcessingBase::~ProcessingBase()
 		delete [] m_pYfisheyeData;
 }
 
-void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false */)
+void ProcessingBase::Prepare(const Mat& imageHSV)
 {
-	if (!bSkipHSVConvert && image.rows > 0 && image.cols > 0)
-    {
-	    cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
-    }
-
     if (c_bUseLastDiagImage)
 	{
 #ifdef TEST_FISHEYE_CORRECTION_BY_LUT
 		Mat inrangeTemp;
-		cv::inRange(m_imageHSV, m_lower, m_upper, inrangeTemp);	// Identify color per HSV image
+		cv::inRange(imageHSV, m_lower, m_upper, inrangeTemp);	// Identify color per HSV image
 
 		m_inrange = inrangeTemp.clone();	// Get the output size right
 		imwrite("inrangeTemp.jpg", inrangeTemp);
@@ -182,34 +177,14 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
 #else
 		if (loopCounter == 0)
         {
-             char buf[300];
-			 int span = 5;
-			 for (int h = 65; h < 91; h++)
-			 {
-				 for (int s = 50; s < 256; s += 5)
-				 {
-					 for (int v = 50; v < 256; v += 5)
-					 {
-						 Scalar lower = Scalar(h, s, v);
-						 Scalar upper = Scalar(h + span, 255, 255);
-						 inRange(m_imageHSV, lower, upper, m_inrange);
-#ifdef BUILD_ON_WINDOWS
-						 sprintf_s<sizeof(buf)>(buf, "%sinrange_H%d-%d_S%d_V%d.jpg", c_testOutputPath, h, h + span, s, v);
-#else
-						 sprintf(buf, "inrange_H%d-%d_S%d_V%d.jpg", c_testOutputPath, h, h + span, s, v);
-#endif
-						 imwrite(buf, m_inrange);
-					 }
-				 }
-             }
-         }
+//			CalibrateHSV(imageHSV, 67, 75, 5, 50);
+//			CalibrateHSV(imageHSV, 30, 50, 10, 50);
+		}
 
-		inRange(m_imageHSV, m_lower, m_upper, m_inrange);
+		cv::inRange(imageHSV, m_lower, m_upper, m_inrange);
 #endif
 
-		if (!bSkipHSVConvert)
-		{
-			char fileName[255];
+		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
 		sprintf_s<sizeof(fileName)>(fileName, "%s%dinrange_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
@@ -223,25 +198,51 @@ void ProcessingBase::Prepare(const Mat& image, bool bSkipHSVConvert /* = false *
 			sprintf(fileName, "inrange.jpg");
 		}
 #endif
-			imwrite(fileName, m_inrange);
-			imwrite("image.jpg", image);
-		}
+		imwrite(fileName, m_inrange);
     }
     else
     {    
         // Searching for color in the image that has a high of upper scaler and a low of lower scaler. Stores result in inrange
-		inRange(m_imageHSV, m_lower, m_upper, m_inrange);	// Identify color per HSV image
+		inRange(imageHSV, m_lower, m_upper, m_inrange);	// Identify color per HSV image
 
         if (loopCounter <= c_loopCountToSaveDiagImage)
         {
             // For manually calibrating the camera
 			char fileName[255];
+#ifdef BUILD_ON_WINDOWS
+			sprintf_s<sizeof(fileName)>(fileName, "%sinrange_%d", c_testOutputPath, loopCounter);
+#else
 			sprintf(fileName, "inrange%d.jpg", loopCounter);
+#endif
 			imwrite(fileName, m_inrange);
-			sprintf(fileName, "image%d.jpg", loopCounter);
-			imwrite(fileName, image);
         }
     }
+}
+
+void ProcessingBase::CalibrateHSV(const Mat& imageHSV, int hue1, int hue2, int span, int satValueIncrement)
+{
+	Mat inrange;
+	char buf[300];
+	for (int h = hue1; h < hue2; h++)
+	{
+		for (int s = 50; s < 256; s += satValueIncrement)
+		{
+			for (int v = 50; v < 256; v += satValueIncrement)
+			{
+				cout << "Generating test inrange for hue " << h << " saturation " << s << " value " << v << endl;
+				Scalar lower = Scalar(h, s, v);
+				//Scalar upper = Scalar(h + span, 255, 255);
+				Scalar upper = Scalar(h + span, 175, 175);
+				inRange(imageHSV, lower, upper, inrange);
+#ifdef BUILD_ON_WINDOWS
+				sprintf_s<sizeof(buf)>(buf, "%sinrange_H%d-%d_S%d_V%d.jpg", c_testOutputPath, h, h + span, s, v);
+#else
+				sprintf(buf, "inrange_H%d-%d_S%d_V%d.jpg", h, h + span, s, v);
+#endif
+				imwrite(buf, inrange);
+			}
+		}
+	}
 }
 
 void ProcessingBase::FindContours()
@@ -358,19 +359,6 @@ void ProcessingBase::RejectSmallContours()
 				m_rectDescr.push_back(rd);
 				m_linePoints.push_back(make_pair(ld.m_point1, ld.m_point2));
 				contours.push_back(m_contours[i]);
-				if (c_bDrawAllContours)
-				{
-					drawContours(m_drawing, m_contours, (int)i, c_contourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
-					//char buf[500];
-					//sprintf_s<sizeof(buf)>(buf, "Contour index %zu  x     y", i);
-					//cout << buf << endl;
-					//for (auto& pt : m_contours[i])
-					//{
-					//	//sprintf_s<sizeof(buf)>(buf, "Contour index %d  x     y", i);
-					//	sprintf_s<sizeof(buf)>(buf,   "                  %4d   %4d", pt.x, pt.y);
-					//	cout << buf << endl;
-					//}
-				}
 			}
 		}
   //      else
@@ -380,6 +368,23 @@ void ProcessingBase::RejectSmallContours()
     }
 
     m_contours.swap(contours);
+
+	for (size_t i = 0; i < m_contours.size(); i++)
+	{
+		if (c_bDrawAllContours)
+		{
+			drawContours(m_drawing, m_contours, (int)i, c_contourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
+			//char buf[500];
+			//sprintf_s<sizeof(buf)>(buf, "Contour index %zu  x     y", i);
+			//cout << buf << endl;
+			//for (auto& pt : m_contours[i])
+			//{
+			//	//sprintf_s<sizeof(buf)>(buf, "Contour index %d  x     y", i);
+			//	sprintf_s<sizeof(buf)>(buf,   "                  %4d   %4d", pt.x, pt.y);
+			//	cout << buf << endl;
+			//}
+		}
+	}
 
 #ifdef PI_TIMING
 		long int start_time;
@@ -733,6 +738,9 @@ void ProcessingBase::FindCornerCoordinates()
 		}
 	}
 
+	m_leftTarget.m_side = eUnknownSide;
+	m_rightTarget.m_side = eUnknownSide;
+
 	const vector<string> sideStr =
 	{
 		  "Unknown"
@@ -774,6 +782,8 @@ void ProcessingBase::FindCornerCoordinates()
 				m_object_center_x = (m_rectDescr[i].m_minRect.center.x + m_rectDescr[i + 1].m_minRect.center.x) / 2.0f;
 				m_object_center_y = m_rectDescr[i].m_minRect.center.y;
 				circle(image, Point((int)m_object_center_x, (int)m_object_center_y), 16, c_centerColor, 2);
+				m_leftTarget = m_rectDescr[i];
+				m_rightTarget = m_rectDescr[i + 1];
 			}
 
 			shortSide = min(m_rectDescr[i].m_minRect.size.width, m_rectDescr[i].m_minRect.size.height);

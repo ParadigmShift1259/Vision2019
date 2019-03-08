@@ -190,5 +190,4 @@ void ProcessingLine::ProcessImage(const Mat& image)
 	//FindBiggestContour();
 	//FindVerticalRange();
 	CalcOutputValues();
-
 }

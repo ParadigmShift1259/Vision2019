@@ -116,7 +116,7 @@ int main()
 				retro.ProcessImage(camera.GetImage());
 				offBoardComms.SetRetro(retro);
 
-				line.SetImageHSV(retro.GetImageHSV());	// Re-use the convtered HSV image
+				line.SetRetroCoords(retro.GetLeftTarget(), retro.GetRightTarget());
  				line.ProcessImage(camera.GetImage());
 				offBoardComms.SetLine(line);
 				break;

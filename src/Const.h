@@ -12,7 +12,7 @@
 //#define PI_TIMING
 #define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
 //#define PORTRAIT_IMAGE
-constexpr bool c_bUseLastDiagImage = false;                  //!< If true, read a previously saved image than getting one from camera
+constexpr bool c_bUseLastDiagImage = true;                  //!< If true, read a previously saved image than getting one from camera
 constexpr int c_loopCountToSaveDiagImage = 10;
 constexpr double c_camera_offset_x0 = 8.5;					//!< [inch] Camera offset from center of the robot
 
@@ -79,5 +79,7 @@ static cv::Scalar c_lowerCheckerBoard = { 1, 1, 50 };		//!< [HSV triplet] Lower 
 extern int loopCounter;
 extern std::vector<std::string> testFiles;
 extern std::vector<double> testDist;
+
+extern const char* c_testOutputPath;
 
 #endif // CONST_H

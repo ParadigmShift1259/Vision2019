@@ -21,10 +21,11 @@ public:
 
     void AcquireImage();
 
-    const Mat& GetImage() const { return m_image; }
+    const Mat& GetImage() const { return m_imageHSV; }
 
 private:
     VideoCapture m_Camera = VideoCapture(0);
     Mat m_image;
+	Mat m_imageHSV;												//!< Converted input image BGR->HSV
 };
 #endif  // CAMERAWRAPPER_H

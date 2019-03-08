@@ -18,6 +18,9 @@ public:
 
 	void ProcessImage(const Mat& image) override;
 
+	RectDescr GetLeftTarget() const { return m_leftTarget; }
+	RectDescr GetRightTarget() const { return m_rightTarget; }
+
 private:
 };
 

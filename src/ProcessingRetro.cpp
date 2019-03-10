@@ -16,8 +16,8 @@ ProcessingRetro::ProcessingRetro()
 #else
     //: ProcessingBase(   { 90, 255, 255 }, 
     //                    { 65,  90,  90 } )     // Colors for Retro reflective tape with green lighting (FIRST sample images)
-	: ProcessingBase({ 74, 255, 255 },
-					 { 67, 110, 110 })		// Colors for Retro reflective tape with green lighting (Team 1259 2019 Feb 16)
+	: ProcessingBase({ 90, 255, 255 },
+					 { 40, 153, 100 })		// Colors for Retro reflective tape with green lighting (Team 1259 2019 Feb 16)
 	//: ProcessingBase({ 90, 255, 255 },
 	//				 { 85,  90,  90 })		// Colors for Retro reflective tape with 2016 discrete LED green lighting (Team 1259 2019 Mar 6)
 #endif
@@ -43,5 +43,20 @@ void ProcessingRetro::ProcessImage(const Mat& image)
 	FindCornerCoordinates();
 	//FindBiggestContour();
 	//FindVerticalRange();
-	CalcOutputValues();
+	CalcOutputValues("Retro");
+
+	//double actualDist;
+	//double horzAngle;
+	//float longSide = max(m_leftTarget.m_minRect.size.width, m_leftTarget.m_minRect.size.height);
+
+	//EQuality quality = CalcOutputValues("LeftRetro", longSide, m_leftTarget.m_minRect.center.x, m_leftTarget.m_minRect.center.y, actualDist, horzAngle);
+	//m_OutputValuesLeftTarget.SetDistance(actualDist);
+	//m_OutputValuesLeftTarget.SetAngle(horzAngle);
+	//m_OutputValuesLeftTarget.SetQuality(quality);
+
+	//longSide = max(m_rightTarget.m_minRect.size.width, m_rightTarget.m_minRect.size.height);
+	//quality = CalcOutputValues("RightRetro", longSide, m_rightTarget.m_minRect.center.x, m_rightTarget.m_minRect.center.y, actualDist, horzAngle);
+	//m_OutputValuesRightTarget.SetDistance(actualDist);
+	//m_OutputValuesRightTarget.SetAngle(horzAngle);
+	//m_OutputValuesRightTarget.SetQuality(quality);
 }

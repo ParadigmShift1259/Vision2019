@@ -53,6 +53,31 @@ public:
         }
     }
 
+	OutputValues& operator=(const OutputValues& rhs)
+	{
+		m_bChanged = false;
+		
+		if (m_distance != rhs.GetDistance())
+		{
+			m_distance = rhs.GetDistance();
+			m_bChanged = true;
+		}
+
+		if (m_angle != rhs.GetAngle())
+		{
+			m_angle = rhs.GetAngle();
+			m_bChanged = true;
+		}
+
+		if (m_quality != rhs.GetQuality())
+		{
+			m_quality = rhs.GetQuality();
+			m_bChanged = true;
+		}
+
+		return *this;
+	}
+
     const bool IsChanged() const
     {
         return m_bChanged;

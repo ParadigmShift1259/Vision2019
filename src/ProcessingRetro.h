@@ -20,8 +20,15 @@ public:
 
 	RectDescr GetLeftTarget() const { return m_leftTarget; }
 	RectDescr GetRightTarget() const { return m_rightTarget; }
+	
+	const OutputValues& GetLeftTargetOutputValues() const override { return m_OutputValuesLeftTarget; }
+	const OutputValues& GetRightTargetOutputValues() const override { return m_OutputValuesRightTarget; }
+
+	const char* GetTargetName() override { return "Retro"; }								//!< Derived class name to get unique filenames
 
 private:
+	OutputValues m_OutputValuesLeftTarget;                                //!< Values to send to the Robot
+	OutputValues m_OutputValuesRightTarget;                                //!< Values to send to the Robot
 };
 
 

@@ -8,12 +8,13 @@
 #ifndef CONST_H
 #define CONST_H
 
-#define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
+//#define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
 //#define PI_TIMING
-//#define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
+#define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
 //#define PORTRAIT_IMAGE
-constexpr bool c_bUseLastDiagImage = true;                  //!< If true, read a previously saved image than getting one from camera
-constexpr int c_loopCountToSaveDiagImage = 10;
+#define CAPTURE_EVERY_NTH_IMAGE
+constexpr bool c_bUseLastDiagImage = false;                  //!< If true, read a previously saved image than getting one from camera
+constexpr int c_loopCountToSaveDiagImage = 1;
 constexpr double c_camera_offset_x0 = 8.5;					//!< [inch] Camera offset from center of the robot
 
 //-------------------------------------------------------------------------------------------------------------------------
@@ -75,6 +76,8 @@ static cv::Scalar c_lineColor = { 0, 255, 0 };				//!< [HSV triplet] Color for d
 static cv::Scalar c_biggestContourColor = { 183, 183, 255 };//!< [HSV triplet] Color for drawing biggest contour
 static cv::Scalar c_upperCheckerBoard = { 180, 255, 255 };	//!< [HSV triplet] Upper color range for fisheye calibration checker board
 static cv::Scalar c_lowerCheckerBoard = { 1, 1, 50 };		//!< [HSV triplet] Lower color range for fisheye calibration checker board
+
+extern bool bImageCaptureTrigger;
 
 extern int loopCounter;
 extern std::vector<std::string> testFiles;

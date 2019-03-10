@@ -52,5 +52,10 @@ src/launch.json
 src/.vscode/c_cpp_properties.json
 src/.vscode/tasks.json
 src/moveOutputImages.cmd
+<<<<<<< HEAD
 Vision2019.code-workspace
 .vs/Vision 2019/v15/Browse.VC.opendb
+=======
+*.code-workspace
+>>>>>>> 0c0dd8e0511813772b50637087969e24a93edd6a
+x64/Debug/processingbase.new.obj.enc

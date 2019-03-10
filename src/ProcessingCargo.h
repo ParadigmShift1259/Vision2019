@@ -18,6 +18,8 @@ public:
 
 	void ProcessImage(const Mat& image) override;
 
+	const char* GetTargetName() override { return "Cargo"; }								//!< Derived class name to get unique filenames
+
 private:
 };
 

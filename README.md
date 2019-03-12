@@ -62,5 +62,6 @@ Prerequisites:
 		Copy both the .network file and the .service
 		sudo systemctl enable Vision2019
 		sudo systemctl systemd-networkd
+		chmod run.sh AND VisionProcessingTest
 		
 

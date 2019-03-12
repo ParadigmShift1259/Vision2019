@@ -1,0 +1,14 @@
+[Unit]
+Description=2019Vision
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=pi
+ExecStart=/home/pi/Vision2019/src/run.sh
+
+[Install]
+WantedBy=multi-user.target

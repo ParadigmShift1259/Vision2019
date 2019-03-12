@@ -124,8 +124,8 @@ int main()
 			case eDeliverCargo:
 				retro.ProcessImage(camera.GetImage());
 				offBoardComms.SetRetro(retro);
-				offBoardComms.SetLeftTargetValues(retro);
-				offBoardComms.SetRightTargetValues(retro);
+				//offBoardComms.SetLeftTargetValues(retro);
+				//offBoardComms.SetRightTargetValues(retro);
 
 				//line.SetRetroCoords(retro.GetLeftTarget(), retro.GetRightTarget());
  			//	line.ProcessImage(camera.GetImage());

@@ -61,7 +61,7 @@ Prerequisites:
 		Copy the file by moving to the directory where the underscores are "/" and add one in the beginning
 		Copy both the .network file and the .service
 		sudo systemctl enable Vision2019
-		sudo systemctl systemd-networkd
+		sudo systemctl enable systemd-networkd
 		chmod run.sh AND VisionProcessingTest
 		
 

@@ -57,4 +57,10 @@ Prerequisites:
 		Edit the file
 		After editing, move the file to the boot directory through the following command: sudo mv frc.json /boot/ # sudo in case you may not have permission to transfer
 		
+	Use the following commands for new pi setup:
+		Copy the file by moving to the directory where the underscores are "/" and add one in the beginning
+		Copy both the .network file and the .service
+		sudo systemctl enable Vision2019
+		sudo systemctl systemd-networkd
+		
 

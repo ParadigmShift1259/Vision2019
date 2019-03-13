@@ -42,7 +42,7 @@ Prerequisites:
 			edit the fstab file with nano fstab
 				change ...defaults.ro.noatime
 				to           ...defaults.rw.noatime
-			leave /boot as read only
+			change /boot to read/write too
 			reboot using sudo shutdown -r now
 			the promt should now end with (rw):
 			

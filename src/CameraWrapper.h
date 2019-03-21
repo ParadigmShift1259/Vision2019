@@ -25,7 +25,7 @@ public:
 
 private:
     VideoCapture m_Camera = VideoCapture(0);
-    Mat m_image;
+    //Mat m_image;
 	Mat m_imageHSV;												//!< Converted input image BGR->HSV
 };
 #endif  // CAMERAWRAPPER_H

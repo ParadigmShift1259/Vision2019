@@ -28,7 +28,10 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/FishEyeCorr
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/Portrait/";
 #else
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
-const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
+//const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
+const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/";
+//const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/1ft_0degrees/";
+
 //const char* c_testImagePath = "C:/Users/212036134/Documents/Personal/FIRST Robotics/ImagingData/FromCafeteriaMar2/";
 #endif	// PORTRAIT_IMAGE
 #endif	// TEST_CHECKERBOARD_CALIB
@@ -111,32 +114,45 @@ std::vector<std::string> testFiles
 	//, "im_60in_45deg_h_wlen.jpg"
 	//, "im_60in_m45deg_h_wlen.jpg"
 
-	  "im_394_1p5ft_contact.jpg"
-	, "im_405_1p5ft_contact.jpg"
-	, "im_301_4ft.jpg"
-	, "im_367_2ft.jpg"
-	, "im_298_error_handling.jpg"
-	, "im_296.jpg"
-	, "im_837_w_hatch.jpg"
-	, "im_840_w_hatch.jpg"
-	, "im_426_5ft.jpg"
-	, "im_429_5ft.jpg"
-	, "im_450_5ft.jpg"
-	, "im_455_5ft_angled.jpg"
-	, "im_479_5ft.jpg"
-	, "im_495_4ft.jpg"
-	, "im_508_3ft.jpg"
-	, "im_512_2ft.jpg"
-	, "im_520_1p5ft_contact.jpg"
-	, "im_527_1p5ft_contact.jpg"
-	, "im_577_5ft_2line_start.jpg"
-	, "im_586_5ft_2line_start_tilted.jpg"
-	, "im_603_5ft_2line_start_titled.jpg"
-	, "im_633_4ft_2line_start_titled.jpg"
-	, "im_347_3ft.jpg"
-	, "im_658_3ft_2line_start_titled.jpg"
-	, "im_667_2ft_2line_start_titled.jpg"
-	, "im_674_1ft_2line_start_titled.jpg.jpg"
+	 "image3ft0.jpg"
+	,"image3ft20.jpg"
+	,"image1ft20.jpg"
+	//  "image0.jpg"
+	//  "image1.jpg"
+	//, "image2.jpg"
+	//, "image3.jpg"
+	//, "imagecargo2ft.jpg"
+	//, "imagecargo3ft.jpg"
+	//, "imagecargo4ft.jpg"
+	//, "imagecargo0ft.jpg"
+	//, "imagecargo1ft.jpg"
+
+	//  "im_394_1p5ft_contact.jpg"
+	//, "im_405_1p5ft_contact.jpg"
+	//, "im_301_4ft.jpg"
+	//, "im_367_2ft.jpg"
+	//, "im_298_error_handling.jpg"
+	//, "im_296.jpg"
+	//, "im_837_w_hatch.jpg"
+	//, "im_840_w_hatch.jpg"
+	//, "im_426_5ft.jpg"
+	//, "im_429_5ft.jpg"
+	//, "im_450_5ft.jpg"
+	//, "im_455_5ft_angled.jpg"
+	//, "im_479_5ft.jpg"
+	//, "im_495_4ft.jpg"
+	//, "im_508_3ft.jpg"
+	//, "im_512_2ft.jpg"
+	//, "im_520_1p5ft_contact.jpg"
+	//, "im_527_1p5ft_contact.jpg"
+	//, "im_577_5ft_2line_start.jpg"
+	//, "im_586_5ft_2line_start_tilted.jpg"
+	//, "im_603_5ft_2line_start_titled.jpg"
+	//, "im_633_4ft_2line_start_titled.jpg"
+	//, "im_347_3ft.jpg"
+	//, "im_658_3ft_2line_start_titled.jpg"
+	//, "im_667_2ft_2line_start_titled.jpg"
+	//, "im_674_1ft_2line_start_titled.jpg.jpg"
 
 #endif	// PORTRAIT_IMAGE
 #endif	// TEST_CHECKERBOARD_CALIB
@@ -256,33 +272,45 @@ std::vector<double> testDist	// Keep in sync with testFile vector
 	//, 60.0	//, "im_60in_45deg_h_wlen.jpg"
 	//, 60.0	//, "im_60in_m45deg_h_wlen.jpg"
 
-	  18.0	//im_394_1p5ft_contact.jpg
-	, 18.0	//im_405_1p5ft_contact.jpg
-	, 48.0	//im_301_4ft.jpg
-	, 36.0	//im_347_3ft.jpg
-	, 24.0	//im_367_2ft.jpg
-	, 48.0	//im_298_error_handling.jpg
-	, 48.0	//im_296.jpg
-	, 60.0	//im_837_w_hatch.jpg
-	, 60.0	//im_840_w_hatch.jpg
-	, 60.0	//im_426_5ft.jpg
-	, 60.0	//im_429_5ft.jpg
-	, 60.0	//im_450_5ft.jpg
-	, 60.0	//im_455_5ft_angled.jpg
-	, 60.0	//im_479_5ft.jpg
-	, 48.0	//im_495_4ft.jpg
-	, 36.0	//im_508_3ft.jpg
-	, 24.0	//im_512_2ft.jpg
-	, 18.0	//im_520_1p5ft_contact.jpg
-	, 18.0	//im_527_1p5ft_contact.jpg
-	, 60.0	//im_577_5ft_2line_start.jpg
-	, 60.0	//im_586_5ft_2line_start_tilted.jpg
-	, 60.0	//im_603_5ft_2line_start_titled.jpg
-	, 48.0	//im_633_4ft_2line_start_titled.jpg
-	, 36.0	//im_658_3ft_2line_start_titled.jpg
-	, 24.0	//im_667_2ft_2line_start_titled.jpg
-	, 12.0	//im_674_1ft_2line_start_titled.jpg.jpg
+	36
+,36
+,12//"C:\Users\Developer\Documents\TestData\OutputTestMatrixMar9\1ft_0degrees\image0.jpg"
+	//  18.0	//image0.jpg
+	//, 18.0	//image1.jpg
+	//, 18.0	//image2.jpg
+	//, 18.0	//image3.jpg
+	//, 24.0  //"imagecargo2ft.jpg"
+	//, 36.0  //"imagecargo3ft.jpg"
+	//, 48.0  //"imagecargo4ft.jpg"
+	//, 0.0  //"imagecargo0ft.jpg"
+	//, 12.0  //"imagecargo1ft.jpg"
 
+	//  18.0	//im_394_1p5ft_contact.jpg
+	//, 18.0	//im_405_1p5ft_contact.jpg
+	//, 48.0	//im_301_4ft.jpg
+	//, 36.0	//im_347_3ft.jpg
+	//, 24.0	//im_367_2ft.jpg
+	//, 48.0	//im_298_error_handling.jpg
+	//, 48.0	//im_296.jpg
+	//, 60.0	//im_837_w_hatch.jpg
+	//, 60.0	//im_840_w_hatch.jpg
+	//, 60.0	//im_426_5ft.jpg
+	//, 60.0	//im_429_5ft.jpg
+	//, 60.0	//im_450_5ft.jpg
+	//, 60.0	//im_455_5ft_angled.jpg
+	//, 60.0	//im_479_5ft.jpg
+	//, 48.0	//im_495_4ft.jpg
+	//, 36.0	//im_508_3ft.jpg
+	//, 24.0	//im_512_2ft.jpg
+	//, 18.0	//im_520_1p5ft_contact.jpg
+	//, 18.0	//im_527_1p5ft_contact.jpg
+	//, 60.0	//im_577_5ft_2line_start.jpg
+	//, 60.0	//im_586_5ft_2line_start_tilted.jpg
+	//, 60.0	//im_603_5ft_2line_start_titled.jpg
+	//, 48.0	//im_633_4ft_2line_start_titled.jpg
+	//, 36.0	//im_658_3ft_2line_start_titled.jpg
+	//, 24.0	//im_667_2ft_2line_start_titled.jpg
+	//, 12.0	//im_674_1ft_2line_start_titled.jpg.jpg
 #endif
 
 	//, 18.0	//, "testFishEye.jpg"
@@ -343,28 +371,48 @@ CameraWrapper::CameraWrapper()
 	cout << "CV_CAP_PROP_WHITE_BALANCE_BLUE_U: " << m_Camera.get(CV_CAP_PROP_WHITE_BALANCE_BLUE_U) << endl;
 	cout << "CV_CAP_PROP_WHITE_BALANCE_RED_V: " << m_Camera.get(CV_CAP_PROP_WHITE_BALANCE_RED_V) << endl;
 
-    //m_Camera.set(CV_CAP_PROP_GAIN, 30.0);				// TODO unsupported with VideoCapture?
-	m_Camera.set(CV_CAP_PROP_EXPOSURE, 200.0);			// Default 0.09991
+	//m_Camera.set(CV_CAP_PROP_GAIN, 30.0);				// TODO unsupported with VideoCapture?
+	//m_Camera.set(CV_CAP_PROP_EXPOSURE, 0.0001);			// Default 0.09991
+	//cout << "CV_CAP_PROP_EXPOSURE after set to 0.0001: " << m_Camera.get(CV_CAP_PROP_EXPOSURE) << endl;
 	//m_Camera.set(CV_CAP_PROP_BRIGHTNESS, 0.0);
-	m_Camera.set(CV_CAP_PROP_CONTRAST, 0.5);			// Default 0.5
-	m_Camera.set(CV_CAP_PROP_SATURATION, 0.5);			// Default 0.5
+	//m_Camera.set(CV_CAP_PROP_CONTRAST, 0.5);			// Default 0.5
+	//m_Camera.set(CV_CAP_PROP_SATURATION, 0.5);			// Default 0.5
 	//m_Camera.set(CV_CAP_PROP_HUE, 0.0);
-	m_Camera.set(CV_CAP_PROP_WHITE_BALANCE_BLUE_U, 1000.0);	// Default 1000
-	m_Camera.set(CV_CAP_PROP_WHITE_BALANCE_RED_V, 1000.0);		// Default 1000
+	//m_Camera.set(CV_CAP_PROP_WHITE_BALANCE_BLUE_U, 1000.0);	// Default 1000
+	//m_Camera.set(CV_CAP_PROP_WHITE_BALANCE_RED_V, 1000.0);		// Default 1000
 
+	if (m_Camera.get(CV_CAP_PROP_FRAME_WIDTH) != c_imageWidthPixel)
+	{
+		cout << "Setting camera resolution width to " << c_imageWidthPixel  << " was " << m_Camera.get(CV_CAP_PROP_FRAME_WIDTH) << endl;
+		m_Camera.set(CV_CAP_PROP_FRAME_WIDTH, c_imageWidthPixel);
+	}
+	if (m_Camera.get(CV_CAP_PROP_FRAME_HEIGHT) != c_imageHeightPixel)
+	{
+		cout << "Setting camera resolution height to " << c_imageHeightPixel << " was " << m_Camera.get(CV_CAP_PROP_FRAME_HEIGHT) << endl;
+		m_Camera.set(CV_CAP_PROP_FRAME_HEIGHT, c_imageHeightPixel);
+	}	
+	
 	// Warm up camera for 60 frames to stabilize image brightness
+	cout << "Warming up camera" << endl;
 	int warmUpLoops = 60;
 #ifdef BUILD_ON_WINDOWS
 	warmUpLoops = 1;
 #endif
+	Mat image;
 	for (int loop = 0; loop < warmUpLoops; loop++)
 	{
 		m_Camera.grab();
 	}
-	m_Camera.retrieve(m_image);
-	if (m_image.rows > 0 && m_image.cols > 0)
+	//int grabCount = 0;
+	//while (!m_Camera.grab())
+	//{
+	//	grabCount++;
+	//}
+	//cout << "Camera warmup grab count " << grabCount << endl;
+	m_Camera.retrieve(image);
+	if (image.rows > 0 && image.cols > 0)
 	{
-		cvtColor(m_image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
+		cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
 	}
 	cout << "Camera is opened and warmed up" << endl;
 }
@@ -376,6 +424,8 @@ CameraWrapper::~CameraWrapper()
 
 void CameraWrapper::AcquireImage()
 {
+	Mat image;
+
 	if (c_bUseLastDiagImage)
 	{
 		// Reread the previously saved image to consistently process the same image
@@ -385,17 +435,57 @@ void CameraWrapper::AcquireImage()
 		string fileName = testFiles[loopCounter % (int)testFiles.size()];
 #endif
 
-		m_image = imread(fileName, CV_LOAD_IMAGE_COLOR);
+		image = imread(fileName, CV_LOAD_IMAGE_COLOR);
 
-		if (m_image.empty())
+		if (image.empty())
 		{
 			cout << "Cannot find the specified file name: " << fileName << endl;
 		}
 	}
 	else
 	{
-		m_Camera.grab();
-    	m_Camera.retrieve(m_image);
+		int grabCount = 0;
+		while (!m_Camera.grab())
+		{
+			grabCount++;
+		}
+		//cout << "Camera grab count " << grabCount << endl;
+
+		if (!m_Camera.retrieve(image))
+		{
+			cout << "Cannot retrieve the image from the camera" << endl;
+		}
+	}
+
+	if (!image.empty())
+	{
+		if (image.cols != c_imageWidthPixel || image.rows != c_imageHeightPixel)
+		{
+			cout << "Image from the camera is wrong resolution cols " << image.cols << " rows " << image.rows << endl;
+		}
+
+		if (c_bUseLastDiagImage || bImageCaptureTrigger)
+		//if (loopCounter <= c_loopCountToSaveDiagImage || bImageCaptureTrigger)
+		{
+			char fileName[255];
+#ifdef BUILD_ON_WINDOWS
+			int ndx = loopCounter % testFiles.size();
+			sprintf_s<sizeof(fileName)>(fileName, "%s%dimage_%s.jpg", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
+#else
+			if (c_bUseLastDiagImage)
+			{
+				sprintf(fileName, "image%d.jpg", loopCounter % testFiles.size() + 1);
+			}
+			else
+			{
+				sprintf(fileName, "image%d.jpg", loopCounter);
+			}
+#endif
+			cout << "Capturing image " << fileName << endl;
+			imwrite(fileName, image);
+		}
+
+		cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
 	}
 
 	if (m_image.rows > 0 && m_image.cols > 0)

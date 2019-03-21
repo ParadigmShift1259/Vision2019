@@ -27,7 +27,7 @@ void ProcessingHatch::ProcessImage(const Mat& image)
 	FindCenter();
 	FindBiggestContour();
 	CalcObjectHeight();
-	CalcOutputValues();
+	CalcOutputValues("Hatch");
 }
 
 

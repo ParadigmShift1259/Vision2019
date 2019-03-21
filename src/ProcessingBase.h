@@ -40,6 +40,7 @@ struct RectDescr
 	float m_slope;
 	float m_angle;
 	ESide m_side;
+	float m_yIntercept;
 };
 
 struct LineDescr
@@ -47,6 +48,7 @@ struct LineDescr
 	float m_slope;
 	Point m_point1;
 	Point m_point2;
+	float m_yIntercept;
 };
 
 class ProcessingBase
@@ -58,6 +60,8 @@ public:
 	virtual void ProcessImage(const Mat& image) = 0;						//!< Defer to the derived class to process the input image from the camera
 
     const OutputValues& GetOutputValues() const { return m_OutputValues; }	//!< Return the output values
+	virtual const OutputValues& GetLeftTargetOutputValues() const { return m_OutputValues; }	//!< The derived class should override
+	virtual const OutputValues& GetRightTargetOutputValues() const { return m_OutputValues; }	//!< The derived class should override
 
 protected:
 	void Prepare(const Mat& image);											//!< Perform in-range filtering 
@@ -75,16 +79,19 @@ protected:
 	void FindCenter();														//!< Find center of biggest contour and center of drawing
 	void CalcObjectHeight();												//!< Calculate object height with/without Fish Eye correction based on vertical range
 	void FindBiggestContour();												//!< Process the contours to find the largest contours by moment and draw the contour found TODO split
-	void CalcOutputValues();												//!< Calculate the values that will be sent to the robot
-	void PrintDebugValues(double horzDistInch, double vertDistInch);		//!< Print the output values to the Pi console
+	void CalcOutputValues(const char* objType);								//!< Calculate the values that will be sent to the robot
+	EQuality CalcOutputValues(const char* objType, double objHeight, double objCenterX, double objCenterY, double& actualDistInch, double& horzAngleDegree);
+	void PrintDebugValues(const char* objType, double horzDistInch, double vertDistInch, double objHeight, double actualDistInch, double horzAngleDegree);		//!< Print the output values to the Pi console
 	void CalibrateHSV(const Mat& imageHsv, int hue1, int hue2, int span, int satValueIncrement);	//!< Loop through hue, saturation, and values to find the best upper and lower bound
+	virtual const char* GetTargetName() = 0;								//!< Derived class name to get unique filenames
 
 	// Following settings is for camera calibrated value
-    static constexpr double m_calibTargetSizePixel = 176.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
-	//static constexpr double m_calibTargetSizePixel = 150.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
-	static constexpr double m_calibCameraDistInch = 18.0;  					//!< [inch] Calibration distance from camera to object
-	static constexpr double m_measuredObjectHeight = 5.5;  					//!< [inch] Height of object in inches; used a tape measure in the real world
+  //  static constexpr double m_calibTargetSizePixel = 104.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
+	static constexpr double m_calibTargetSizePixel = 93.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
+	static constexpr double m_calibCameraDistInch = 28.0;  					//!< [inch] Calibration distance from camera to object
+	static constexpr double m_measuredObjectHeight = 6.0;  					//!< [inch] Height of object in inches; used a tape measure in the real world
 	static constexpr double m_defaultPixelPerInch = m_calibTargetSizePixel / m_measuredObjectHeight;	// [pixel/inch] ~25
+	static constexpr double m_cameraToFrontOfRobotDistInch = 18.0;  		//!< [inch] 
 	// Output value bounds
 	static constexpr double m_maxAngle = 60.0;								//!< [degrees] If we calculate an output angle more than this, do not send it
     static constexpr double m_maxActualDist = 10.0 * 12.0;					//!< [inch] 10 feet; if we calculate an output distance more than this, do not send it

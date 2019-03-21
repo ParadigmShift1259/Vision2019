@@ -26,5 +26,5 @@ void ProcessingCargo::ProcessImage(const Mat& image)
 	FindCenter();
 	FindBiggestContour();
 	CalcObjectHeight();
-	CalcOutputValues();
+	CalcOutputValues("Cargo");
 }

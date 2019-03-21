@@ -53,6 +53,7 @@ void overflow_handler(int signal_number)
 #endif
 
 int loopCounter = 0;
+bool bImageCaptureTrigger = false;
 
 int main()
 {
@@ -104,6 +105,14 @@ int main()
 		clock_gettime(CLOCK_REALTIME, &gettime_now);
 		start_time = gettime_now.tv_nsec;		//Get nS value
 #endif
+
+#ifdef CAPTURE_EVERY_NTH_IMAGE
+		bImageCaptureTrigger = false;
+		if (loopCounter % 25 == 0)
+		{
+			bImageCaptureTrigger = true;
+		}
+#endif
 		//cout << "Acquiring image" << endl;
 		camera.AcquireImage();
 		
@@ -115,10 +124,12 @@ int main()
 			case eDeliverCargo:
 				retro.ProcessImage(camera.GetImage());
 				offBoardComms.SetRetro(retro);
+				//offBoardComms.SetLeftTargetValues(retro);
+				//offBoardComms.SetRightTargetValues(retro);
 
-				line.SetRetroCoords(retro.GetLeftTarget(), retro.GetRightTarget());
- 				line.ProcessImage(camera.GetImage());
-				offBoardComms.SetLine(line);
+				//line.SetRetroCoords(retro.GetLeftTarget(), retro.GetRightTarget());
+ 			//	line.ProcessImage(camera.GetImage());
+				//offBoardComms.SetLine(line);
 				break;
 
 			case eFindCargo:

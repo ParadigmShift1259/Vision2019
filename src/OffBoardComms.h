@@ -37,6 +37,9 @@ public:
     void SetCargo(const ProcessingBase& cargo);
     void SetHatch(const ProcessingBase& hatch);
 
+	void SetLeftTargetValues(const ProcessingBase& retro);
+	void SetRightTargetValues(const ProcessingBase& retro);
+
     double GetGyroAngle();
 	EVisionTarget GetState();
 
@@ -55,6 +58,8 @@ private:
     OutputValues m_LineValues;
     OutputValues m_CargoValues;
     OutputValues m_HatchValues;
+	OutputValues m_LeftTargetValues;
+	OutputValues m_RightTargetValues;
 };
 
 #endif  // OFFBOARDCOMMS_H

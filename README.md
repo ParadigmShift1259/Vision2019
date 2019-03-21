@@ -42,7 +42,7 @@ Prerequisites:
 			edit the fstab file with nano fstab
 				change ...defaults.ro.noatime
 				to           ...defaults.rw.noatime
-			leave /boot as read only
+			change /boot to read/write too
 			reboot using sudo shutdown -r now
 			the promt should now end with (rw):
 			
@@ -56,5 +56,12 @@ Prerequisites:
 		If root owns it, change ownership by the following command: chown pi:pi frc.json
 		Edit the file
 		After editing, move the file to the boot directory through the following command: sudo mv frc.json /boot/ # sudo in case you may not have permission to transfer
+		
+	Use the following commands for new pi setup:
+		Copy the file by moving to the directory where the underscores are "/" and add one in the beginning
+		Copy both the .network file and the .service
+		sudo systemctl enable Vision2019
+		sudo systemctl enable systemd-networkd
+		chmod run.sh AND VisionProcessingTest
 		
 

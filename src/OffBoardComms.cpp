@@ -52,6 +52,10 @@ void OffBoardComms::Publish()
 {
 	//if (m_RetroValues.IsChanged() || m_LineValues.IsChanged() || m_CargoValues.IsChanged() || m_HatchValues.IsChanged())
 	{
+		//cout << "Retro IsChanged " << m_RetroValues.IsChanged() << endl;
+		//cout << "Line  IsChanged " << m_LineValues.IsChanged() << endl;
+		//cout << "Cargo IsChanged " << m_CargoValues.IsChanged() << endl;
+		//cout << "Hatch IsChanged " << m_HatchValues.IsChanged() << endl;
 #ifdef USE_OFFBOARD_COMMS
 		m_netTableOpenCV->PutNumber("visioncounter", m_counter);
 
@@ -70,6 +74,14 @@ void OffBoardComms::Publish()
 		m_netTableOpenCV->PutNumber("HatchDistance",  m_HatchValues.GetDistance());
 		m_netTableOpenCV->PutNumber("HatchAngle", m_HatchValues.GetAngle());
 		m_netTableOpenCV->PutNumber("HatchQuality", m_HatchValues.GetQuality());
+
+		//m_netTableOpenCV->PutNumber("RetroLeftDistance", m_LeftTargetValues.GetDistance());
+		//m_netTableOpenCV->PutNumber("RetroLeftAngle", m_LeftTargetValues.GetAngle());
+		//m_netTableOpenCV->PutNumber("RetroLeftQuality", m_LeftTargetValues.GetQuality());
+
+		//m_netTableOpenCV->PutNumber("RetroRightDistance", m_RightTargetValues.GetDistance());
+		//m_netTableOpenCV->PutNumber("RetroRightAngle", m_RightTargetValues.GetAngle());
+		m_netTableOpenCV->PutNumber("RetroRightQuality", m_RightTargetValues.GetQuality());
 #endif
 		m_counter++;
 	}
@@ -93,6 +105,16 @@ void OffBoardComms::SetHatch(const ProcessingBase& hatch)
 void OffBoardComms::SetCargo(const ProcessingBase& cargo)
 {
 	m_CargoValues = cargo.GetOutputValues();
+}
+
+void OffBoardComms::SetLeftTargetValues(const ProcessingBase& retro)
+{
+	m_LeftTargetValues = retro.GetLeftTargetOutputValues();
+}
+
+void OffBoardComms::SetRightTargetValues(const ProcessingBase& retro)
+{
+	m_RightTargetValues = retro.GetRightTargetOutputValues();
 }
 
 double OffBoardComms::GetGyroAngle()

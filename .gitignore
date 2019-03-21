@@ -53,3 +53,4 @@ src/.vscode/c_cpp_properties.json
 src/.vscode/tasks.json
 src/moveOutputImages.cmd
 *.code-workspace
+x64/Debug/processingbase.new.obj.enc

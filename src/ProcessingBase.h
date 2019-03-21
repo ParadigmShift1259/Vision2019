@@ -86,7 +86,7 @@ protected:
 	virtual const char* GetTargetName() = 0;								//!< Derived class name to get unique filenames
 
 	// Following settings is for camera calibrated value
-  //  static constexpr double m_calibTargetSizePixel = 104.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
+    //static constexpr double m_calibTargetSizePixel = 104.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
 	static constexpr double m_calibTargetSizePixel = 93.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
 	static constexpr double m_calibCameraDistInch = 28.0;  					//!< [inch] Calibration distance from camera to object
 	static constexpr double m_measuredObjectHeight = 6.0;  					//!< [inch] Height of object in inches; used a tape measure in the real world

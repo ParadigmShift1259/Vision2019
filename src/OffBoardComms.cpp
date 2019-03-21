@@ -75,12 +75,12 @@ void OffBoardComms::Publish()
 		m_netTableOpenCV->PutNumber("HatchAngle", m_HatchValues.GetAngle());
 		m_netTableOpenCV->PutNumber("HatchQuality", m_HatchValues.GetQuality());
 
-		//m_netTableOpenCV->PutNumber("RetroLeftDistance", m_LeftTargetValues.GetDistance());
-		//m_netTableOpenCV->PutNumber("RetroLeftAngle", m_LeftTargetValues.GetAngle());
-		//m_netTableOpenCV->PutNumber("RetroLeftQuality", m_LeftTargetValues.GetQuality());
+		m_netTableOpenCV->PutNumber("RetroLeftDistance", m_LeftTargetValues.GetDistance());
+		m_netTableOpenCV->PutNumber("RetroLeftAngle", m_LeftTargetValues.GetAngle());
+		m_netTableOpenCV->PutNumber("RetroLeftQuality", m_LeftTargetValues.GetQuality());
 
-		//m_netTableOpenCV->PutNumber("RetroRightDistance", m_RightTargetValues.GetDistance());
-		//m_netTableOpenCV->PutNumber("RetroRightAngle", m_RightTargetValues.GetAngle());
+		m_netTableOpenCV->PutNumber("RetroRightDistance", m_RightTargetValues.GetDistance());
+		m_netTableOpenCV->PutNumber("RetroRightAngle", m_RightTargetValues.GetAngle());
 		m_netTableOpenCV->PutNumber("RetroRightQuality", m_RightTargetValues.GetQuality());
 #endif
 		m_counter++;

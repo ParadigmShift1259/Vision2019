@@ -346,6 +346,8 @@ void ProcessingBase::RejectSmallContours()
 			continue;
 		}
 
+		// Block out the upper corners
+		// We are getting reflections of the green LEDs off of the diffuser plastic
 		int minX = 0;
 		int minY = 0;
 		int maxX = 125;
@@ -761,6 +763,8 @@ void ProcessingBase::FindCornerCoordinates()
 				m_rectDescr[i].m_side = eLeft;
 				m_rectDescr[i + 1].m_side = eRight;
 				float xDiff = m_rectDescr[i + 1].m_minRect.center.x - m_rectDescr[i].m_minRect.center.x;
+				cout << "maxXdiff " << maxXdiff << " xDiff " << xDiff << endl;
+
 				if (maxXdiff < xDiff)
 				{
 					maxXdiff = xDiff;
@@ -775,6 +779,7 @@ void ProcessingBase::FindCornerCoordinates()
 			}
 		}
 	}
+	cout << "final maxXdiff " << maxXdiff << " maxPairIndex " << maxPairIndex << endl;
 
 	m_leftTarget.m_side = eUnknownSide;
 	m_rightTarget.m_side = eUnknownSide;
@@ -787,13 +792,18 @@ void ProcessingBase::FindCornerCoordinates()
 	};
 	//cout << "Screen out bad rectangles" << endl;
 	Point2f vertices[4];
+#ifdef WRITE_OPENCV_TEXT_ON_IMAGES
 	char text[255];
+#endif
 	//const float areaThreshold = c_areaThresholdPercent * maxArea;
 	m_object_height = 0.0;
 	size_t endIndex = min(maxPairIndex + 2, m_rectDescr.size());
 	for (size_t i = maxPairIndex; i < endIndex; i++)			// TODO this is kind of hacky
 	{
 		float longSide = max(m_rectDescr[i].m_minRect.size.width, m_rectDescr[i].m_minRect.size.height);
+		//float longSide = max(m_rectDescr[i].m_minRect.boundingRect2f().width, m_rectDescr[i].m_minRect.boundingRect2f().height);
+		//cout << "bounding box width " << m_rectDescr[i].m_minRect.boundingRect2f().width << " height " << m_rectDescr[i].m_minRect.boundingRect2f().height << endl;
+
 		float shortSide = 0.0f;
 		float aspectRatio = 0.0f;
 		//cout << "longSide " << longSide << endl;
@@ -802,7 +812,10 @@ void ProcessingBase::FindCornerCoordinates()
 			if (m_object_height < (double)longSide && m_rectDescr[i].m_side == eLeft)
 			{
 				m_object_height = (double)longSide;
+				//longSide = max(m_rectDescr[i + 1].m_minRect.boundingRect2f().width, m_rectDescr[i + 1].m_minRect.boundingRect2f().height);
+				//m_object_height = max(m_object_height, (double)longSide);
 				m_object_center_x = (m_rectDescr[i].m_minRect.center.x + m_rectDescr[i + 1].m_minRect.center.x) / 2.0f;
+				//m_object_center_y = (m_rectDescr[i].m_minRect.center.y + m_rectDescr[i + 1].m_minRect.center.y) / 2.0f;
 				m_object_center_y = m_rectDescr[i].m_minRect.center.y;
 				circle(image, Point((int)m_object_center_x, (int)m_object_center_y), 16, c_centerColor, 2);
 				m_leftTarget = m_rectDescr[i];
@@ -1098,6 +1111,11 @@ void ProcessingBase::FishEyeCorrectPoint(int xIn, int yIn, int& xOut, int& yOut)
 
 void ProcessingBase::CalcOutputValues(const char* objType)
 {
+	cout << "calling CalcOutputValues " << objType
+		<< " m_object_height " << m_object_height
+		<< " object x " << m_object_center_x
+		<< " object y " << m_object_center_y
+		<< endl;
 	EQuality quality = CalcOutputValues(objType, m_object_height, m_object_center_x, m_object_center_y, m_Actual_Distance_Inch, m_Horizontal_Angle_Degree);
 	m_OutputValues.SetDistance(m_Actual_Distance_Inch);
 	m_OutputValues.SetAngle(m_Horizontal_Angle_Degree);
@@ -1139,44 +1157,22 @@ EQuality ProcessingBase::CalcOutputValues(const char* objType, double objHeight,
 	double pixel_per_in = m_defaultPixelPerInch / scaledHeightPixel;
 
 	total_Distance_Inch = ((standard_height_p / objHeight) * m_calibCameraDistInch);
-	//cout << "total_Distance_Inch: " << total_Distance_Inch << endl;
-	horizontal_Distance_Inch = (objCenterX - m_im_center_x) / pixel_per_in;	// Convert horizontal pixel offset to inches @ 18 camera dist
-	//cout << "horizontal_Distance_Inch: " << horizontal_Distance_Inch << endl;
+	cout << "total_Distance_Inch: " << total_Distance_Inch << endl;
+	horizontal_Distance_Inch = (objCenterX - m_im_center_x) / pixel_per_in;	// Convert horizontal pixel offset to inches
+	cout << "horizontal_Distance_Inch: " << horizontal_Distance_Inch << endl;
 	comp_Horizontal_Distance_Inch = horizontal_Distance_Inch + c_camera_offset_x0;
-	//comp_Horizontal_Distance_Inch = horizontal_Distance_Inch;
-	//cout << "comp_Horizontal_Distance_Inch: " << comp_Horizontal_Distance_Inch << endl;
+	cout << "comp_Horizontal_Distance_Inch: " << comp_Horizontal_Distance_Inch << endl;
 	vertical_Distance_Pixel = m_im_center_y - objCenterY;
-	//cout << "vertical_Distance_Pixel: " << vertical_Distance_Pixel << endl;
-	vertical_Distance_Inch = vertical_Distance_Pixel / pixel_per_in;				// Convert vertical pixel offset to inches @ 18 camera dist
-	//cout << "vertical_Distance_Inch: " << vertical_Distance_Inch << endl;
+	cout << "vertical_Distance_Pixel: " << vertical_Distance_Pixel << endl;
+	vertical_Distance_Inch = vertical_Distance_Pixel / pixel_per_in;				// Convert vertical pixel offset to inches
+	cout << "vertical_Distance_Inch: " << vertical_Distance_Inch << endl;
 	horzAngleDegree = atan(comp_Horizontal_Distance_Inch / m_calibCameraDistInch) * m_radiansToDegrees;
-	//cout << "m_Horizontal_Angle_Degree: " << horzAngleDegree << endl;
+	cout << "m_Horizontal_Angle_Degree: " << horzAngleDegree << endl;
 	vertical_Angle_Degree = atan(vertical_Distance_Pixel / (pixel_per_in * m_calibCameraDistInch)) * m_radiansToDegrees;
-	//cout << "vertical_Angle_Degree: " << vertical_Angle_Degree << endl;
+	cout << "vertical_Angle_Degree: " << vertical_Angle_Degree << endl;
 	actualDistInch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians) - m_cameraToFrontOfRobotDistInch;
 	//actualDistInch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians);
-	//cout << "m_Actual_Distance_Inch: " << actualDistInch << endl;
-
-#if 0
-	const double c_heightDist = 14.0;
-	double alpha = atan(c_heightDist / m_Actual_Distance_Inch);
-	double correctObjHeight = objHeight / cos(alpha);
-	total_Distance_Inch = ((standard_height_p / correctObjHeight) * m_calibCameraDistInch);
-	//cout << "total_Distance_Inch: " << total_Distance_Inch << endl;
-	horizontal_Distance_Inch = (objCenterX - m_im_center_x) / pixel_per_in;	// Convert horizontal pixel offset to inches @ 18 camera dist
-	//cout << "horizontal_Distance_Inch: " << horizontal_Distance_Inch << endl;
-	comp_Horizontal_Distance_Inch = horizontal_Distance_Inch + c_camera_offset_x0;	// because camera at right side of robot when facing to object 
-	//cout << "comp_Horizontal_Distance_Inch: " << comp_Horizontal_Distance_Inch << endl;
-	vertical_Distance_Pixel = m_im_center_y - objCenterY;
-	//cout << "vertical_Distance_Pixel: " << vertical_Distance_Pixel << endl;
-	vertical_Distance_Inch = vertical_Distance_Pixel / pixel_per_in;				// Convert vertical pixel offset to inches @ 18 camera dist
-	//cout << "vertical_Distance_Inch: " << vertical_Distance_Inch << endl;
-	horzAngleDegree = atan(comp_Horizontal_Distance_Inch / m_calibCameraDistInch) * m_radiansToDegrees;
-	//cout << "m_Horizontal_Angle_Degree: " << horzAngleDegree << endl;
-	vertical_Angle_Degree = atan(vertical_Distance_Pixel / (pixel_per_in * m_calibCameraDistInch)) * m_radiansToDegrees;
-	//cout << "vertical_Angle_Degree: " << vertical_Angle_Degree << endl;
-	actualDistInch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians) - m_cameraToFrontOfRobotDistInch;	// Subtract the dist from camera to front of robot
-#endif
+	cout << "m_Actual_Distance_Inch: " << actualDistInch << endl;
 
 	EQuality quality = eYellowTrackingObjects;
 

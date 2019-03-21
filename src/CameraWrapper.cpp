@@ -29,8 +29,9 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_
 #else
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
-const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/";
+//const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/1ft_0degrees/";
+const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/StLouisData/2019_StLouis_Test/images_30deg/";
 
 //const char* c_testImagePath = "C:/Users/212036134/Documents/Personal/FIRST Robotics/ImagingData/FromCafeteriaMar2/";
 #endif	// PORTRAIT_IMAGE
@@ -114,9 +115,13 @@ std::vector<std::string> testFiles
 	//, "im_60in_45deg_h_wlen.jpg"
 	//, "im_60in_m45deg_h_wlen.jpg"
 
-	 "image3ft0.jpg"
-	,"image3ft20.jpg"
-	,"image1ft20.jpg"
+	// "image3ft0.jpg"
+	//,"image3ft20.jpg"
+	//,"image1ft20.jpg"
+
+	//"image0.jpg"
+	"image675.jpg"
+
 	//  "image0.jpg"
 	//  "image1.jpg"
 	//, "image2.jpg"
@@ -272,9 +277,12 @@ std::vector<double> testDist	// Keep in sync with testFile vector
 	//, 60.0	//, "im_60in_45deg_h_wlen.jpg"
 	//, 60.0	//, "im_60in_m45deg_h_wlen.jpg"
 
-	36
-,36
-,12//"C:\Users\Developer\Documents\TestData\OutputTestMatrixMar9\1ft_0degrees\image0.jpg"
+	// 36
+	//,36
+	//,12//"C:\Users\Developer\Documents\TestData\OutputTestMatrixMar9\1ft_0degrees\image0.jpg"
+	//12	//"C:\Users\Developer\Documents\TestData\OutputTestMatrixMar9\1ft_0degrees\image0.jpg"
+	36	// ? image675.jpg
+
 	//  18.0	//image0.jpg
 	//, 18.0	//image1.jpg
 	//, 18.0	//image2.jpg

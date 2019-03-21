@@ -1,4 +1,5 @@
 #!/bin/bash
+sleep 30
 cd /home/pi/Vision2019/src
 while :
 do

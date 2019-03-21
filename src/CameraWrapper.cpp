@@ -311,7 +311,6 @@ std::vector<double> testDist	// Keep in sync with testFile vector
 	//, 36.0	//im_658_3ft_2line_start_titled.jpg
 	//, 24.0	//im_667_2ft_2line_start_titled.jpg
 	//, 12.0	//im_674_1ft_2line_start_titled.jpg.jpg
-
 #endif
 
 	//, 18.0	//, "testFishEye.jpg"
@@ -487,5 +486,14 @@ void CameraWrapper::AcquireImage()
 		}
 
 		cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
+	}
+
+	if (m_image.rows > 0 && m_image.cols > 0)
+	{
+		cvtColor(m_image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
+		if (loopCounter <= c_loopCountToSaveDiagImage)
+		{
+			imwrite("image.jpg", m_image);
+		}
 	}
 }

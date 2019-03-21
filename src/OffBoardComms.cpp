@@ -50,7 +50,7 @@ OffBoardComms::OffBoardComms()
 
 void OffBoardComms::Publish()
 {
-	if (m_RetroValues.IsChanged() || m_LineValues.IsChanged() || m_CargoValues.IsChanged() || m_HatchValues.IsChanged())
+	//if (m_RetroValues.IsChanged() || m_LineValues.IsChanged() || m_CargoValues.IsChanged() || m_HatchValues.IsChanged())
 	{
 		//cout << "Retro IsChanged " << m_RetroValues.IsChanged() << endl;
 		//cout << "Line  IsChanged " << m_LineValues.IsChanged() << endl;

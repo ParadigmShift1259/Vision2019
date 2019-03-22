@@ -156,39 +156,6 @@ void ProcessingLine::RejectSmallContours()
 		m_contours.clear();
 	}
 
-#ifdef PI_TIMING
-	long int start_time;
-	long int time_difference;
-	struct timespec gettime_now;
-
-	clock_gettime(CLOCK_REALTIME, &gettime_now);
-	start_time = gettime_now.tv_nsec;		//Get nS value
-
-	int count = 0;
-	vector<vector<Point>> corrected(m_contours.size());
-	for (size_t i = 0; i < m_contours.size(); i++)
-	{
-		auto& vIn = m_contours[i];
-		auto& vOut = corrected[i];
-		vOut.resize(vIn.size());
-		for (size_t j = 0; j < vIn.size(); j++)
-		{
-			double xCorrected;
-			double yCorrected;
-			count++;
-			FishEyeCorrectPoint(vIn[j].x, vIn[j].y, xCorrected, yCorrected);
-			vOut[j].x = xCorrected;
-			vOut[j].y = yCorrected;
-		}
-	}
-
-	clock_gettime(CLOCK_REALTIME, &gettime_now);
-	time_difference = gettime_now.tv_nsec - start_time;
-	if (time_difference < 0)
-		time_difference += 1000000000;				//(Rolls over every 1 second)
-	cout << "Fisheye correction of " << count << " points took " << time_difference << " nanoseconds " << time_difference / count << " nanosec/pt" << endl;
-#endif
-
 #ifdef DRAW_OPENCV_FIT_LINE
 	for (auto& it : m_linePoints)
 	{
@@ -298,10 +265,8 @@ void ProcessingLine::ProcessImage(const Mat& image)
 	Prepare(image);
 	FindContours();
 	RejectSmallContours();
-#ifndef TEST_FISHEYE_CORRECTION_BY_LUT
 	//FishEyeCorrectContour(m_selectedPairIndex);
 	FishEyeCorrectContours();
-#endif
 	FitLinesToContours();
 	//FindCornerCoordinates();
 	//FindBiggestContour();

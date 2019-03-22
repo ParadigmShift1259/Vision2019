@@ -9,7 +9,6 @@
 #define CONST_H
 
 #define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
-//#define PI_TIMING
 //#define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
 //#define PORTRAIT_IMAGE
 //#define CAPTURE_EVERY_NTH_IMAGE
@@ -19,8 +18,6 @@ constexpr double c_camera_offset_x0 = 0.0;					//!< [inch] Camera offset from ce
 //constexpr double c_camera_offset_x0 = 8.5;					//!< [inch] Camera offset from center of the robot
 
 //-------------------------------------------------------------------------------------------------------------------------
-//#define TEST_GAFFER_TAPE_ALIGNMENT_IMGS		// Use this when testing hatch vision targets made with white gaffer's tape
-//#define TEST_FISHEYE_CORRECTION_BY_LUT
 //#define TEST_CHECKERBOARD_CALIB
 
 #ifndef TEST_CHECKERBOARD_CALIB
@@ -50,7 +47,7 @@ constexpr double PI = 4.0 * atan(1.0);
 #endif
 
 constexpr double c_smallContourPercentOfMax = 0.30;         //!< Reject contours that are less than this % of max countour point count
-constexpr size_t c_minContourPoints = 100;					//!< Reject contours that have less points than this
+constexpr size_t c_minContourPoints = 50;					//!< Reject contours that have less points than this
 constexpr size_t c_maxContourPoints = 2000;                 //!< Reject contours that have more points than this
 
 constexpr float c_occludedAspectRatio = 0.43f;			    //!< [ratio] Aspect ratio greater than this might be an occluded retroreflective target
@@ -64,9 +61,10 @@ constexpr int c_imageWidthPixel = 1280;						//!< [pixel] Height in pixels of im
 #endif
 
 static cv::Scalar c_contourColor = { 231, 96, 97 };         //!< [HSV triplet] We will draw a contour of specific color
+static cv::Scalar c_fishEyeContourColor = { 30, 130, 250 };	//!< [HSV triplet] Color for drawing uncorrected contours
+static cv::Scalar c_biggestContourColor = { 183, 183, 255 };//!< [HSV triplet] Color for drawing biggest contour
 static cv::Scalar c_centerColor = { 231, 96, 97 };          //!< [HSV triplet] Color for marking center of image and object
 static cv::Scalar c_lineColor = { 0, 255, 0 };				//!< [HSV triplet] Color for drawing best fit lines
-static cv::Scalar c_biggestContourColor = { 183, 183, 255 };//!< [HSV triplet] Color for drawing biggest contour
 static cv::Scalar c_upperCheckerBoard = { 180, 255, 255 };	//!< [HSV triplet] Upper color range for fisheye calibration checker board
 static cv::Scalar c_lowerCheckerBoard = { 1, 1, 50 };		//!< [HSV triplet] Lower color range for fisheye calibration checker board
 

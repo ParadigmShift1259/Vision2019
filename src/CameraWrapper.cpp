@@ -30,8 +30,8 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/";
-//const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/1ft_0degrees/";
-const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/StLouisData/2019_StLouis_Test/images_30deg/";
+const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/";
+//const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/StLouisData/2019_StLouis_Test/images_30deg/";
 
 //const char* c_testImagePath = "C:/Users/212036134/Documents/Personal/FIRST Robotics/ImagingData/FromCafeteriaMar2/";
 #endif	// PORTRAIT_IMAGE
@@ -119,8 +119,10 @@ std::vector<std::string> testFiles
 	//,"image3ft20.jpg"
 	//,"image1ft20.jpg"
 
-	//"image0.jpg"
-	"image675.jpg"
+	  "image1ft_0deg.jpg"
+	// "image6ft_20degRt.jpg"
+
+	//"image675.jpg"
 
 	//  "image0.jpg"
 	//  "image1.jpg"
@@ -279,9 +281,8 @@ std::vector<double> testDist	// Keep in sync with testFile vector
 
 	// 36
 	//,36
-	//,12//"C:\Users\Developer\Documents\TestData\OutputTestMatrixMar9\1ft_0degrees\image0.jpg"
-	//12	//"C:\Users\Developer\Documents\TestData\OutputTestMatrixMar9\1ft_0degrees\image0.jpg"
-	36	// ? image675.jpg
+	  12
+	// 72
 
 	//  18.0	//image0.jpg
 	//, 18.0	//image1.jpg
@@ -494,14 +495,5 @@ void CameraWrapper::AcquireImage()
 		}
 
 		cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
-	}
-
-	if (m_image.rows > 0 && m_image.cols > 0)
-	{
-		cvtColor(m_image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
-		if (loopCounter <= c_loopCountToSaveDiagImage)
-		{
-			imwrite("image.jpg", m_image);
-		}
 	}
 }

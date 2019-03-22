@@ -10,10 +10,6 @@
 #include "ProcessingRetro.h"
 
 ProcessingRetro::ProcessingRetro()
-#ifdef TEST_GAFFER_TAPE_ALIGNMENT_IMGS
-	: ProcessingBase({ 179, 52, 255 },
-			 		 { 0,  0, 180 })     // White gaffer tape test
-#else
     //: ProcessingBase(   { 90, 255, 255 }, 
     //                    { 65,  90,  90 } )     // Colors for Retro reflective tape with green lighting (FIRST sample images)
 
@@ -28,7 +24,6 @@ ProcessingRetro::ProcessingRetro()
 
 	//: ProcessingBase({ 90, 255, 255 },
 	//				 { 85,  90,  90 })		// Colors for Retro reflective tape with 2016 discrete LED green lighting (Team 1259 2019 Mar 6)
-#endif
 {
 }
 
@@ -44,10 +39,8 @@ void ProcessingRetro::ProcessImage(const Mat& image)
 	RejectSmallContours();
 	//FitLinesToContours();
 	//SelectCenterRetroPairs();
-#ifndef TEST_FISHEYE_CORRECTION_BY_LUT
 	//FishEyeCorrectContour(m_selectedPairIndex);
-	FishEyeCorrectContours();
-#endif
+	//FishEyeCorrectContours();
 	FindCornerCoordinates();
 	//FindBiggestContour();
 	//FindVerticalRange();

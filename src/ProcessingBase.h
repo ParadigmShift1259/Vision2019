@@ -117,8 +117,6 @@ protected:
 
     double m_im_center_x = 0.0;									//!< X coord for center of image (drawing)
     double m_im_center_y = 0.0;									//!< Y coord for center of image (drawing)
-	double m_R;													//!< Radius to center of image for fisheye correction
-	double m_borderCorr;										//!< Scaling factor per border for fisheye correction
 
     double m_object_contour_max_y;								//!< Max Y coord for contour of object
     double m_object_contour_min_y;								//!< Min Y coord for contour of object

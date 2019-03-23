@@ -8,13 +8,16 @@
 #ifndef CONST_H
 #define CONST_H
 
-#define BUILD_ON_WINDOWS						// Uncomment to build on Windows; comment to build on RasPi
-//#define USE_OFFBOARD_COMMS							// Uncomment if you want to use it
+//#define BUILD_ON_WINDOWS						// Uncomment to build on Windows; comment to build on RasPi
+#define USE_OFFBOARD_COMMS							// Uncomment if you want to use it
 //#define PORTRAIT_IMAGE
 //#define CAPTURE_EVERY_NTH_IMAGE
-//#define CALC_LEFT_RIGHT_TARGETS				// Uncomment to calculate the distance to each retro target individually
-//constexpr double c_camera_offset_x0 = 0.0;			//!< [inch] Camera offset from center of the robot
-constexpr double c_camera_offset_x0 = 8.5;	//!< [inch] Camera offset from center of the robot
+#define CALC_LEFT_RIGHT_TARGETS				// Uncomment to calculate the distance to each retro target individually
+constexpr double c_camera_offset_x0 = 0.0;			//!< [inch] Camera offset from center of the robot
+//constexpr double c_camera_offset_x0 = 8.5;	//!< [inch] Camera offset from center of the robot
+
+//#define TRACK_TO_LAST_COORD
+constexpr double c_trackToLastCoordDist = 30.0;	//!< [inch] Distance under which we track to the last object center instead of image center
 
 //-------------------------------------------------------------------------------------------------------------------------
 //#define TEST_CHECKERBOARD_CALIB
@@ -26,12 +29,12 @@ constexpr double c_camera_offset_x0 = 8.5;	//!< [inch] Camera offset from center
 /// If true, read a previously saved image than getting one from camera
 #ifdef BUILD_ON_WINDOWS
 constexpr bool c_bUseLastDiagImage = true;
+constexpr bool c_bDrawAllContours = true;                   //!< If true, draw every countour found
+#define WRITE_OPENCV_TEXT_ON_IMAGES
 #else
 constexpr bool c_bUseLastDiagImage = false;
+constexpr bool c_bDrawAllContours = false;                   //!< If true, draw every countour found
 #endif
-
-#define WRITE_OPENCV_TEXT_ON_IMAGES
-constexpr bool c_bDrawAllContours = true;                   //!< If true, draw every countour found
 
 // Define these one at a time
 //#define TEST_FILES_LINE					// Uncomment to test image files of the alignment (gaffer's tape) lines
@@ -54,9 +57,12 @@ constexpr double PI = 4.0 * atan(1.0);
 
 constexpr double c_smallContourPercentOfMax = 0.30;         //!< Reject contours that are less than this % of max countour point count
 constexpr size_t c_minContourPoints = 60;					//!< Reject contours that have less points than this
-constexpr size_t c_maxContourPoints = 2000;                 //!< Reject contours that have more points than this
+constexpr size_t c_maxContourPoints = 700;					//!< Reject contours that have more points than this
 
 constexpr float c_occludedAspectRatio = 0.43f;			    //!< [ratio] Aspect ratio greater than this might be an occluded retroreflective target
+
+constexpr int c_upperCornerIgnore = 300;					//!< [pixel] Number of pixels to ignore in the upper left and right
+constexpr int c_lowerImageIgnore = 200;						//!< [pixel] Number of pixels to ignore at the bottom of the image
 
 #ifdef PORTRAIT_IMAGE
 constexpr int c_imageHeightPixel = 1280;					//!< [pixel] Height in pixels of image captured by camera
@@ -73,6 +79,8 @@ static cv::Scalar c_centerColor = { 231, 96, 97 };          //!< [HSV triplet] C
 static cv::Scalar c_lineColor = { 0, 255, 0 };				//!< [HSV triplet] Color for drawing best fit lines
 static cv::Scalar c_upperCheckerBoard = { 180, 255, 255 };	//!< [HSV triplet] Upper color range for fisheye calibration checker board
 static cv::Scalar c_lowerCheckerBoard = { 1, 1, 50 };		//!< [HSV triplet] Lower color range for fisheye calibration checker board
+static cv::Scalar c_black = { 0, 0, 0 };					//!< [HSV triplet] Black
+//static cv::Scalar c_outOfRange = { 40, 153, 0 };
 
 extern bool bImageCaptureTrigger;
 

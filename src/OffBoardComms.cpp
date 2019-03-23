@@ -18,7 +18,12 @@ OffBoardComms::OffBoardComms()
 	cout << "Initializing off board comms" << endl;
 	m_nt_Inst = NetworkTableInstance::GetDefault();
 	m_nt_Inst.StartClientTeam(1259);
+#endif
+}
 
+void OffBoardComms::Connect()
+{
+#ifdef USE_OFFBOARD_COMMS
 	while (!m_nt_Inst.IsConnected())
 	{
 #ifdef BUILD_ON_WINDOWS
@@ -75,13 +80,15 @@ void OffBoardComms::Publish()
 		m_netTableOpenCV->PutNumber("HatchAngle", m_HatchValues.GetAngle());
 		m_netTableOpenCV->PutNumber("HatchQuality", m_HatchValues.GetQuality());
 
-		m_netTableOpenCV->PutNumber("RetroLeftDistance", m_LeftTargetValues.GetDistance());
-		m_netTableOpenCV->PutNumber("RetroLeftAngle", m_LeftTargetValues.GetAngle());
-		m_netTableOpenCV->PutNumber("RetroLeftQuality", m_LeftTargetValues.GetQuality());
+		m_netTableOpenCV->PutNumber("ApproachDirection", m_approachDirection);
 
-		m_netTableOpenCV->PutNumber("RetroRightDistance", m_RightTargetValues.GetDistance());
-		m_netTableOpenCV->PutNumber("RetroRightAngle", m_RightTargetValues.GetAngle());
-		m_netTableOpenCV->PutNumber("RetroRightQuality", m_RightTargetValues.GetQuality());
+		//m_netTableOpenCV->PutNumber("RetroLeftDistance", m_LeftTargetValues.GetDistance());
+		//m_netTableOpenCV->PutNumber("RetroLeftAngle", m_LeftTargetValues.GetAngle());
+		//m_netTableOpenCV->PutNumber("RetroLeftQuality", m_LeftTargetValues.GetQuality());
+
+		//m_netTableOpenCV->PutNumber("RetroRightDistance", m_RightTargetValues.GetDistance());
+		//m_netTableOpenCV->PutNumber("RetroRightAngle", m_RightTargetValues.GetAngle());
+		//m_netTableOpenCV->PutNumber("RetroRightQuality", m_RightTargetValues.GetQuality());
 #endif
 		m_counter++;
 	}
@@ -107,15 +114,15 @@ void OffBoardComms::SetCargo(const ProcessingBase& cargo)
 	m_CargoValues = cargo.GetOutputValues();
 }
 
-void OffBoardComms::SetLeftTargetValues(const ProcessingBase& retro)
-{
-	m_LeftTargetValues = retro.GetLeftTargetOutputValues();
-}
-
-void OffBoardComms::SetRightTargetValues(const ProcessingBase& retro)
-{
-	m_RightTargetValues = retro.GetRightTargetOutputValues();
-}
+//void OffBoardComms::SetLeftTargetValues(const ProcessingBase& retro)
+//{
+//	m_LeftTargetValues = retro.GetLeftTargetOutputValues();
+//}
+//
+//void OffBoardComms::SetRightTargetValues(const ProcessingBase& retro)
+//{
+//	m_RightTargetValues = retro.GetRightTargetOutputValues();
+//}
 
 double OffBoardComms::GetGyroAngle()
 {

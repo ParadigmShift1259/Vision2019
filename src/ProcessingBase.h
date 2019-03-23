@@ -70,6 +70,7 @@ public:
 
 protected:
 	void Prepare(const Mat& image);											//!< Perform in-range filtering 
+	void BlackOutInRangeRegions(Mat& inrange);								//!< Write some regions of the inrange image with black
 	void FindContours();													//!< Process the in-range image to get object contours (outlines)
 	void FitLinesToContours();												//!< Best fit of a straight line through all contours
 	LineDescr FitLineToContour(const vector<Point>& contour);				//!< Fit line to single contour and return slope
@@ -131,6 +132,9 @@ protected:
     double m_object_center_x = 0.0;								//!< X coord for center of object
     double m_object_center_y = 0.0;								//!< Y coord for center of object 
     double m_object_height = 0.0;    							//!< [units??] Vision target height on image 
+
+	double m_lastObjCenterX = 0.0;								//!< Previous X coord for center of object
+	double m_lastObjCenterY = 0.0;								//!< Previous Y coord for center of object
 
     // Contour variables to give contour location. Countour is outline points of the object you are trying to identify
 	int m_biggestContour = 0;									//!< Size of biggest contour based on moments

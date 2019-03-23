@@ -31,6 +31,7 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/";
 const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/";
+//const char* c_testImagePath = "C:/Projects/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/StLouisData/2019_StLouis_Test/images_30deg/";
 
 //const char* c_testImagePath = "C:/Users/212036134/Documents/Personal/FIRST Robotics/ImagingData/FromCafeteriaMar2/";
@@ -119,12 +120,18 @@ std::vector<std::string> testFiles
 	//,"image3ft20.jpg"
 	//,"image1ft20.jpg"
 
+	//"image50.jpg"
+	//,"image125.jpg"
+	//,"image200.jpg"
 	  "image1ft_0deg.jpg"
 	, "image2ft_0deg.jpg"
 	, "image3ft_0deg.jpg"
 	, "image4ft_0deg.jpg"
 	, "image5ft_0deg.jpg"
 	, "image6ft_0deg.jpg"
+	, "image6ft_10degLf.jpg"
+	, "image6ft_10degRt.jpg"
+	, "image6ft_20degLf.jpg"
 	, "image6ft_20degRt.jpg"
 
 	//"image675.jpg"
@@ -286,11 +293,19 @@ std::vector<double> testDist	// Keep in sync with testFile vector
 
 	// 36
 	//,36
+
+	//  12
+	//, 72
+	//, 24
+
 	  12
 	, 24
 	, 36
 	, 48
 	, 60
+	, 72
+	, 72
+	, 72
 	, 72
 	, 72
 

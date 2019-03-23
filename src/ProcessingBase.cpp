@@ -131,6 +131,7 @@ void ProcessingBase::Prepare(const Mat& imageHSV)
 		//}
 
 		cv::inRange(imageHSV, m_lower, m_upper, m_inrange);
+		BlackOutInRangeRegions(m_inrange);
 
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
@@ -153,6 +154,7 @@ void ProcessingBase::Prepare(const Mat& imageHSV)
     {    
         // Searching for color in the image that has a high of upper scaler and a low of lower scaler. Stores result in inrange
 		inRange(imageHSV, m_lower, m_upper, m_inrange);	// Identify color per HSV image
+		BlackOutInRangeRegions(m_inrange);
 
 		if (bImageCaptureTrigger)
         {
@@ -167,6 +169,39 @@ void ProcessingBase::Prepare(const Mat& imageHSV)
 			SaveFileInBackground(m_inrangeWriteTask, fileName, m_inrange);
 		}
     }
+}
+
+// Black out the lower pixels and upper corner pixels
+void ProcessingBase::BlackOutInRangeRegions(Mat& inrange)
+{
+	{
+		const Point pts[] = 
+		{
+			  { 0, 0 }
+			, { 0, c_upperCornerIgnore }
+			, { c_upperCornerIgnore, 0 }
+
+		};
+		fillConvexPoly(inrange, pts, 3, c_black, 8, 0);
+	}
+
+	{
+		const Point pts[] =
+		{
+			  { c_imageWidthPixel, 0 }
+			, { c_imageWidthPixel, c_upperCornerIgnore }
+			, { c_imageWidthPixel - c_upperCornerIgnore, 0 }
+
+		};
+		fillConvexPoly(inrange, pts, 3, c_black, 8, 0);
+	}
+
+	{
+		const Point pt1(0, c_imageHeightPixel - c_lowerImageIgnore);
+		const Point pt2(c_imageWidthPixel, c_imageHeightPixel);
+
+		cv::rectangle(inrange, pt1, pt2, c_black, CV_FILLED, 8, 0);
+	}
 }
 
 void ProcessingBase::CalibrateHSV(const Mat& imageHSV, int hue1, int hue2, int span, int satValueIncrement)
@@ -279,50 +314,50 @@ void ProcessingBase::RejectSmallContours()
     //cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
     for (size_t i = 0; i < m_contours.size(); i++)
     {
-		bool bContourInLowerImage = false;
-		for (size_t j = 0; j < m_contours[i].size(); j++)
-		{
-			if (m_contours[i].at(j).y >= 860)
-			{
-				bContourInLowerImage = true;
-				break;
-			}
-		}
+		//bool bContourInLowerImage = false;
+		//for (size_t j = 0; j < m_contours[i].size(); j++)
+		//{
+		//	if (m_contours[i].at(j).y >= c_imageHeightPixel - c_lowerImageIgnore)
+		//	{
+		//		bContourInLowerImage = true;
+		//		break;
+		//	}
+		//}
 
-		if (bContourInLowerImage)
-		{
-			continue;
-		}
+		//if (bContourInLowerImage)
+		//{
+		//	continue;
+		//}
 
 		// Block out the upper corners
 		// We are getting reflections of the green LEDs off of the diffuser plastic
-		int minX = 0;
-		int minY = 0;
-		int maxX = 125;
-		int maxY = 125;
-		line(m_drawing, Point(minX, minY), Point(minX, maxY), c_contourColor, 2, 8);
-		line(m_drawing, Point(minX, maxY), Point(maxX, maxY), c_contourColor, 2, 8);
-		line(m_drawing, Point(maxX, maxY), Point(maxX, minY), c_contourColor, 2, 8);
-		line(m_drawing, Point(maxX, minY), Point(minX, minY), c_contourColor, 2, 8);
+		//int minX = 0;
+		//int minY = 0;
+		//int maxX = c_upperCornerIgnore;
+		//int maxY = c_upperCornerIgnore;
+		//line(m_drawing, Point(minX, minY), Point(minX, maxY), c_contourColor, 2, 8);
+		//line(m_drawing, Point(minX, maxY), Point(maxX, maxY), c_contourColor, 2, 8);
+		//line(m_drawing, Point(maxX, maxY), Point(maxX, minY), c_contourColor, 2, 8);
+		//line(m_drawing, Point(maxX, minY), Point(minX, minY), c_contourColor, 2, 8);
 
-		auto x = m_contours[i].at(0).x;
-		auto y = m_contours[i].at(0).y;
-		if (y <= maxY && x <= maxX)
-		{
-			continue;
-		}
+		//auto x = m_contours[i].at(0).x;
+		//auto y = m_contours[i].at(0).y;
+		//if (y <= maxY && x <= maxX)
+		//{
+		//	continue;
+		//}
 
-		minX = c_imageWidthPixel - 125;
-		maxX = c_imageWidthPixel;
-		line(m_drawing, Point(minX, minY), Point(minX, maxY), c_contourColor, 2, 8);
-		line(m_drawing, Point(minX, maxY), Point(maxX, maxY), c_contourColor, 2, 8);
-		line(m_drawing, Point(maxX, maxY), Point(maxX, minY), c_contourColor, 2, 8);
-		line(m_drawing, Point(maxX, minY), Point(minX, minY), c_contourColor, 2, 8);
+		//minX = c_imageWidthPixel - c_upperCornerIgnore;
+		//maxX = c_imageWidthPixel;
+		//line(m_drawing, Point(minX, minY), Point(minX, maxY), c_contourColor, 2, 8);
+		//line(m_drawing, Point(minX, maxY), Point(maxX, maxY), c_contourColor, 2, 8);
+		//line(m_drawing, Point(maxX, maxY), Point(maxX, minY), c_contourColor, 2, 8);
+		//line(m_drawing, Point(maxX, minY), Point(minX, minY), c_contourColor, 2, 8);
 
-		if (y <= maxY && x >= minX)
-		{
-			continue;
-		}
+		//if (y <= maxY && x >= minX)
+		//{
+		//	continue;
+		//}
 
 		if (c_bDrawAllContours)
 		{
@@ -333,7 +368,7 @@ void ProcessingBase::RejectSmallContours()
 		RectDescr rd;
 		rd.m_minRect = minAreaRect(m_contours[i]);
 
-		cout << "Contour size " << m_contours[i].size() << " area " << rd.m_minRect.size.area() << endl;
+		//cout << "Contour size " << m_contours[i].size() << " area " << rd.m_minRect.size.area() << endl;
 		//if (m_contours[i].size() > threshold && abs(ld.m_slope) > 1.0f)
 		if (m_contours[i].size() > threshold && rd.m_minRect.size.area() > 0.0f)
         {
@@ -625,6 +660,7 @@ void ProcessingBase::FindCornerCoordinates()
 	// NOTE: m_rectDescr is not in the same order as m_contours now
 	//-------------------------------------------------------------
 
+	bool bTrackToLastCoord = false;
 	float minXdiff = FLT_MAX;			// Minimum difference of pair center to image center
 	size_t minPairIndex = 0;
 	for (size_t i = 0; i < m_rectDescr.size(); i++)
@@ -646,8 +682,20 @@ void ProcessingBase::FindCornerCoordinates()
 				m_rectDescr[i + 1].m_side = eRight;
 				//float xDiff = m_rectDescr[i + 1].m_minRect.center.x - m_rectDescr[i].m_minRect.center.x;
 				//cout << "maxXdiff " << maxXdiff << " xDiff " << xDiff << endl;
-				float xDiffLeft = abs((float)m_im_center_x - m_rectDescr[i].m_minRect.center.x);
-				float xDiffRight = abs((float)m_im_center_x - m_rectDescr[i + 1].m_minRect.center.x);
+
+				float x_center = (float)m_im_center_x;
+				float y_center = (float)m_im_center_y;
+#ifdef TRACK_TO_LAST_COORD
+				if (m_lastObjCenterX != 0.0 && m_lastObjCenterY != 0.0 && m_Actual_Distance_Inch < c_trackToLastCoordDist)
+				{
+					bTrackToLastCoord = true;
+					x_center = (float)m_lastObjCenterX;
+					y_center = (float)m_lastObjCenterY;
+				}
+#endif
+
+				float xDiffLeft = abs((float)x_center - m_rectDescr[i].m_minRect.center.x);
+				float xDiffRight = abs((float)y_center - m_rectDescr[i + 1].m_minRect.center.x);
 				//cout << "minXdiff " << minXdiff << " xDiffLeft " << xDiffLeft << " xDiffRight " << xDiffRight << endl;
 				float xDiff = min(xDiffLeft, xDiffRight);
 
@@ -710,6 +758,18 @@ void ProcessingBase::FindCornerCoordinates()
 				//m_object_center_y = m_rectDescr[i].m_minRect.center.y;
 				circle(image, Point((int)m_object_center_x, (int)m_object_center_y), 16, c_centerColor, 2);
 
+#ifdef TRACK_TO_LAST_COORD
+				if (m_lastObjCenterX == 0.0 && m_lastObjCenterY == 0.0 && m_Actual_Distance_Inch < c_trackToLastCoordDist)
+				{
+					bTrackToLastCoord = true;
+				}
+
+				if (bTrackToLastCoord)
+				{
+					m_lastObjCenterX = m_object_center_x;
+					m_lastObjCenterY = m_object_center_y;
+				}
+#endif
 				m_leftTarget = m_rectDescr[i];
 				m_rightTarget = m_rectDescr[i + 1];
 			}
@@ -986,18 +1046,23 @@ void ProcessingBase::SaveFileInBackground(Task& writeTask, const std::string& fi
 
 void ProcessingBase::CalcOutputValues(const char* objType)
 {
-	cout << "calling CalcOutputValues " << objType
-		<< " m_object_height " << m_object_height
-		<< " object x " << m_object_center_x
-		<< " object y " << m_object_center_y
-		<< endl;
+	//cout << "calling CalcOutputValues " << objType
+	//	<< " m_object_height " << m_object_height
+	//	<< " object x " << m_object_center_x
+	//	<< " object y " << m_object_center_y
+	//	<< endl;
 	EQuality quality = CalcOutputValues(objType, m_object_height, m_object_center_x, m_object_center_y, m_Actual_Distance_Inch, m_Horizontal_Angle_Degree);
 	m_OutputValues.SetDistance(m_Actual_Distance_Inch);
 	m_OutputValues.SetAngle(m_Horizontal_Angle_Degree);
 	m_OutputValues.SetQuality(quality);
 }
 
-EQuality ProcessingBase::CalcOutputValues(const char* objType, double objHeight, double objCenterX, double objCenterY, double& actualDistInch, double& horzAngleDegree)
+EQuality ProcessingBase::CalcOutputValues(const char* objType
+										, double objHeight
+										, double objCenterX
+										, double objCenterY
+										, double& actualDistInch
+										, double& horzAngleDegree)
 {
 	//cout << __func__ << " start" << endl;
 	if (m_contours.size() == 0)
@@ -1050,7 +1115,7 @@ EQuality ProcessingBase::CalcOutputValues(const char* objType, double objHeight,
 	actualDistInch += fudge;
 	//actualDistInch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians) - m_cameraToFrontOfRobotDistInch;
 	//actualDistInch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians);
-	cout << "m_Actual_Distance_Inch: " << actualDistInch << endl;
+	//cout << "m_Actual_Distance_Inch: " << actualDistInch << endl;
 
 	EQuality quality = eYellowTrackingObjects;
 
@@ -1059,11 +1124,11 @@ EQuality ProcessingBase::CalcOutputValues(const char* objType, double objHeight,
         (abs(vertical_Angle_Degree) > m_maxAngle) ||
         (actualDistInch < 0) || (actualDistInch > m_maxActualDist ))
     {
-		cout << "One or more calculated output values are out of bounds, setting to horz angle and dist to zero" << endl;
-		cout << " m_Actual_Distance_Inch : " << actualDistInch
-			<< " m_Horizontal_Angle_Degree: " << horzAngleDegree
-			<< " vertical_Angle_Degree: " << vertical_Angle_Degree
-			<< endl;
+		//cout << "One or more calculated output values are out of bounds, setting to horz angle and dist to zero" << endl;
+		//cout << " m_Actual_Distance_Inch : " << actualDistInch
+		//	<< " m_Horizontal_Angle_Degree: " << horzAngleDegree
+		//	<< " vertical_Angle_Degree: " << vertical_Angle_Degree
+		//	<< endl;
 		horzAngleDegree = 0.0;
 		actualDistInch = 0.0;
 		quality = eRedNoData;
@@ -1073,7 +1138,7 @@ EQuality ProcessingBase::CalcOutputValues(const char* objType, double objHeight,
 		quality = eGreenReady;
 	}
 
-	PrintDebugValues(objType, comp_Horizontal_Distance_Inch, vertical_Distance_Inch, objHeight, actualDistInch, horzAngleDegree);
+	//PrintDebugValues(objType, comp_Horizontal_Distance_Inch, vertical_Distance_Inch, objHeight, actualDistInch, horzAngleDegree);
 	//cout << __func__ << " end" << endl;
 
 	return quality;
@@ -1115,15 +1180,28 @@ void ProcessingBase::PrintDebugValues(const char* objType, double horzDistInch, 
 		<< testFiles[ndx]
 		<< endl;
 #else
-	cout    << "Counter: " << loopCounter
-			<< " " << objType
-			<< " Horizontal_Distance_Inch: " << horzDistInch
-			<< " Vertical_Distance_Inch " << vertDistInch
-			<< " Actual_Distance_Inch: " << actualDistInch
-			<< " Test Image Camera dist: " << camDist
-			<< " Diff from actual: " << actualDistInch - camDist
-			<< " Horizontal_Angle " << horzAngleDegree
-			<< endl;
+	//char output[512];
+	printf(//output
+			 "Loop %06d %10s ActualDist %3.3f HorzAngle %3.3f CameraDist %3.3f DiffFromActual %3.3f HorzDist %3.3f VertDist %3.3f"
+			, loopCounter
+			, objType
+			, actualDistInch
+			, horzAngleDegree
+			, camDist
+			, actualDistInch - camDist
+			, horzDistInch
+			, vertDistInch
+			);
+
+		//cout    << "Counter: " << loopCounter
+		//	<< " " << objType
+		//	<< " Horizontal_Distance_Inch: " << horzDistInch
+		//	<< " Vertical_Distance_Inch " << vertDistInch
+		//	<< " Actual_Distance_Inch: " << actualDistInch
+		//	<< " Test Image Camera dist: " << camDist
+		//	<< " Diff from actual: " << actualDistInch - camDist
+		//	<< " Horizontal_Angle " << horzAngleDegree
+		//	<< endl;
 
 	//cout << endl;
 #endif

@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <future>
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstdint>
@@ -62,6 +63,10 @@ public:
     const OutputValues& GetOutputValues() const { return m_OutputValues; }	//!< Return the output values
 	virtual const OutputValues& GetLeftTargetOutputValues() const { return m_OutputValues; }	//!< The derived class should override
 	virtual const OutputValues& GetRightTargetOutputValues() const { return m_OutputValues; }	//!< The derived class should override
+	
+	/// Save an image file on a background thread
+	template <class Task>
+	void SaveFileInBackground(Task& writeTask, const std::string& fileName, const Mat& matrix);
 
 protected:
 	void Prepare(const Mat& image);											//!< Perform in-range filtering 
@@ -87,7 +92,9 @@ protected:
 
 	// Following settings is for camera calibrated value
     //static constexpr double m_calibTargetSizePixel = 104.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
-	static constexpr double m_calibTargetSizePixel = 93.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
+	//static constexpr double m_calibTargetSizePixel = 93.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
+	static constexpr double m_calibTargetSizePixel = 90.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
+	//static constexpr double m_calibTargetSizePixel = 85.0;					//!< [pixel] Height in pixels of a target placed m_calibCameraDistInch from the camera
 	static constexpr double m_calibCameraDistInch = 28.0;  					//!< [inch] Calibration distance from camera to object
 	static constexpr double m_measuredObjectHeight = 6.0;  					//!< [inch] Height of object in inches; used a tape measure in the real world
 	static constexpr double m_defaultPixelPerInch = m_calibTargetSizePixel / m_measuredObjectHeight;	// [pixel/inch] ~25
@@ -144,6 +151,13 @@ protected:
 
 	uint16_t* m_pXfisheyeData;//[c_imageWidthPixel * c_imageHeightPixel];
 	uint16_t* m_pYfisheyeData;//[c_imageWidthPixel * c_imageHeightPixel];
+
+	//using WriteFuture = future<pair<const std::string, const Mat>>;
+	using WriteFuture = future<void>;
+	WriteFuture	m_imageWriteTask;
+	WriteFuture	m_inrangeWriteTask;
+	WriteFuture	m_drawingWriteTask;
+	WriteFuture	m_trapezoidWriteTask;
 };
 
 

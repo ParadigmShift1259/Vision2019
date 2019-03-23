@@ -120,7 +120,12 @@ std::vector<std::string> testFiles
 	//,"image1ft20.jpg"
 
 	  "image1ft_0deg.jpg"
-	// "image6ft_20degRt.jpg"
+	, "image2ft_0deg.jpg"
+	, "image3ft_0deg.jpg"
+	, "image4ft_0deg.jpg"
+	, "image5ft_0deg.jpg"
+	, "image6ft_0deg.jpg"
+	, "image6ft_20degRt.jpg"
 
 	//"image675.jpg"
 
@@ -282,7 +287,12 @@ std::vector<double> testDist	// Keep in sync with testFile vector
 	// 36
 	//,36
 	  12
-	// 72
+	, 24
+	, 36
+	, 48
+	, 60
+	, 72
+	, 72
 
 	//  18.0	//image0.jpg
 	//, 18.0	//image1.jpg
@@ -474,7 +484,6 @@ void CameraWrapper::AcquireImage()
 		}
 
 		if (c_bUseLastDiagImage || bImageCaptureTrigger)
-		//if (loopCounter <= c_loopCountToSaveDiagImage || bImageCaptureTrigger)
 		{
 			char fileName[255];
 #ifdef BUILD_ON_WINDOWS
@@ -491,9 +500,27 @@ void CameraWrapper::AcquireImage()
 			}
 #endif
 			cout << "Capturing image " << fileName << endl;
-			imwrite(fileName, image);
+			//imwrite(fileName, image);
+			SaveFileInBackground(m_imageWriteTask, fileName, image);
 		}
 
 		cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
 	}
+}
+
+template <class Task>
+void CameraWrapper::SaveFileInBackground(Task& writeTask, const std::string& fileName, const Mat& matrix)
+{
+	if (writeTask.valid())
+	{
+		cout << "Waiting for previous write task to complete" << endl;
+		writeTask.wait();
+		cout << "Done waiting for previous write task to complete" << endl;
+	}
+
+	// Do not pass the arguments as references; we need copies, otherwise both the foregroud and background threads will access the objects
+	writeTask = async(launch::async, [fileName, matrix]()
+	{
+		imwrite(fileName, matrix);
+	});
 }

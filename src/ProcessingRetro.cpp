@@ -37,15 +37,10 @@ void ProcessingRetro::ProcessImage(const Mat& image)
 	Prepare(image);
 	FindContours();
 	RejectSmallContours();
-	//FitLinesToContours();
-	//SelectCenterRetroPairs();
-	//FishEyeCorrectContour(m_selectedPairIndex);
-	//FishEyeCorrectContours();
 	FindCornerCoordinates();
-	//FindBiggestContour();
-	//FindVerticalRange();
 	CalcOutputValues("Retro");
 
+#ifdef CALC_LEFT_RIGHT_TARGETS
 	double actualDist;
 	double horzAngle;
 	float longSide = max(m_leftTarget.m_minRect.size.width, m_leftTarget.m_minRect.size.height);
@@ -70,4 +65,5 @@ void ProcessingRetro::ProcessImage(const Mat& image)
 	m_OutputValuesRightTarget.SetDistance(actualDist);
 	m_OutputValuesRightTarget.SetAngle(horzAngle);
 	m_OutputValuesRightTarget.SetQuality(quality);
+#endif
 }

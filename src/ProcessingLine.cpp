@@ -163,7 +163,6 @@ void ProcessingLine::RejectSmallContours()
 	}
 #endif
 	if (c_bUseLastDiagImage || bImageCaptureTrigger)
-	//if (loopCounter == c_loopCountToSaveDiagImage || c_bUseLastDiagImage || bImageCaptureTrigger)
 	{
 		// For manually calibrating the camera
 		char fileName[255];

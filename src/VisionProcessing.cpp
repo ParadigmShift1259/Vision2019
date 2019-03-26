@@ -91,6 +91,7 @@ int main()
 #endif
 
 	cout << "Starting main loop" << endl;
+	//offBoardComms.Connect();
 #ifndef BUILD_ON_WINDOWS
 	while (true)
 #else
@@ -124,8 +125,9 @@ int main()
 			case eDeliverCargo:
 				retro.ProcessImage(camera.GetImage());
 				offBoardComms.SetRetro(retro);
-				offBoardComms.SetLeftTargetValues(retro);
-				offBoardComms.SetRightTargetValues(retro);
+				//offBoardComms.SetApproachDirection(retro.GetApproachDirection());
+				//offBoardComms.SetLeftTargetValues(retro);
+				//offBoardComms.SetRightTargetValues(retro);
 
 				//line.SetRetroCoords(retro.GetLeftTarget(), retro.GetRightTarget());
 				//line.ProcessImage(camera.GetImage());
@@ -157,7 +159,7 @@ int main()
 		if (time_difference < 0)
 			time_difference += 1000000000;				//(Rolls over every 1 second)
 		double millisec = time_difference / 1000000.0;
-		cout << "Loop time " << millisec << " milliseconds" << endl;
+		printf("Loop time %4.3f ms\n", millisec);
 #endif
 	}  //end of while
 

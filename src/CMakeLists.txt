@@ -7,7 +7,7 @@ find_package(OpenCV REQUIRED)
 #find_package(wpilib REQUIRED)
 #include_directories(${/usr/local/frc/include})
 
-set (CMAKE_CXX_FLAGS "-L/usr/local/frc/lib -lntcore -I/usr/local/frc/include -O3")
+set (CMAKE_CXX_FLAGS "-L/usr/local/frc/lib -lntcore -lpthread -I/usr/local/frc/include -O3")
 
 add_executable( VisionProcessing
                 VisionProcessing.cpp

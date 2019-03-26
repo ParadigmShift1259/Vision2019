@@ -95,7 +95,6 @@ void ProcessingRetro::ProcessImage(const Mat& image)
 			direction = "Right ";
 		}
 	}
-#endif	// CALC_LEFT_RIGHT_TARGETS
 
 	printf("Loop %06d Retro ActualDist %8.3f HorzAngle %8.3f ApproachDir %s L/R %8.3f "	// NOTE do not add \n, main loop will do it
 		, loopCounter
@@ -104,4 +103,11 @@ void ProcessingRetro::ProcessImage(const Mat& image)
 		, direction.c_str()
 		, leftRightdiff
 	);
+#else
+	printf("Loop %06d Retro ActualDist %8.3f HorzAngle %8.3f "	// NOTE do not add \n, main loop will do it
+		, loopCounter
+		, m_Actual_Distance_Inch
+		, m_Horizontal_Angle_Degree
+	);
+#endif	// CALC_LEFT_RIGHT_TARGETS
 }

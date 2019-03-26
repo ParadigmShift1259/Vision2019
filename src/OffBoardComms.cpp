@@ -18,12 +18,7 @@ OffBoardComms::OffBoardComms()
 	cout << "Initializing off board comms" << endl;
 	m_nt_Inst = NetworkTableInstance::GetDefault();
 	m_nt_Inst.StartClientTeam(1259);
-#endif
-}
 
-void OffBoardComms::Connect()
-{
-#ifdef USE_OFFBOARD_COMMS
 	while (!m_nt_Inst.IsConnected())
 	{
 #ifdef BUILD_ON_WINDOWS
@@ -33,10 +28,10 @@ void OffBoardComms::Connect()
 #endif
 	}
 
-    m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
-    m_netTableSmartDashboard = m_nt_Inst.GetTable("SmartDashboard");
+	m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
+	m_netTableSmartDashboard = m_nt_Inst.GetTable("SmartDashboard");
 
-    m_visioncounter = 0;
+	m_visioncounter = 0;
 	//Keys = netTable->GetKeys();
 	//for (auto key: Keys)
 	//{
@@ -44,7 +39,7 @@ void OffBoardComms::Connect()
 	//}
 	m_ntval = m_netTableOpenCV->GetValue("visioncounter");
 
-    if (m_ntval)
+	if (m_ntval)
 	{
 		m_visioncounter = m_ntval->GetDouble();
 		cout << "Retrieving counter value: " << m_visioncounter << endl;
@@ -52,6 +47,38 @@ void OffBoardComms::Connect()
 #endif
 	m_counter = (int)m_visioncounter;
 }
+
+//void OffBoardComms::Connect()
+//{
+//#ifdef USE_OFFBOARD_COMMS
+//	while (!m_nt_Inst.IsConnected())
+//	{
+//#ifdef BUILD_ON_WINDOWS
+//		Sleep(100);
+//#else
+//		sleep(0.1);
+//#endif
+//	}
+//
+//    m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
+//    m_netTableSmartDashboard = m_nt_Inst.GetTable("SmartDashboard");
+//
+//    m_visioncounter = 0;
+//	//Keys = netTable->GetKeys();
+//	//for (auto key: Keys)
+//	//{
+//	//	cout<<"These are the keys: "<<key<<endl;
+//	//}
+//	m_ntval = m_netTableOpenCV->GetValue("visioncounter");
+//
+//    if (m_ntval)
+//	{
+//		m_visioncounter = m_ntval->GetDouble();
+//		cout << "Retrieving counter value: " << m_visioncounter << endl;
+//	}
+//#endif
+//	m_counter = (int)m_visioncounter;
+//}
 
 void OffBoardComms::Publish()
 {
@@ -68,18 +95,19 @@ void OffBoardComms::Publish()
 		m_netTableOpenCV->PutNumber("RetroAngle", m_RetroValues.GetAngle());
 		m_netTableOpenCV->PutNumber("RetroQuality", m_RetroValues.GetQuality());
 
-		m_netTableOpenCV->PutNumber("LineDistance",  m_LineValues.GetDistance());
-		m_netTableOpenCV->PutNumber("LineAngle", m_LineValues.GetAngle());
-		m_netTableOpenCV->PutNumber("LineQuality", m_LineValues.GetQuality());
+		//m_netTableOpenCV->PutNumber("LineDistance",  m_LineValues.GetDistance());
+		//m_netTableOpenCV->PutNumber("LineAngle", m_LineValues.GetAngle());
+		//m_netTableOpenCV->PutNumber("LineQuality", m_LineValues.GetQuality());
 
-		m_netTableOpenCV->PutNumber("CargoDistance",  m_CargoValues.GetDistance());
-		m_netTableOpenCV->PutNumber("CargoAngle", m_CargoValues.GetAngle());
-		m_netTableOpenCV->PutNumber("CargoQuality", m_CargoValues.GetQuality());
+		//m_netTableOpenCV->PutNumber("CargoDistance",  m_CargoValues.GetDistance());
+		//m_netTableOpenCV->PutNumber("CargoAngle", m_CargoValues.GetAngle());
+		//m_netTableOpenCV->PutNumber("CargoQuality", m_CargoValues.GetQuality());
 
-		m_netTableOpenCV->PutNumber("HatchDistance",  m_HatchValues.GetDistance());
-		m_netTableOpenCV->PutNumber("HatchAngle", m_HatchValues.GetAngle());
-		m_netTableOpenCV->PutNumber("HatchQuality", m_HatchValues.GetQuality());
+		//m_netTableOpenCV->PutNumber("HatchDistance",  m_HatchValues.GetDistance());
+		//m_netTableOpenCV->PutNumber("HatchAngle", m_HatchValues.GetAngle());
+		//m_netTableOpenCV->PutNumber("HatchQuality", m_HatchValues.GetQuality());
 
+#ifdef CALC_LEFT_RIGHT_TARGETS
 		m_netTableOpenCV->PutNumber("ApproachDirection", m_approachDirection);
 
 		//m_netTableOpenCV->PutNumber("RetroLeftDistance", m_LeftTargetValues.GetDistance());
@@ -89,7 +117,8 @@ void OffBoardComms::Publish()
 		//m_netTableOpenCV->PutNumber("RetroRightDistance", m_RightTargetValues.GetDistance());
 		//m_netTableOpenCV->PutNumber("RetroRightAngle", m_RightTargetValues.GetAngle());
 		//m_netTableOpenCV->PutNumber("RetroRightQuality", m_RightTargetValues.GetQuality());
-#endif
+#endif	// CALC_LEFT_RIGHT_TARGETS
+#endif	// USE_OFFBOARD_COMMS
 		m_counter++;
 	}
 }

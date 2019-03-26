@@ -12,7 +12,7 @@
 #define USE_OFFBOARD_COMMS							// Uncomment if you want to use it
 //#define PORTRAIT_IMAGE
 //#define CAPTURE_EVERY_NTH_IMAGE
-#define CALC_LEFT_RIGHT_TARGETS				// Uncomment to calculate the distance to each retro target individually
+//#define CALC_LEFT_RIGHT_TARGETS				// Uncomment to calculate the distance to each retro target individually
 constexpr double c_camera_offset_x0 = 0.0;			//!< [inch] Camera offset from center of the robot
 //constexpr double c_camera_offset_x0 = 8.5;	//!< [inch] Camera offset from center of the robot
 

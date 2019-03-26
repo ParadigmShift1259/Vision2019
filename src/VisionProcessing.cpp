@@ -71,12 +71,12 @@ int main()
 	signal(SIGFPE, overflow_handler);
 #endif
 
-	OffBoardComms offBoardComms;
 	CameraWrapper camera;
 	ProcessingCargo cargo;
 	ProcessingHatch hatch;
 	ProcessingLine line;
 	ProcessingRetro retro;
+	OffBoardComms offBoardComms;
 
 	EVisionTarget state = eLoadingStation;	// offBoardComms.GetState();
 
@@ -91,7 +91,7 @@ int main()
 #endif
 
 	cout << "Starting main loop" << endl;
-	offBoardComms.Connect();
+	//offBoardComms.Connect();
 #ifndef BUILD_ON_WINDOWS
 	while (true)
 #else
@@ -125,7 +125,7 @@ int main()
 			case eDeliverCargo:
 				retro.ProcessImage(camera.GetImage());
 				offBoardComms.SetRetro(retro);
-				offBoardComms.SetApproachDirection(retro.GetApproachDirection());
+				//offBoardComms.SetApproachDirection(retro.GetApproachDirection());
 				//offBoardComms.SetLeftTargetValues(retro);
 				//offBoardComms.SetRightTargetValues(retro);
 

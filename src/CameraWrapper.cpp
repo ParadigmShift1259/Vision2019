@@ -28,11 +28,11 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/FishEyeCorr
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/Portrait/";
 #else
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
-//const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
+const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/";
-//const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/1ft_0degrees/";
-const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/StLouisData/2019_StLouis_Test/images_30deg/";
-
+//const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/";
+//const char* c_testImagePath = "C:/Projects/";
+//const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/StLouisData/2019_StLouis_Test/images_30deg/";
 //const char* c_testImagePath = "C:/Users/212036134/Documents/Personal/FIRST Robotics/ImagingData/FromCafeteriaMar2/";
 #endif	// PORTRAIT_IMAGE
 #endif	// TEST_CHECKERBOARD_CALIB
@@ -119,8 +119,22 @@ std::vector<std::string> testFiles
 	//,"image3ft20.jpg"
 	//,"image1ft20.jpg"
 
-	//"image0.jpg"
-	"image675.jpg"
+	//"image50.jpg"
+	//,"image125.jpg"
+	//,"image200.jpg"
+
+	//  "image1ft_0deg.jpg"
+	//, "image2ft_0deg.jpg"
+	//, "image3ft_0deg.jpg"
+	//, "image4ft_0deg.jpg"
+	//, "image5ft_0deg.jpg"
+	//, "image6ft_0deg.jpg"
+	//, "image6ft_10degLf.jpg"
+	//, "image6ft_10degRt.jpg"
+	//, "image6ft_20degLf.jpg"
+	//, "image6ft_20degRt.jpg"
+
+	//"image675.jpg"
 
 	//  "image0.jpg"
 	//  "image1.jpg"
@@ -132,7 +146,8 @@ std::vector<std::string> testFiles
 	//, "imagecargo0ft.jpg"
 	//, "imagecargo1ft.jpg"
 
-	//  "im_394_1p5ft_contact.jpg"
+	  "im_394_1p5ft_contactUpsideDown.jpg"
+	, "im_394_1p5ft_contact.jpg"
 	//, "im_405_1p5ft_contact.jpg"
 	//, "im_301_4ft.jpg"
 	//, "im_367_2ft.jpg"
@@ -279,9 +294,21 @@ std::vector<double> testDist	// Keep in sync with testFile vector
 
 	// 36
 	//,36
-	//,12//"C:\Users\Developer\Documents\TestData\OutputTestMatrixMar9\1ft_0degrees\image0.jpg"
-	//12	//"C:\Users\Developer\Documents\TestData\OutputTestMatrixMar9\1ft_0degrees\image0.jpg"
-	36	// ? image675.jpg
+
+	//  12
+	//, 72
+	//, 24
+
+	  12
+	, 24
+	, 36
+	, 48
+	, 60
+	, 72
+	, 72
+	, 72
+	, 72
+	, 72
 
 	//  18.0	//image0.jpg
 	//, 18.0	//image1.jpg
@@ -432,6 +459,7 @@ CameraWrapper::~CameraWrapper()
 
 void CameraWrapper::AcquireImage()
 {
+	ScopedTimer timer("CameraWrapper::AcquireImage ");
 	Mat image;
 
 	if (c_bUseLastDiagImage)
@@ -443,7 +471,10 @@ void CameraWrapper::AcquireImage()
 		string fileName = testFiles[loopCounter % (int)testFiles.size()];
 #endif
 
-		image = imread(fileName, CV_LOAD_IMAGE_COLOR);
+		{
+			ScopedTimer timer("Reading image from file ");
+			image = imread(fileName, CV_LOAD_IMAGE_COLOR);
+		}
 
 		if (image.empty())
 		{
@@ -472,13 +503,19 @@ void CameraWrapper::AcquireImage()
 			cout << "Image from the camera is wrong resolution cols " << image.cols << " rows " << image.rows << endl;
 		}
 
+#ifdef CORRECT_UPSIDE_DOWN_IMAGE
+		{
+			ScopedTimer timer("Rotating image ");
+			rotate(image, image, ROTATE_180);	// Camera moved to center of robot, temporarily upside down
+		}
+#endif
+
 		if (c_bUseLastDiagImage || bImageCaptureTrigger)
-		//if (loopCounter <= c_loopCountToSaveDiagImage || bImageCaptureTrigger)
 		{
 			char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 			int ndx = loopCounter % testFiles.size();
-			sprintf_s<sizeof(fileName)>(fileName, "%s%dimage_%s.jpg", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
+			sprintf_s<sizeof(fileName)>(fileName, "%s%dimage_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
 #else
 			if (c_bUseLastDiagImage)
 			{
@@ -489,19 +526,36 @@ void CameraWrapper::AcquireImage()
 				sprintf(fileName, "image%d.jpg", loopCounter);
 			}
 #endif
-			cout << "Capturing image " << fileName << endl;
-			imwrite(fileName, image);
+			//cout << "Capturing image " << fileName << endl;
+			//imwrite(fileName, image);
+			SaveFileInBackground(m_imageWriteTask, fileName, image);
 		}
 
-		cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
-	}
-
-	if (m_image.rows > 0 && m_image.cols > 0)
-	{
-		cvtColor(m_image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
-		if (loopCounter <= c_loopCountToSaveDiagImage)
 		{
-			imwrite("image.jpg", m_image);
+			ScopedTimer timer("Convert image color scheme ");
+			cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
 		}
 	}
+}
+
+template <class Task>
+void CameraWrapper::SaveFileInBackground(Task& writeTask, const std::string& fileName, const Mat& matrix)
+{
+	if (writeTask.valid())
+	{
+		ScopedTimer timer("Done waiting for previous write task to complete, elapsed ");
+		writeTask.wait();
+	}
+
+	//thread::id this_id = this_thread::get_id();
+	//cout << "Thread " << this_id << endl;
+
+	// Do not pass the arguments as references; we need copies, otherwise both the foregroud and background threads will access the objects
+	writeTask = async(launch::async, [fileName, matrix]()
+	{
+		//thread::id this_id = this_thread::get_id();
+		//cout << "Thread " << this_id << endl;
+		ScopedTimer timer("Write task complete, elapsed ");
+		imwrite(fileName, matrix);
+	});
 }

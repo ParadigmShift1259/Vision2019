@@ -25,6 +25,14 @@ enum EQuality
     eGreenReady
 };
 
+enum EApproachDirection
+{
+	eUnknownDirection,
+	eApproachFromLeft,
+	eApproachFromCenter,
+	eApproachFromRight,
+};
+
 class OutputValues
 {
 public:
@@ -75,6 +83,12 @@ public:
 			m_bChanged = true;
 		}
 
+		//if (m_approachDirection != rhs.m_approachDirection)
+		//{
+		//	m_approachDirection = rhs.GetApproachDirection();
+		//	m_bChanged = true;
+		//}
+
 		return *this;
 	}
 
@@ -98,6 +112,11 @@ public:
         return m_quality;
     }
 
+	//EApproachDirection GetApproachDirection() const
+	//{
+	//	return m_approachDirection;
+	//}
+	
     void SetDistance(double distance) 
     {
         m_distance = distance;
@@ -113,10 +132,16 @@ public:
         m_quality = quality;
     }
 
+	//void SetApproachDirection(EApproachDirection approachDirection)
+	//{
+	//	m_approachDirection = approachDirection;
+	//}
+
 private:
     double m_distance = 0.0;
     double m_angle = 0.0;
     int m_quality = eRedNoData;
+	//EApproachDirection m_approachDirection = eUnknownDirection;
 
     bool m_bChanged = false;    
 };

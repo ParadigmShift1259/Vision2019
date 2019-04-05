@@ -9,10 +9,6 @@
 
 #include "ProcessingBase.h"
 
-#ifdef PI_TIMING
-#include <time.h>	// For clock_gettime()
-#endif
-
 // 2018 competition cube settings
 //Scalar ProcessingBase::m_upper = { 20, 280, 50 };                  
 //Scalar ProcessingBase::m_lower = { 40, 255, 255 };
@@ -44,26 +40,11 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 	//	<< endl;
 
 #ifdef BUILD_ON_WINDOWS
-#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
-#ifdef PORTRAIT_IMAGE
-	string fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/x_index_960x1280_Portrait_uint16.img";
-#else
-	string fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/x_index_960x1280_Landscape_uint16.img";
-#endif
-#else
 #ifdef PORTRAIT_IMAGE
 	string fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/c_index_960x1280_Portrait_uint16.img";
 #else
 	string fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/c_index_960x1280_Landscape_uint16.img";
 	//string fileName = "C:/Users/212036134/Documents/Personal/FIRST Robotics/TestData/FishEyeCorrected/c_index_960x1280_Landscape_uint16.img";
-#endif
-#endif
-#else
-#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
-#ifdef PORTRAIT_IMAGE
-	string fileName = "x_index_960x1280_Portrait_uint16.img";
-#else
-	string fileName = "x_index_960x1280_Landscape_uint16.img";
 #endif
 #else
 #ifdef PORTRAIT_IMAGE
@@ -72,7 +53,7 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 	string fileName = "c_index_960x1280_Landscape_uint16.img";
 #endif
 #endif
-#endif
+
 	m_pXfisheyeData = new uint16_t[c_imageWidthPixel * c_imageHeightPixel];
 	m_pYfisheyeData = new uint16_t[c_imageWidthPixel * c_imageHeightPixel];
 	memset(m_pXfisheyeData, 0, sizeof(uint16_t) * c_imageWidthPixel * c_imageHeightPixel);
@@ -88,26 +69,11 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 	in.close();
 
 #ifdef BUILD_ON_WINDOWS
-#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
-#ifdef PORTRAIT_IMAGE
-	fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/y_index_960x1280_Portrait_uint16.img";
-#else
-	fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/y_index_960x1280_Landscape_uint16.img";
-#endif
-#else
 #ifdef PORTRAIT_IMAGE
 	fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/r_index_960x1280_Portrait_uint16.img";
 #else
 	fileName = "C:/Users/Developer/Documents/TestData/FishEyeCorrected/r_index_960x1280_Landscape_uint16.img";
 	//fileName = "C:/Users/212036134/Documents/Personal/FIRST Robotics/TestData/FishEyeCorrected/r_index_960x1280_Landscape_uint16.img";
-#endif
-#endif
-#else
-#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
-#ifdef PORTRAIT_IMAGE
-	string fileName = "y_index_960x1280_Portrait_uint16.img";
-#else
-	string fileName = "y_index_960x1280_Landscape_uint16.img";
 #endif
 #else
 #ifdef PORTRAIT_IMAGE
@@ -116,7 +82,7 @@ ProcessingBase::ProcessingBase(const Scalar& upper, const Scalar& lower)
 	fileName = "r_index_960x1280_Landscape_uint16.img";
 #endif
 #endif
-#endif
+
 	cout << "Loading fisheye correction look up table " << fileName << endl;
 	in.open(fileName, flags);
 	while (!in.eof())
@@ -132,62 +98,46 @@ ProcessingBase::~ProcessingBase()
 		delete [] m_pXfisheyeData;
 	if (m_pYfisheyeData)
 		delete [] m_pYfisheyeData;
+
+	if (m_imageWriteTask.valid())
+	{
+		m_imageWriteTask.wait();
+	}
+
+	if (m_inrangeWriteTask.valid())
+	{
+		m_inrangeWriteTask.wait();
+	}
+
+	if (m_drawingWriteTask.valid())
+	{
+		m_drawingWriteTask.wait();
+	}
+
+	if (m_trapezoidWriteTask.valid())
+	{
+		m_trapezoidWriteTask.wait();
+	}
 }
 
 void ProcessingBase::Prepare(const Mat& imageHSV)
 {
-    if (c_bUseLastDiagImage)
-	{
-#ifdef TEST_FISHEYE_CORRECTION_BY_LUT
-		Mat inrangeTemp;
-		cv::inRange(imageHSV, m_lower, m_upper, inrangeTemp);	// Identify color per HSV image
-
-		m_inrange = inrangeTemp.clone();	// Get the output size right
-		imwrite("inrangeTemp.jpg", inrangeTemp);
-
-		for (int row = 0; row < c_imageHeightPixel; row++)
-		{
-			for (int col = 0; col < c_imageWidthPixel; col++)
-			{
-				int ndx = (int)((c_imageWidthPixel * row) + col);		// [y][x] if 2D array
-				uint16_t c = 0;
-				uint16_t r = 0;
-				if (ndx < c_imageWidthPixel * c_imageHeightPixel)
-				{
-					c = m_pXfisheyeData[ndx];
-					r = m_pYfisheyeData[ndx];
-				}
-
-				if (r != 0)
-				{
-					r--;
-				}
-
-				if (c != 0)
-				{
-					c--;
-				}
-
-				uchar color = inrangeTemp.at<uchar>(Point(c, r));
-				m_inrange.at<uchar>(Point(col, row)) = color;
-			}
-		}
-		imwrite("imageInRange.jpg", inrangeTemp);
-		imwrite("imageCorrected.jpg", m_inrange);
-#else
-		if (loopCounter == 0)
-        {
+	ScopedTimer timer("ProcessingBase::Prepare ");
+	if (c_bUseLastDiagImage)
+    {
+		//if (loopCounter == 0)
+		//{
 //			CalibrateHSV(imageHSV, 67, 75, 5, 50);
 //			CalibrateHSV(imageHSV, 30, 50, 10, 50);
-		}
+		//}
 
 		cv::inRange(imageHSV, m_lower, m_upper, m_inrange);
-#endif
+		BlackOutInRangeRegions(m_inrange);
 
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
-		sprintf_s<sizeof(fileName)>(fileName, "%s%dinrange%s_%s.jpg", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
+		sprintf_s<sizeof(fileName)>(fileName, "%s%dinrange%s_%s", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
 #else
 		if (c_bUseLastDiagImage)
 		{
@@ -198,15 +148,16 @@ void ProcessingBase::Prepare(const Mat& imageHSV)
 			sprintf(fileName, "inrange%s%d.jpg", GetTargetName(), loopCounter);
 		}
 #endif
-		imwrite(fileName, m_inrange);
+		//imwrite(fileName, m_inrange);
+		SaveFileInBackground(m_inrangeWriteTask, fileName, m_inrange);
     }
     else
     {    
         // Searching for color in the image that has a high of upper scaler and a low of lower scaler. Stores result in inrange
 		inRange(imageHSV, m_lower, m_upper, m_inrange);	// Identify color per HSV image
+		BlackOutInRangeRegions(m_inrange);
 
 		if (bImageCaptureTrigger)
-		//if (loopCounter <= c_loopCountToSaveDiagImage || bImageCaptureTrigger)
         {
             // For manually calibrating the camera
 			char fileName[255];
@@ -215,9 +166,44 @@ void ProcessingBase::Prepare(const Mat& imageHSV)
 #else
 			sprintf(fileName, "inrange%s_%.0f_%.0f_%d.jpg", GetTargetName(), m_upper[0], m_lower[0], loopCounter);
 #endif
-			imwrite(fileName, m_inrange);
+			//imwrite(fileName, m_inrange);
+			SaveFileInBackground(m_inrangeWriteTask, fileName, m_inrange);
         }
     }
+}
+
+// Black out the lower pixels and upper corner pixels
+void ProcessingBase::BlackOutInRangeRegions(Mat& inrange)
+{
+	ScopedTimer timer("ProcessingBase::BlackOutInRangeRegions ");
+	{
+		const Point pts[] = 
+		{
+			  { 0, 0 }
+			, { 0, c_upperCornerIgnore }
+			, { c_upperCornerIgnore, 0 }
+
+		};
+		fillConvexPoly(inrange, pts, 3, c_black, 8, 0);
+	}
+
+	{
+		const Point pts[] =
+		{
+			  { c_imageWidthPixel, 0 }
+			, { c_imageWidthPixel, c_upperCornerIgnore }
+			, { c_imageWidthPixel - c_upperCornerIgnore, 0 }
+
+		};
+		fillConvexPoly(inrange, pts, 3, c_black, 8, 0);
+	}
+
+	{
+		const Point pt1(0, c_imageHeightPixel - c_lowerImageIgnore);
+		const Point pt2(c_imageWidthPixel, c_imageHeightPixel);
+
+		cv::rectangle(inrange, pt1, pt2, c_black, CV_FILLED, 8, 0);
+	}
 }
 
 void ProcessingBase::CalibrateHSV(const Mat& imageHSV, int hue1, int hue2, int span, int satValueIncrement)
@@ -240,7 +226,8 @@ void ProcessingBase::CalibrateHSV(const Mat& imageHSV, int hue1, int hue2, int s
 #else
 				sprintf(buf, "inrange_H%d-%d_S%d_V%d.jpg", h, h + span, s, v);
 #endif
-				imwrite(buf, inrange);
+				//imwrite(buf, inrange);
+				SaveFileInBackground(m_inrangeWriteTask, buf, inrange);
 			}
 		}
 	}
@@ -248,6 +235,7 @@ void ProcessingBase::CalibrateHSV(const Mat& imageHSV, int hue1, int hue2, int s
 
 void ProcessingBase::FindContours()
 {
+	ScopedTimer timer("ProcessingBase::FindContours ");
     findContours(m_inrange, m_contours, m_hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
     // creates a drawing matrix with inrange size and fills it with zeroes
     m_drawing = Mat::zeros(m_inrange.size(), CV_8UC3);
@@ -255,8 +243,6 @@ void ProcessingBase::FindContours()
 	// Find image center coordinate
 	m_im_center_x = m_drawing.size().width / 2;
 	m_im_center_y = m_drawing.size().height / 2;
-	m_R = sqrt(m_im_center_x * m_im_center_x + m_im_center_y * m_im_center_y);	// For fisheye correction
-	m_borderCorr = 1 / (1 + m_k * pow(min(m_im_center_x, m_im_center_y) / m_R, 2.0)); // Scaling factor per border
 
     // Reset the contour values to zero
     m_biggestContour = 0;
@@ -290,13 +276,12 @@ void ProcessingBase::FindBiggestContour()
     }
 
 	if (c_bUseLastDiagImage || bImageCaptureTrigger)
-	//if (loopCounter == c_loopCountToSaveDiagImage || c_bUseLastDiagImage || bImageCaptureTrigger)
     {
         // For manually calibrating the camera
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
-		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing%s_%s.jpg", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
+		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing%s_%s", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
 #else
 		if (c_bUseLastDiagImage)
 		{
@@ -307,12 +292,15 @@ void ProcessingBase::FindBiggestContour()
 			sprintf(fileName, "drawing%s%d.jpg", GetTargetName(), loopCounter);
 		}
 #endif
-        imwrite(fileName, m_drawing);
+        //imwrite(fileName, m_drawing);
+		SaveFileInBackground(m_drawingWriteTask, fileName, m_drawing);
     }
 }
 
 void ProcessingBase::RejectSmallContours()
 {
+	ScopedTimer timer("ProcessingBase::RejectSmallContours ");
+
     // Walk through each contour that we found looking for the biggest contour by point count
     size_t maxSize = 0;
     //cout << "Finding max contour size out of " << m_contours.size() << " contours"<< endl;
@@ -331,54 +319,16 @@ void ProcessingBase::RejectSmallContours()
     //cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
     for (size_t i = 0; i < m_contours.size(); i++)
     {
-		bool bContourInLowerImage = false;
-		for (size_t j = 0; j < m_contours[i].size(); j++)
+		if (c_bDrawAllContours)
 		{
-			if (m_contours[i].at(j).y >= 860)
-			{
-				bContourInLowerImage = true;
-				break;
-			}
+			drawContours(m_drawing, m_contours, (int)i, c_fishEyeContourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
 		}
-
-		if (bContourInLowerImage)
-		{
-			continue;
-		}
-
-		// Block out the upper corners
-		// We are getting reflections of the green LEDs off of the diffuser plastic
-		int minX = 0;
-		int minY = 0;
-		int maxX = 125;
-		int maxY = 125;
-		line(m_drawing, Point(minX, minY), Point(minX, maxY), c_contourColor, 2, 8);
-		line(m_drawing, Point(minX, maxY), Point(maxX, maxY), c_contourColor, 2, 8);
-		line(m_drawing, Point(maxX, maxY), Point(maxX, minY), c_contourColor, 2, 8);
-		line(m_drawing, Point(maxX, minY), Point(minX, minY), c_contourColor, 2, 8);
-
-		auto x = m_contours[i].at(0).x;
-		auto y = m_contours[i].at(0).y;
-		if (y <= maxY && x <= maxX)
-		{
-			continue;
-		}
-
-		minX = c_imageWidthPixel - 125;
-		maxX = c_imageWidthPixel;
-		line(m_drawing, Point(minX, minY), Point(minX, maxY), c_contourColor, 2, 8);
-		line(m_drawing, Point(minX, maxY), Point(maxX, maxY), c_contourColor, 2, 8);
-		line(m_drawing, Point(maxX, maxY), Point(maxX, minY), c_contourColor, 2, 8);
-		line(m_drawing, Point(maxX, minY), Point(minX, minY), c_contourColor, 2, 8);
-
-		if (y <= maxY && x >= minX)
-		{
-			continue;
-		}
+		FishEyeCorrectContour(i);
 
 		RectDescr rd;
 		rd.m_minRect = minAreaRect(m_contours[i]);
 
+		//cout << "Contour size " << m_contours[i].size() << " area " << rd.m_minRect.size.area() << endl;
 		//if (m_contours[i].size() > threshold && abs(ld.m_slope) > 1.0f)
 		if (m_contours[i].size() > threshold && rd.m_minRect.size.area() > 0.0f)
         {
@@ -412,51 +362,9 @@ void ProcessingBase::RejectSmallContours()
 		if (c_bDrawAllContours)
 		{
 			drawContours(m_drawing, m_contours, (int)i, c_contourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
-			//char buf[500];
-			//sprintf_s<sizeof(buf)>(buf, "Contour index %zu  x     y", i);
-			//cout << buf << endl;
-			//for (auto& pt : m_contours[i])
-			//{
-			//	//sprintf_s<sizeof(buf)>(buf, "Contour index %d  x     y", i);
-			//	sprintf_s<sizeof(buf)>(buf,   "                  %4d   %4d", pt.x, pt.y);
-			//	cout << buf << endl;
-			//}
-		}
-	}
-
-#ifdef PI_TIMING
-		long int start_time;
-		long int time_difference;
-		struct timespec gettime_now;
-	
-		clock_gettime(CLOCK_REALTIME, &gettime_now);
-		start_time = gettime_now.tv_nsec;		//Get nS value
-	
-		int count = 0;
-		vector<vector<Point>> corrected(m_contours.size());
-		for (size_t i = 0; i < m_contours.size(); i++)
-		{
-			auto& vIn = m_contours[i];
-			auto& vOut = corrected[i];
-			vOut.resize(vIn.size());
-			for (size_t j = 0; j < vIn.size(); j++)
-			{
-				double xCorrected;
-				double yCorrected;
-				count++;
-				FishEyeCorrectPoint(vIn[j].x, vIn[j].y, xCorrected, yCorrected);
-				vOut[j].x = xCorrected;
-				vOut[j].y = yCorrected;
 			}
 		}
 	
-		clock_gettime(CLOCK_REALTIME, &gettime_now);
-		time_difference = gettime_now.tv_nsec - start_time;
-		if (time_difference < 0)
-			time_difference += 1000000000;				//(Rolls over every 1 second)
-		cout << "Fisheye correction of " << count << " points took " << time_difference << " nanoseconds " << time_difference / count << " nanosec/pt" << endl;
-	#endif
-
 #ifdef DRAW_OPENCV_FIT_LINE
 	for (auto& it : m_linePoints)
 	{
@@ -464,13 +372,12 @@ void ProcessingBase::RejectSmallContours()
 	}
 #endif
 	if (c_bUseLastDiagImage || bImageCaptureTrigger)
-	//if (loopCounter == c_loopCountToSaveDiagImage || c_bUseLastDiagImage || bImageCaptureTrigger)
 	{
 		// For manually calibrating the camera
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
-		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing%s_%s.jpg", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
+		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing%s_%s", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
 #else
 		if (c_bUseLastDiagImage)
 		{
@@ -481,7 +388,8 @@ void ProcessingBase::RejectSmallContours()
 			sprintf(fileName, "drawing%s%d.jpg", GetTargetName(), loopCounter);
 		}
 #endif
-		imwrite(fileName, m_drawing);
+		//imwrite(fileName, m_drawing);
+		SaveFileInBackground(m_drawingWriteTask, fileName, m_drawing);
 	}
 }
 
@@ -498,6 +406,7 @@ void ProcessingBase::FishEyeCorrectContours()
 
 void ProcessingBase::FishEyeCorrectContour(size_t index)
 {
+	ScopedTimer timer("ProcessingBase::FishEyeCorrectContour ");
 	//cout << __func__ << " start" << endl;
 
 	for (size_t j = 0; j < m_contours[index].size(); j++)
@@ -514,14 +423,6 @@ void ProcessingBase::FishEyeCorrectContour(size_t index)
 	}
 	//cout << __func__ << " end" << endl;
 }
-
-//void ProcessingBase::SortContours()
-//{
-//	std::sort(m_contours.begin(), m_contours.end(), [](vector<Point>& innerVec)
-//	{
-//		if ()
-//	});
-//}
 
 void ProcessingBase::FitLinesToContours()
 {
@@ -652,12 +553,16 @@ void ProcessingBase::ApproximatePolygons()
 		sprintf(fileName, "polygons.jpg");
 	}
 #endif
-	imwrite(fileName, image);
+	//imwrite(fileName, image);
+	if (bImageCaptureTrigger)
+	{
+		SaveFileInBackground(m_imageWriteTask, fileName, image);
+	}
 }
-
 
 void ProcessingBase::FindCornerCoordinates()
 {
+	ScopedTimer timer("ProcessingBase::FindCornerCoordinates ");
 	//cout << __func__ << " start" << endl;
 	if (m_contours.size() == 0)
 	{
@@ -696,43 +601,7 @@ void ProcessingBase::FindCornerCoordinates()
 	colors.push_back({   0,   0, 128 });
 #endif
 
-	// TODO We do not need this loop anymore if we are not screening out by area
-	//cout << "Find minimum area rectangles" << endl;
-	//float maxArea = FLT_MIN;
 	size_t numContours = m_contours.size();
-	//for (size_t i = 0; i < numContours; i++)
-		//{
-	//	//double contour_area = contourArea(m_contours[i]);
-	//	//cout << "contour_area " << contour_area << endl;
-	//	//cout << "min rect area " << m_rectDescr[i].m_minRect.size.area() << endl;
-	//	//cout << "95% of min rect area " << 0.95 * m_rectDescr[i].m_minRect.size.area() << endl;
-	//	//if (contour_area < 0.95 * m_rectDescr[i].m_minRect.size.area())
-	//	//{
-	//	//	continue;
-	//	//}
-
-	//	maxArea = max(maxArea, m_rectDescr[i].m_minRect.size.area());
-
-	//	//cout << "Calc aspect ratio" << endl;
-	//	float aspectRatio1 = 0.0f;
-	//	float aspectRatio2 = 0.0f;
-	//	if (m_rectDescr[i].m_minRect.size.height > 0.0f)
-	//	{
-	//		aspectRatio1 = m_rectDescr[i].m_minRect.size.width / m_rectDescr[i].m_minRect.size.height;
-	//	}
-	//	if (m_rectDescr[i].m_minRect.size.width > 0.0f)
-	//	{
-	//		aspectRatio2 = m_rectDescr[i].m_minRect.size.height / m_rectDescr[i].m_minRect.size.width;
-	//	}
-
-	//	cout << "Minimum area " << m_rectDescr[i].m_minRect.size.area()
-	//		<< " width " << m_rectDescr[i].m_minRect.size.width
-	//		<< " height " << m_rectDescr[i].m_minRect.size.height
-	//		<< " angle " << m_rectDescr[i].m_angle
-	//		<< " aspect ratio 1 " << aspectRatio1
-	//		<< " aspect ratio 2 " << aspectRatio1
-	//		<< endl;
-		//}
 
 	// Sort by x coord of minimum area rect
 	std::sort(m_rectDescr.begin(), m_rectDescr.end(), [](RectDescr& rd1, RectDescr& rd2)
@@ -743,8 +612,9 @@ void ProcessingBase::FindCornerCoordinates()
 	// NOTE: m_rectDescr is not in the same order as m_contours now
 	//-------------------------------------------------------------
 
-	float maxXdiff = 0;
-	size_t maxPairIndex = 0;
+	bool bTrackToLastCoord = false;
+	float minXdiff = FLT_MAX;			// Minimum difference of pair center to image center
+	size_t minPairIndex = 0;
 	for (size_t i = 0; i < m_rectDescr.size(); i++)
 	{
 		//cout << "Find left/right" << endl;
@@ -762,13 +632,29 @@ void ProcessingBase::FindCornerCoordinates()
 				//cout << "Intersection above" << endl;
 				m_rectDescr[i].m_side = eLeft;
 				m_rectDescr[i + 1].m_side = eRight;
-				float xDiff = m_rectDescr[i + 1].m_minRect.center.x - m_rectDescr[i].m_minRect.center.x;
-				cout << "maxXdiff " << maxXdiff << " xDiff " << xDiff << endl;
+				//float xDiff = m_rectDescr[i + 1].m_minRect.center.x - m_rectDescr[i].m_minRect.center.x;
+				//cout << "maxXdiff " << maxXdiff << " xDiff " << xDiff << endl;
 
-				if (maxXdiff < xDiff)
+				float x_center = (float)m_im_center_x;
+				float y_center = (float)m_im_center_y;
+#ifdef TRACK_TO_LAST_COORD
+				if (m_lastObjCenterX != 0.0 && m_lastObjCenterY != 0.0 && m_Actual_Distance_Inch < c_trackToLastCoordDist)
 				{
-					maxXdiff = xDiff;
-					maxPairIndex = i;
+					bTrackToLastCoord = true;
+					x_center = (float)m_lastObjCenterX;
+					y_center = (float)m_lastObjCenterY;
+				}
+#endif
+
+				float xDiffLeft = abs((float)x_center - m_rectDescr[i].m_minRect.center.x);
+				float xDiffRight = abs((float)y_center - m_rectDescr[i + 1].m_minRect.center.x);
+				//cout << "minXdiff " << minXdiff << " xDiffLeft " << xDiffLeft << " xDiffRight " << xDiffRight << endl;
+				float xDiff = min(xDiffLeft, xDiffRight);
+
+				if (minXdiff > xDiff)
+				{
+					minXdiff = xDiff;
+					minPairIndex = i;
 				}
 				i++;
 			}
@@ -779,7 +665,8 @@ void ProcessingBase::FindCornerCoordinates()
 			}
 		}
 	}
-	cout << "final maxXdiff " << maxXdiff << " maxPairIndex " << maxPairIndex << endl;
+	//cout << "final maxXdiff " << maxXdiff << " maxPairIndex " << maxPairIndex << endl;
+	//cout << "final minXdiff " << minXdiff << " maxPairIndex " << minPairIndex << endl;
 
 	m_leftTarget.m_side = eUnknownSide;
 	m_rightTarget.m_side = eUnknownSide;
@@ -797,8 +684,8 @@ void ProcessingBase::FindCornerCoordinates()
 #endif
 	//const float areaThreshold = c_areaThresholdPercent * maxArea;
 	m_object_height = 0.0;
-	size_t endIndex = min(maxPairIndex + 2, m_rectDescr.size());
-	for (size_t i = maxPairIndex; i < endIndex; i++)			// TODO this is kind of hacky
+	size_t endIndex = min(minPairIndex + 2, m_rectDescr.size());
+	for (size_t i = minPairIndex; i < endIndex; i++)			// TODO this is kind of hacky
 	{
 		float longSide = max(m_rectDescr[i].m_minRect.size.width, m_rectDescr[i].m_minRect.size.height);
 		//float longSide = max(m_rectDescr[i].m_minRect.boundingRect2f().width, m_rectDescr[i].m_minRect.boundingRect2f().height);
@@ -811,13 +698,30 @@ void ProcessingBase::FindCornerCoordinates()
 		{
 			if (m_object_height < (double)longSide && m_rectDescr[i].m_side == eLeft)
 			{
+#define USE_BOUNDING_BOX
+#ifdef USE_BOUNDING_BOX
+				longSide = max(m_rectDescr[i + 1].m_minRect.boundingRect2f().width, m_rectDescr[i + 1].m_minRect.boundingRect2f().height);
+				m_object_height = max(m_object_height, (double)longSide);
+#else
 				m_object_height = (double)longSide;
-				//longSide = max(m_rectDescr[i + 1].m_minRect.boundingRect2f().width, m_rectDescr[i + 1].m_minRect.boundingRect2f().height);
-				//m_object_height = max(m_object_height, (double)longSide);
+#endif
 				m_object_center_x = (m_rectDescr[i].m_minRect.center.x + m_rectDescr[i + 1].m_minRect.center.x) / 2.0f;
-				//m_object_center_y = (m_rectDescr[i].m_minRect.center.y + m_rectDescr[i + 1].m_minRect.center.y) / 2.0f;
-				m_object_center_y = m_rectDescr[i].m_minRect.center.y;
+				m_object_center_y = (m_rectDescr[i].m_minRect.center.y + m_rectDescr[i + 1].m_minRect.center.y) / 2.0f;
+				//m_object_center_y = m_rectDescr[i].m_minRect.center.y;
 				circle(image, Point((int)m_object_center_x, (int)m_object_center_y), 16, c_centerColor, 2);
+
+#ifdef TRACK_TO_LAST_COORD
+				if (m_lastObjCenterX == 0.0 && m_lastObjCenterY == 0.0 && m_Actual_Distance_Inch < c_trackToLastCoordDist)
+				{
+					bTrackToLastCoord = true;
+				}
+
+				if (bTrackToLastCoord)
+				{
+					m_lastObjCenterX = m_object_center_x;
+					m_lastObjCenterY = m_object_center_y;
+				}
+#endif
 				m_leftTarget = m_rectDescr[i];
 				m_rightTarget = m_rectDescr[i + 1];
 			}
@@ -893,12 +797,11 @@ void ProcessingBase::FindCornerCoordinates()
 	}
 
 	if (c_bUseLastDiagImage || bImageCaptureTrigger)
-	//if (loopCounter == c_loopCountToSaveDiagImage || c_bUseLastDiagImage || bImageCaptureTrigger)
 	{
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
-		sprintf_s<sizeof(fileName)>(fileName, "%s%d_trapezoid%s_%s.jpg", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
+		sprintf_s<sizeof(fileName)>(fileName, "%s%d_trapezoid%s_%s", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
 #else
 		if (c_bUseLastDiagImage)
 		{
@@ -909,7 +812,8 @@ void ProcessingBase::FindCornerCoordinates()
 			sprintf(fileName, "trapezoid%s%d.jpg", GetTargetName(), loopCounter);
 		}
 #endif
-		imwrite(fileName, image);
+		//imwrite(fileName, image);
+		SaveFileInBackground(m_trapezoidWriteTask, fileName, image);
 	}
 	//cout << __func__ << " end" << endl;
 }
@@ -1017,15 +921,6 @@ void ProcessingBase::CalcObjectHeight()
 
 void ProcessingBase::FishEyeCorrectPoint(double xIn, double yIn, double& xOut, double& yOut)
 {
-#ifdef PI_TIMING
-	long int start_time;
-	long int time_difference;
-	struct timespec gettime_now;
-
-	clock_gettime(CLOCK_REALTIME, &gettime_now);
-	start_time = gettime_now.tv_nsec;		//Get nS value
-#endif
-
 	int ndx = (int)((c_imageWidthPixel * yIn) + xIn);		// [y][x] if 2D array
 	uint16_t col = 0;
 	uint16_t row = 0;
@@ -1052,27 +947,10 @@ void ProcessingBase::FishEyeCorrectPoint(double xIn, double yIn, double& xOut, d
 	{
 		xOut = col - 1;
 	}
-
-#ifdef PI_TIMING
-	clock_gettime(CLOCK_REALTIME, &gettime_now);
-	time_difference = gettime_now.tv_nsec - start_time;
-	if (time_difference < 0)
-		time_difference += 1000000000;				//(Rolls over every 1 second)
-	cout << "Fisheye correction took " << time_difference << " nanoseconds" << endl;
-#endif
 }
 
 void ProcessingBase::FishEyeCorrectPoint(int xIn, int yIn, int& xOut, int& yOut)
 {
-#ifdef PI_TIMING
-	long int start_time;
-	long int time_difference;
-	struct timespec gettime_now;
-
-	clock_gettime(CLOCK_REALTIME, &gettime_now);
-	start_time = gettime_now.tv_nsec;		//Get nS value
-#endif
-
 	int ndx = ((c_imageWidthPixel * yIn) + xIn);		// [y][x] if 2D array
 	uint16_t col = 0;
 	uint16_t row = 0;
@@ -1084,7 +962,7 @@ void ProcessingBase::FishEyeCorrectPoint(int xIn, int yIn, int& xOut, int& yOut)
 
 	if (row == 0)
 	{
-		yOut = yIn;
+		yOut = 0;// yIn;
 	}
 	else
 	{
@@ -1093,37 +971,52 @@ void ProcessingBase::FishEyeCorrectPoint(int xIn, int yIn, int& xOut, int& yOut)
 
 	if (col == 0)
 	{
-		xOut = xIn;
+		xOut = 0;//xIn;
 	}
 	else
 	{
 		xOut = col - 1;
 	}
+}
 
-#ifdef PI_TIMING
-	clock_gettime(CLOCK_REALTIME, &gettime_now);
-	time_difference = gettime_now.tv_nsec - start_time;
-	if (time_difference < 0)
-		time_difference += 1000000000;				//(Rolls over every 1 second)
-	cout << "Fisheye correction took " << time_difference << " nanoseconds" << endl;
-#endif
+template <class Task>
+void ProcessingBase::SaveFileInBackground(Task& writeTask, const std::string& fileName, const Mat& matrix)
+{
+	if (writeTask.valid())
+	{
+		ScopedTimer timer("Done waiting for previous write task to complete, elapsed ");
+		writeTask.wait();
+	}
+
+	// Do not pass the arguments as references; we need copies, otherwise both the foregroud and background threads will access the objects
+	writeTask = async(launch::async, [fileName, matrix]()
+	{
+		ScopedTimer timer("Write task complete, elapsed ");
+		imwrite(fileName, matrix);
+	});
 }
 
 void ProcessingBase::CalcOutputValues(const char* objType)
 {
-	cout << "calling CalcOutputValues " << objType
-		<< " m_object_height " << m_object_height
-		<< " object x " << m_object_center_x
-		<< " object y " << m_object_center_y
-		<< endl;
+	//cout << "calling CalcOutputValues " << objType
+	//	<< " m_object_height " << m_object_height
+	//	<< " object x " << m_object_center_x
+	//	<< " object y " << m_object_center_y
+	//	<< endl;
 	EQuality quality = CalcOutputValues(objType, m_object_height, m_object_center_x, m_object_center_y, m_Actual_Distance_Inch, m_Horizontal_Angle_Degree);
 	m_OutputValues.SetDistance(m_Actual_Distance_Inch);
 	m_OutputValues.SetAngle(m_Horizontal_Angle_Degree);
 	m_OutputValues.SetQuality(quality);
 }
 
-EQuality ProcessingBase::CalcOutputValues(const char* objType, double objHeight, double objCenterX, double objCenterY, double& actualDistInch, double& horzAngleDegree)
+EQuality ProcessingBase::CalcOutputValues(const char* objType
+										, double objHeight
+										, double objCenterX
+										, double objCenterY
+										, double& actualDistInch
+										, double& horzAngleDegree)
 {
+	ScopedTimer timer("ProcessingBase::CalcOutputValues ");
 	//cout << __func__ << " start" << endl;
 	if (m_contours.size() == 0)
     { 
@@ -1157,22 +1050,25 @@ EQuality ProcessingBase::CalcOutputValues(const char* objType, double objHeight,
 	double pixel_per_in = m_defaultPixelPerInch / scaledHeightPixel;
 
 	total_Distance_Inch = ((standard_height_p / objHeight) * m_calibCameraDistInch);
-	cout << "total_Distance_Inch: " << total_Distance_Inch << endl;
+	//cout << "total_Distance_Inch: " << total_Distance_Inch << endl;
 	horizontal_Distance_Inch = (objCenterX - m_im_center_x) / pixel_per_in;	// Convert horizontal pixel offset to inches
-	cout << "horizontal_Distance_Inch: " << horizontal_Distance_Inch << endl;
+	//cout << "horizontal_Distance_Inch: " << horizontal_Distance_Inch << endl;
 	comp_Horizontal_Distance_Inch = horizontal_Distance_Inch + c_camera_offset_x0;
-	cout << "comp_Horizontal_Distance_Inch: " << comp_Horizontal_Distance_Inch << endl;
+	//cout << "comp_Horizontal_Distance_Inch: " << comp_Horizontal_Distance_Inch << endl;
 	vertical_Distance_Pixel = m_im_center_y - objCenterY;
-	cout << "vertical_Distance_Pixel: " << vertical_Distance_Pixel << endl;
+	//cout << "vertical_Distance_Pixel: " << vertical_Distance_Pixel << endl;
 	vertical_Distance_Inch = vertical_Distance_Pixel / pixel_per_in;				// Convert vertical pixel offset to inches
-	cout << "vertical_Distance_Inch: " << vertical_Distance_Inch << endl;
+	//cout << "vertical_Distance_Inch: " << vertical_Distance_Inch << endl;
 	horzAngleDegree = atan(comp_Horizontal_Distance_Inch / m_calibCameraDistInch) * m_radiansToDegrees;
-	cout << "m_Horizontal_Angle_Degree: " << horzAngleDegree << endl;
+	//cout << "m_Horizontal_Angle_Degree: " << horzAngleDegree << endl;
 	vertical_Angle_Degree = atan(vertical_Distance_Pixel / (pixel_per_in * m_calibCameraDistInch)) * m_radiansToDegrees;
-	cout << "vertical_Angle_Degree: " << vertical_Angle_Degree << endl;
-	actualDistInch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians) - m_cameraToFrontOfRobotDistInch;
+	//cout << "vertical_Angle_Degree: " << vertical_Angle_Degree << endl;
+	actualDistInch = total_Distance_Inch * cos(horzAngleDegree * m_degreesToRadians) - m_cameraToFrontOfRobotDistInch;
+	double fudge = 36.0 * actualDistInch / 100.0;	// Remove the effect of subtracting m_cameraToFrontOfRobotDistInch as you get further away
+	actualDistInch += fudge;
+	//actualDistInch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians) - m_cameraToFrontOfRobotDistInch;
 	//actualDistInch = total_Distance_Inch * cos(vertical_Angle_Degree * m_degreesToRadians);
-	cout << "m_Actual_Distance_Inch: " << actualDistInch << endl;
+	//cout << "m_Actual_Distance_Inch: " << actualDistInch << endl;
 
 	EQuality quality = eYellowTrackingObjects;
 
@@ -1181,11 +1077,11 @@ EQuality ProcessingBase::CalcOutputValues(const char* objType, double objHeight,
         (abs(vertical_Angle_Degree) > m_maxAngle) ||
         (actualDistInch < 0) || (actualDistInch > m_maxActualDist ))
     {
-		cout << "One or more calculated output values are out of bounds, setting to horz angle and dist to zero" << endl;
-		cout << " m_Actual_Distance_Inch : " << actualDistInch
-			<< " m_Horizontal_Angle_Degree: " << horzAngleDegree
-			<< " vertical_Angle_Degree: " << vertical_Angle_Degree
-			<< endl;
+		//cout << "One or more calculated output values are out of bounds, setting to horz angle and dist to zero" << endl;
+		//cout << " m_Actual_Distance_Inch : " << actualDistInch
+		//	<< " m_Horizontal_Angle_Degree: " << horzAngleDegree
+		//	<< " vertical_Angle_Degree: " << vertical_Angle_Degree
+		//	<< endl;
 		horzAngleDegree = 0.0;
 		actualDistInch = 0.0;
 		quality = eRedNoData;
@@ -1195,7 +1091,7 @@ EQuality ProcessingBase::CalcOutputValues(const char* objType, double objHeight,
 		quality = eGreenReady;
 	}
 
-	PrintDebugValues(objType, comp_Horizontal_Distance_Inch, vertical_Distance_Inch, objHeight, actualDistInch, horzAngleDegree);
+	//PrintDebugValues(objType, comp_Horizontal_Distance_Inch, vertical_Distance_Inch, objHeight, actualDistInch, horzAngleDegree);
 	//cout << __func__ << " end" << endl;
 
 	return quality;
@@ -1237,15 +1133,28 @@ void ProcessingBase::PrintDebugValues(const char* objType, double horzDistInch, 
 		<< testFiles[ndx]
 		<< endl;
 #else
-	cout    << "Counter: " << loopCounter
-			<< " " << objType
-			<< " Horizontal_Distance_Inch: " << horzDistInch
-			<< " Vertical_Distance_Inch " << vertDistInch
-			<< " Actual_Distance_Inch: " << actualDistInch
-			<< " Test Image Camera dist: " << camDist
-			<< " Diff from actual: " << actualDistInch - camDist
-			<< " Horizontal_Angle " << horzAngleDegree
-			<< endl;
+	//char output[512];
+	printf(//output
+			 "Loop %06d %10s ActualDist %3.3f HorzAngle %3.3f CameraDist %3.3f DiffFromActual %3.3f HorzDist %3.3f VertDist %3.3f"
+			, loopCounter
+			, objType
+			, actualDistInch
+			, horzAngleDegree
+			, camDist
+			, actualDistInch - camDist
+			, horzDistInch
+			, vertDistInch
+			);
+
+		//cout    << "Counter: " << loopCounter
+		//	<< " " << objType
+		//	<< " Horizontal_Distance_Inch: " << horzDistInch
+		//	<< " Vertical_Distance_Inch " << vertDistInch
+		//	<< " Actual_Distance_Inch: " << actualDistInch
+		//	<< " Test Image Camera dist: " << camDist
+		//	<< " Diff from actual: " << actualDistInch - camDist
+		//	<< " Horizontal_Angle " << horzAngleDegree
+		//	<< endl;
 
 	//cout << endl;
 #endif

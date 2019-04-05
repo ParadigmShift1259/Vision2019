@@ -8,13 +8,14 @@
 #ifndef CONST_H
 #define CONST_H
 
-//#define BUILD_ON_WINDOWS						// Uncomment to build on Windows; comment to build on RasPi
-#define USE_OFFBOARD_COMMS							// Uncomment if you want to use it
+//#define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
+//#define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
 //#define PORTRAIT_IMAGE
-//#define CAPTURE_EVERY_NTH_IMAGE
+#define CAPTURE_EVERY_NTH_IMAGE
+#define CORRECT_UPSIDE_DOWN_IMAGE
 //#define CALC_LEFT_RIGHT_TARGETS				// Uncomment to calculate the distance to each retro target individually
-constexpr double c_camera_offset_x0 = 0.0;			//!< [inch] Camera offset from center of the robot
-//constexpr double c_camera_offset_x0 = 8.5;	//!< [inch] Camera offset from center of the robot
+constexpr double c_camera_offset_x0 = 0.0;					//!< [inch] Camera offset from center of the robot
+//constexpr double c_camera_offset_x0 = 8.5;					//!< [inch] Camera offset from center of the robot
 
 //#define TRACK_TO_LAST_COORD
 constexpr double c_trackToLastCoordDist = 30.0;	//!< [inch] Distance under which we track to the last object center instead of image center
@@ -48,6 +49,36 @@ constexpr bool c_bDrawAllContours = false;                   //!< If true, draw 
 #include <algorithm>
 #include <vector>
 #include <map>
+#include <chrono>
+
+#define USE_SCOPED_TIMER
+class ScopedTimer
+{
+public:
+	ScopedTimer(const char* logText) : m_logText(logText)
+	{
+#ifdef USE_SCOPED_TIMER
+		m_start = std::chrono::system_clock::now();
+#endif
+	}
+
+	~ScopedTimer()
+	{
+#ifdef USE_SCOPED_TIMER
+		auto now = std::chrono::system_clock::now();
+		std::chrono::milliseconds elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start);
+		if (elapsed.count() > 0)
+		{
+			//std::cout << std::endl;
+			std::cout << m_logText << elapsed.count() << " milliseconds" << std::endl;
+		}
+#endif
+	}
+
+private:
+	std::chrono::system_clock::time_point m_start;
+	const char* m_logText;
+};
 
 #ifdef BUILD_ON_WINDOWS
 const double PI = 4.0 * atan(1.0);

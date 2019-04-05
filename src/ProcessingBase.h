@@ -68,6 +68,10 @@ public:
 	template <class Task>
 	void SaveFileInBackground(Task& writeTask, const std::string& fileName, const Mat& matrix);
 
+	/// Save an image file on a background thread
+	template <class Task>
+	void SaveFileInBackground(Task& writeTask, const std::string& fileName, const Mat& matrix);
+
 protected:
 	void Prepare(const Mat& image);											//!< Perform in-range filtering 
 	void BlackOutInRangeRegions(Mat& inrange);								//!< Write some regions of the inrange image with black

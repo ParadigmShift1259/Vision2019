@@ -117,7 +117,7 @@ public:
 	//	return m_approachDirection;
 	//}
 	
-	void SetDistance(double distance)
+    void SetDistance(double distance) 
     {
         m_distance = distance;
     }

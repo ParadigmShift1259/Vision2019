@@ -28,7 +28,7 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/FishEyeCorr
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/Portrait/";
 #else
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
-//const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
+const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/";
 const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/";
 //const char* c_testImagePath = "C:/Projects/";
@@ -146,7 +146,8 @@ std::vector<std::string> testFiles
 	//, "imagecargo0ft.jpg"
 	//, "imagecargo1ft.jpg"
 
-	//  "im_394_1p5ft_contact.jpg"
+	  "im_394_1p5ft_contactUpsideDown.jpg"
+	, "im_394_1p5ft_contact.jpg"
 	//, "im_405_1p5ft_contact.jpg"
 	//, "im_301_4ft.jpg"
 	//, "im_367_2ft.jpg"
@@ -458,6 +459,7 @@ CameraWrapper::~CameraWrapper()
 
 void CameraWrapper::AcquireImage()
 {
+	//ScopedTimer timer("CameraWrapper::AcquireImage ");
 	Mat image;
 
 	if (c_bUseLastDiagImage)
@@ -469,7 +471,10 @@ void CameraWrapper::AcquireImage()
 		string fileName = testFiles[loopCounter % (int)testFiles.size()];
 #endif
 
-		image = imread(fileName, CV_LOAD_IMAGE_COLOR);
+		{
+			//ScopedTimer timer("Reading image from file ");
+			image = imread(fileName, CV_LOAD_IMAGE_COLOR);
+		}
 
 		if (image.empty())
 		{
@@ -498,12 +503,19 @@ void CameraWrapper::AcquireImage()
 			cout << "Image from the camera is wrong resolution cols " << image.cols << " rows " << image.rows << endl;
 		}
 
+#ifdef CORRECT_UPSIDE_DOWN_IMAGE
+		{
+			//ScopedTimer timer("Rotating image ");
+			rotate(image, image, ROTATE_180);	// Camera moved to center of robot, temporarily upside down
+		}
+#endif
+
 		if (c_bUseLastDiagImage || bImageCaptureTrigger)
 		{
 			char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 			int ndx = loopCounter % testFiles.size();
-			sprintf_s<sizeof(fileName)>(fileName, "%s%dimage_%s.jpg", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
+			sprintf_s<sizeof(fileName)>(fileName, "%s%dimage_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
 #else
 			if (c_bUseLastDiagImage)
 			{
@@ -514,12 +526,15 @@ void CameraWrapper::AcquireImage()
 				sprintf(fileName, "image%d.jpg", loopCounter);
 			}
 #endif
-			cout << "Capturing image " << fileName << endl;
+			//cout << "Capturing image " << fileName << endl;
 			//imwrite(fileName, image);
 			SaveFileInBackground(m_imageWriteTask, fileName, image);
 		}
 
-		cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
+		{
+			//ScopedTimer timer("Convert image color scheme ");
+			cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
+		}
 	}
 }
 
@@ -528,14 +543,19 @@ void CameraWrapper::SaveFileInBackground(Task& writeTask, const std::string& fil
 {
 	if (writeTask.valid())
 	{
-		cout << "Waiting for previous write task to complete" << endl;
+		//ScopedTimer timer("Done waiting for previous write task to complete, elapsed ");
 		writeTask.wait();
-		cout << "Done waiting for previous write task to complete" << endl;
 	}
+
+	//thread::id this_id = this_thread::get_id();
+	//cout << "Thread " << this_id << endl;
 
 	// Do not pass the arguments as references; we need copies, otherwise both the foregroud and background threads will access the objects
 	writeTask = async(launch::async, [fileName, matrix]()
 	{
+		//thread::id this_id = this_thread::get_id();
+		//cout << "Thread " << this_id << endl;
+		//ScopedTimer timer("Write task complete, elapsed ");
 		imwrite(fileName, matrix);
 	});
 }

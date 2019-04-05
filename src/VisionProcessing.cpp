@@ -13,13 +13,13 @@
 #include "ProcessingRetro.h"
 #include <iostream>
 
-#ifndef BUILD_ON_WINDOWS
-#define PI_TIMING_MAIN_LOOP
-#endif
-
-#ifdef PI_TIMING_MAIN_LOOP
-#include <time.h>	// For clock_gettime()
-#endif
+//#ifndef BUILD_ON_WINDOWS
+//#define PI_TIMING_MAIN_LOOP
+//#endif
+//
+//#ifdef PI_TIMING_MAIN_LOOP
+//#include <time.h>	// For clock_gettime()
+//#endif
 
 //#define CATCH_FLOATING_POINT_EXCEPTIONS
 #ifdef CATCH_FLOATING_POINT_EXCEPTIONS
@@ -91,13 +91,19 @@ int main()
 #endif
 
 	cout << "Starting main loop" << endl;
+//namedWindow("TestWindow");
 	//offBoardComms.Connect();
+	chrono::system_clock::time_point startTimePoint;
+	chrono::system_clock::time_point now;
 #ifndef BUILD_ON_WINDOWS
 	while (true)
 #else
 	for (int i = 0; i < testFiles.size(); i++)
 #endif
 	{
+{
+	ScopedTimer t(" ");
+		//waitKey(0);
 #ifdef PI_TIMING_MAIN_LOOP
 		long int start_time;
 		long int time_difference;
@@ -106,6 +112,7 @@ int main()
 		clock_gettime(CLOCK_REALTIME, &gettime_now);
 		start_time = gettime_now.tv_nsec;		//Get nS value
 #endif
+		//startTimePoint = chrono::system_clock::now();
 
 #ifdef CAPTURE_EVERY_NTH_IMAGE
 		bImageCaptureTrigger = false;
@@ -161,6 +168,18 @@ int main()
 		double millisec = time_difference / 1000000.0;
 		printf("Loop time %4.3f ms\n", millisec);
 #endif
+
+		//now = chrono::system_clock::now();
+		//chrono::milliseconds elapsed = chrono::duration_cast<chrono::milliseconds>(now - startTimePoint);
+#ifdef BUILD_ON_WINDOWS
+		printf("Loop time %4I64d ms\n", elapsed.count());
+#else
+//		printf("Loop time %4d ms\n", elapsed.count());
+#endif
+
+// Temp
+//printf("\n");
+}
 	}  //end of while
 
 	cout << "Exiting" << endl;

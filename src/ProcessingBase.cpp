@@ -122,12 +122,13 @@ ProcessingBase::~ProcessingBase()
 
 void ProcessingBase::Prepare(const Mat& imageHSV)
 {
-    if (c_bUseLastDiagImage)
-	{
+	//ScopedTimer timer("ProcessingBase::Prepare ");
+	if (c_bUseLastDiagImage)
+    {
 		//if (loopCounter == 0)
 		//{
-		//	CalibrateHSV(imageHSV, 67, 75, 5, 50);
-		//	CalibrateHSV(imageHSV, 30, 50, 10, 50);
+//			CalibrateHSV(imageHSV, 67, 75, 5, 50);
+//			CalibrateHSV(imageHSV, 30, 50, 10, 50);
 		//}
 
 		cv::inRange(imageHSV, m_lower, m_upper, m_inrange);
@@ -136,7 +137,7 @@ void ProcessingBase::Prepare(const Mat& imageHSV)
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
-		sprintf_s<sizeof(fileName)>(fileName, "%s%dinrange%s_%s.jpg", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
+		sprintf_s<sizeof(fileName)>(fileName, "%s%dinrange%s_%s", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
 #else
 		if (c_bUseLastDiagImage)
 		{
@@ -167,13 +168,14 @@ void ProcessingBase::Prepare(const Mat& imageHSV)
 #endif
 			//imwrite(fileName, m_inrange);
 			SaveFileInBackground(m_inrangeWriteTask, fileName, m_inrange);
-		}
+        }
     }
 }
 
 // Black out the lower pixels and upper corner pixels
 void ProcessingBase::BlackOutInRangeRegions(Mat& inrange)
 {
+	//ScopedTimer timer("ProcessingBase::BlackOutInRangeRegions ");
 	{
 		const Point pts[] = 
 		{
@@ -233,6 +235,7 @@ void ProcessingBase::CalibrateHSV(const Mat& imageHSV, int hue1, int hue2, int s
 
 void ProcessingBase::FindContours()
 {
+	//ScopedTimer timer("ProcessingBase::FindContours ");
     findContours(m_inrange, m_contours, m_hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
     // creates a drawing matrix with inrange size and fills it with zeroes
     m_drawing = Mat::zeros(m_inrange.size(), CV_8UC3);
@@ -278,7 +281,7 @@ void ProcessingBase::FindBiggestContour()
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
-		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing%s_%s.jpg", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
+		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing%s_%s", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
 #else
 		if (c_bUseLastDiagImage)
 		{
@@ -291,11 +294,13 @@ void ProcessingBase::FindBiggestContour()
 #endif
         //imwrite(fileName, m_drawing);
 		SaveFileInBackground(m_drawingWriteTask, fileName, m_drawing);
-	}
+    }
 }
 
 void ProcessingBase::RejectSmallContours()
 {
+	//ScopedTimer timer("ProcessingBase::RejectSmallContours ");
+
     // Walk through each contour that we found looking for the biggest contour by point count
     size_t maxSize = 0;
     //cout << "Finding max contour size out of " << m_contours.size() << " contours"<< endl;
@@ -314,51 +319,6 @@ void ProcessingBase::RejectSmallContours()
     //cout << "Max contour size " << maxSize << " threshold " << threshold << endl;
     for (size_t i = 0; i < m_contours.size(); i++)
     {
-		//bool bContourInLowerImage = false;
-		//for (size_t j = 0; j < m_contours[i].size(); j++)
-		//{
-		//	if (m_contours[i].at(j).y >= c_imageHeightPixel - c_lowerImageIgnore)
-		//	{
-		//		bContourInLowerImage = true;
-		//		break;
-		//	}
-		//}
-
-		//if (bContourInLowerImage)
-		//{
-		//	continue;
-		//}
-
-		// Block out the upper corners
-		// We are getting reflections of the green LEDs off of the diffuser plastic
-		//int minX = 0;
-		//int minY = 0;
-		//int maxX = c_upperCornerIgnore;
-		//int maxY = c_upperCornerIgnore;
-		//line(m_drawing, Point(minX, minY), Point(minX, maxY), c_contourColor, 2, 8);
-		//line(m_drawing, Point(minX, maxY), Point(maxX, maxY), c_contourColor, 2, 8);
-		//line(m_drawing, Point(maxX, maxY), Point(maxX, minY), c_contourColor, 2, 8);
-		//line(m_drawing, Point(maxX, minY), Point(minX, minY), c_contourColor, 2, 8);
-
-		//auto x = m_contours[i].at(0).x;
-		//auto y = m_contours[i].at(0).y;
-		//if (y <= maxY && x <= maxX)
-		//{
-		//	continue;
-		//}
-
-		//minX = c_imageWidthPixel - c_upperCornerIgnore;
-		//maxX = c_imageWidthPixel;
-		//line(m_drawing, Point(minX, minY), Point(minX, maxY), c_contourColor, 2, 8);
-		//line(m_drawing, Point(minX, maxY), Point(maxX, maxY), c_contourColor, 2, 8);
-		//line(m_drawing, Point(maxX, maxY), Point(maxX, minY), c_contourColor, 2, 8);
-		//line(m_drawing, Point(maxX, minY), Point(minX, minY), c_contourColor, 2, 8);
-
-		//if (y <= maxY && x >= minX)
-		//{
-		//	continue;
-		//}
-
 		if (c_bDrawAllContours)
 		{
 			drawContours(m_drawing, m_contours, (int)i, c_fishEyeContourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
@@ -402,9 +362,9 @@ void ProcessingBase::RejectSmallContours()
 		if (c_bDrawAllContours)
 		{
 			drawContours(m_drawing, m_contours, (int)i, c_contourColor, 2, 8, m_hierarchy, 0); // Line thickness 2, line type 8, offset 0
+			}
 		}
-	}
-
+	
 #ifdef DRAW_OPENCV_FIT_LINE
 	for (auto& it : m_linePoints)
 	{
@@ -417,7 +377,7 @@ void ProcessingBase::RejectSmallContours()
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
-		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing%s_%s.jpg", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
+		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawing%s_%s", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
 #else
 		if (c_bUseLastDiagImage)
 		{
@@ -447,6 +407,7 @@ void ProcessingBase::FishEyeCorrectContours()
 
 void ProcessingBase::FishEyeCorrectContour(size_t index)
 {
+	//ScopedTimer timer("ProcessingBase::FishEyeCorrectContour ");
 	//cout << __func__ << " start" << endl;
 
 	for (size_t j = 0; j < m_contours[index].size(); j++)
@@ -463,14 +424,6 @@ void ProcessingBase::FishEyeCorrectContour(size_t index)
 	}
 	//cout << __func__ << " end" << endl;
 }
-
-//void ProcessingBase::SortContours()
-//{
-//	std::sort(m_contours.begin(), m_contours.end(), [](vector<Point>& innerVec)
-//	{
-//		if ()
-//	});
-//}
 
 void ProcessingBase::FitLinesToContours()
 {
@@ -608,9 +561,9 @@ void ProcessingBase::ApproximatePolygons()
 	}
 }
 
-
 void ProcessingBase::FindCornerCoordinates()
 {
+	//ScopedTimer timer("ProcessingBase::FindCornerCoordinates ");
 	//cout << __func__ << " start" << endl;
 	if (m_contours.size() == 0)
 	{
@@ -849,7 +802,7 @@ void ProcessingBase::FindCornerCoordinates()
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
-		sprintf_s<sizeof(fileName)>(fileName, "%s%d_trapezoid%s_%s.jpg", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
+		sprintf_s<sizeof(fileName)>(fileName, "%s%d_trapezoid%s_%s", c_testOutputPath, ndx + 1, GetTargetName(), testFiles[ndx].c_str());
 #else
 		if (c_bUseLastDiagImage)
 		{
@@ -1032,14 +985,14 @@ void ProcessingBase::SaveFileInBackground(Task& writeTask, const std::string& fi
 {
 	if (writeTask.valid())
 	{
-		cout << "Waiting for previous write task to complete" << endl;
+		//ScopedTimer timer("Done waiting for previous write task to complete, elapsed ");
 		writeTask.wait();
-		cout << "Done waiting for previous write task to complete" << endl;
 	}
 
 	// Do not pass the arguments as references; we need copies, otherwise both the foregroud and background threads will access the objects
 	writeTask = async(launch::async, [fileName, matrix]()
 	{
+		//ScopedTimer timer("Write task complete, elapsed ");
 		imwrite(fileName, matrix);
 	});
 }
@@ -1064,6 +1017,7 @@ EQuality ProcessingBase::CalcOutputValues(const char* objType
 										, double& actualDistInch
 										, double& horzAngleDegree)
 {
+	//ScopedTimer timer("ProcessingBase::CalcOutputValues ");
 	//cout << __func__ << " start" << endl;
 	if (m_contours.size() == 0)
     { 

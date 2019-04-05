@@ -168,7 +168,7 @@ void ProcessingLine::RejectSmallContours()
 		char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 		int ndx = loopCounter % testFiles.size();
-		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawingLine_%s.jpg", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
+		sprintf_s<sizeof(fileName)>(fileName, "%s%ddrawingLine_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
 #else
 		if (c_bUseLastDiagImage)
 		{

@@ -459,7 +459,7 @@ CameraWrapper::~CameraWrapper()
 
 void CameraWrapper::AcquireImage()
 {
-	ScopedTimer timer("CameraWrapper::AcquireImage ");
+	//ScopedTimer timer("CameraWrapper::AcquireImage ");
 	Mat image;
 
 	if (c_bUseLastDiagImage)
@@ -472,7 +472,7 @@ void CameraWrapper::AcquireImage()
 #endif
 
 		{
-			ScopedTimer timer("Reading image from file ");
+			//ScopedTimer timer("Reading image from file ");
 			image = imread(fileName, CV_LOAD_IMAGE_COLOR);
 		}
 
@@ -505,7 +505,7 @@ void CameraWrapper::AcquireImage()
 
 #ifdef CORRECT_UPSIDE_DOWN_IMAGE
 		{
-			ScopedTimer timer("Rotating image ");
+			//ScopedTimer timer("Rotating image ");
 			rotate(image, image, ROTATE_180);	// Camera moved to center of robot, temporarily upside down
 		}
 #endif
@@ -532,7 +532,7 @@ void CameraWrapper::AcquireImage()
 		}
 
 		{
-			ScopedTimer timer("Convert image color scheme ");
+			//ScopedTimer timer("Convert image color scheme ");
 			cvtColor(image, m_imageHSV, COLOR_BGR2HSV);	// Convert BGR to HSV
 		}
 	}
@@ -543,7 +543,7 @@ void CameraWrapper::SaveFileInBackground(Task& writeTask, const std::string& fil
 {
 	if (writeTask.valid())
 	{
-		ScopedTimer timer("Done waiting for previous write task to complete, elapsed ");
+		//ScopedTimer timer("Done waiting for previous write task to complete, elapsed ");
 		writeTask.wait();
 	}
 
@@ -555,7 +555,7 @@ void CameraWrapper::SaveFileInBackground(Task& writeTask, const std::string& fil
 	{
 		//thread::id this_id = this_thread::get_id();
 		//cout << "Thread " << this_id << endl;
-		ScopedTimer timer("Write task complete, elapsed ");
+		//ScopedTimer timer("Write task complete, elapsed ");
 		imwrite(fileName, matrix);
 	});
 }

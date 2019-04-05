@@ -51,7 +51,7 @@ constexpr bool c_bDrawAllContours = false;                   //!< If true, draw 
 #include <map>
 #include <chrono>
 
-//#define USE_SCOPED_TIMER
+#define USE_SCOPED_TIMER
 class ScopedTimer
 {
 public:
@@ -69,7 +69,7 @@ public:
 		std::chrono::milliseconds elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start);
 		if (elapsed.count() > 0)
 		{
-			std::cout << std::endl;
+			//std::cout << std::endl;
 			std::cout << m_logText << elapsed.count() << " milliseconds" << std::endl;
 		}
 #endif

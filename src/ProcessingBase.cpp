@@ -122,7 +122,7 @@ ProcessingBase::~ProcessingBase()
 
 void ProcessingBase::Prepare(const Mat& imageHSV)
 {
-	ScopedTimer timer("ProcessingBase::Prepare ");
+	//ScopedTimer timer("ProcessingBase::Prepare ");
 	if (c_bUseLastDiagImage)
     {
 		//if (loopCounter == 0)
@@ -175,7 +175,7 @@ void ProcessingBase::Prepare(const Mat& imageHSV)
 // Black out the lower pixels and upper corner pixels
 void ProcessingBase::BlackOutInRangeRegions(Mat& inrange)
 {
-	ScopedTimer timer("ProcessingBase::BlackOutInRangeRegions ");
+	//ScopedTimer timer("ProcessingBase::BlackOutInRangeRegions ");
 	{
 		const Point pts[] = 
 		{
@@ -235,7 +235,7 @@ void ProcessingBase::CalibrateHSV(const Mat& imageHSV, int hue1, int hue2, int s
 
 void ProcessingBase::FindContours()
 {
-	ScopedTimer timer("ProcessingBase::FindContours ");
+	//ScopedTimer timer("ProcessingBase::FindContours ");
     findContours(m_inrange, m_contours, m_hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
     // creates a drawing matrix with inrange size and fills it with zeroes
     m_drawing = Mat::zeros(m_inrange.size(), CV_8UC3);
@@ -299,7 +299,7 @@ void ProcessingBase::FindBiggestContour()
 
 void ProcessingBase::RejectSmallContours()
 {
-	ScopedTimer timer("ProcessingBase::RejectSmallContours ");
+	//ScopedTimer timer("ProcessingBase::RejectSmallContours ");
 
     // Walk through each contour that we found looking for the biggest contour by point count
     size_t maxSize = 0;
@@ -406,7 +406,7 @@ void ProcessingBase::FishEyeCorrectContours()
 
 void ProcessingBase::FishEyeCorrectContour(size_t index)
 {
-	ScopedTimer timer("ProcessingBase::FishEyeCorrectContour ");
+	//ScopedTimer timer("ProcessingBase::FishEyeCorrectContour ");
 	//cout << __func__ << " start" << endl;
 
 	for (size_t j = 0; j < m_contours[index].size(); j++)
@@ -562,7 +562,7 @@ void ProcessingBase::ApproximatePolygons()
 
 void ProcessingBase::FindCornerCoordinates()
 {
-	ScopedTimer timer("ProcessingBase::FindCornerCoordinates ");
+	//ScopedTimer timer("ProcessingBase::FindCornerCoordinates ");
 	//cout << __func__ << " start" << endl;
 	if (m_contours.size() == 0)
 	{
@@ -984,14 +984,14 @@ void ProcessingBase::SaveFileInBackground(Task& writeTask, const std::string& fi
 {
 	if (writeTask.valid())
 	{
-		ScopedTimer timer("Done waiting for previous write task to complete, elapsed ");
+		//ScopedTimer timer("Done waiting for previous write task to complete, elapsed ");
 		writeTask.wait();
 	}
 
 	// Do not pass the arguments as references; we need copies, otherwise both the foregroud and background threads will access the objects
 	writeTask = async(launch::async, [fileName, matrix]()
 	{
-		ScopedTimer timer("Write task complete, elapsed ");
+		//ScopedTimer timer("Write task complete, elapsed ");
 		imwrite(fileName, matrix);
 	});
 }
@@ -1016,7 +1016,7 @@ EQuality ProcessingBase::CalcOutputValues(const char* objType
 										, double& actualDistInch
 										, double& horzAngleDegree)
 {
-	ScopedTimer timer("ProcessingBase::CalcOutputValues ");
+	//ScopedTimer timer("ProcessingBase::CalcOutputValues ");
 	//cout << __func__ << " start" << endl;
 	if (m_contours.size() == 0)
     { 

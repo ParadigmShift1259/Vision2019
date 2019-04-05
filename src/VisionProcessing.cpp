@@ -102,7 +102,7 @@ int main()
 #endif
 	{
 {
-	ScopedTimer t("Main loop ");
+	ScopedTimer t(" ");
 		//waitKey(0);
 #ifdef PI_TIMING_MAIN_LOOP
 		long int start_time;
@@ -178,7 +178,7 @@ int main()
 #endif
 
 // Temp
-printf("\n");
+//printf("\n");
 }
 	}  //end of while
 

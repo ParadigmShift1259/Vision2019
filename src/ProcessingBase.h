@@ -63,6 +63,10 @@ public:
     const OutputValues& GetOutputValues() const { return m_OutputValues; }	//!< Return the output values
 	virtual const OutputValues& GetLeftTargetOutputValues() const { return m_OutputValues; }	//!< The derived class should override
 	virtual const OutputValues& GetRightTargetOutputValues() const { return m_OutputValues; }	//!< The derived class should override
+	
+	/// Save an image file on a background thread
+	template <class Task>
+	void SaveFileInBackground(Task& writeTask, const std::string& fileName, const Mat& matrix);
 
 	/// Save an image file on a background thread
 	template <class Task>

@@ -59,7 +59,7 @@ public:
             m_quality = quality;
             m_bChanged = true;
         }
-    }
+	}
 
 	OutputValues& operator=(const OutputValues& rhs)
 	{

@@ -28,10 +28,10 @@ OffBoardComms::OffBoardComms()
 #endif
 	}
 
-    m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
-    m_netTableSmartDashboard = m_nt_Inst.GetTable("SmartDashboard");
+	m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
+	m_netTableSmartDashboard = m_nt_Inst.GetTable("SmartDashboard");
 
-    m_visioncounter = 0;
+	m_visioncounter = 0;
 	//Keys = netTable->GetKeys();
 	//for (auto key: Keys)
 	//{
@@ -39,7 +39,7 @@ OffBoardComms::OffBoardComms()
 	//}
 	m_ntval = m_netTableOpenCV->GetValue("visioncounter");
 
-    if (m_ntval)
+	if (m_ntval)
 	{
 		m_visioncounter = m_ntval->GetDouble();
 		cout << "Retrieving counter value: " << m_visioncounter << endl;

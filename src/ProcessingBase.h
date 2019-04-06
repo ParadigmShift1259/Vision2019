@@ -68,10 +68,6 @@ public:
 	template <class Task>
 	void SaveFileInBackground(Task& writeTask, const std::string& fileName, const Mat& matrix);
 
-	/// Save an image file on a background thread
-	template <class Task>
-	void SaveFileInBackground(Task& writeTask, const std::string& fileName, const Mat& matrix);
-
 protected:
 	void Prepare(const Mat& image);											//!< Perform in-range filtering 
 	void BlackOutInRangeRegions(Mat& inrange);								//!< Write some regions of the inrange image with black
@@ -104,9 +100,6 @@ protected:
 	static constexpr double m_measuredObjectHeight = 6.0;  					//!< [inch] Height of object in inches; used a tape measure in the real world
 	static constexpr double m_defaultPixelPerInch = m_calibTargetSizePixel / m_measuredObjectHeight;	// [pixel/inch] ~25
 	static constexpr double m_cameraToFrontOfRobotDistInch = 18.0;  		//!< [inch] 
-	// Output value bounds
-	static constexpr double m_maxAngle = 60.0;								//!< [degrees] If we calculate an output angle more than this, do not send it
-    static constexpr double m_maxActualDist = 10.0 * 12.0;					//!< [inch] 10 feet; if we calculate an output distance more than this, do not send it
 	static constexpr const double m_k = -0.46;     							//!< Constant value for fisheye lens used by Raspberry pi (determined empirically)
 
 #ifdef BUILD_ON_WINDOWS
@@ -126,9 +119,8 @@ protected:
 
     double m_Horizontal_Angle_Degree = 0.0;						//!< [inch] Estimated angle in the plane of the floor from robot to target
 	double m_Actual_Distance_Inch = 0.0;						//!< [inch] Estimated total distance as the crow flies from robot to target with compensation for offset camera
-
-    double m_im_center_x = 0.0;									//!< X coord for center of image (drawing)
-    double m_im_center_y = 0.0;									//!< Y coord for center of image (drawing)
+	double m_lastHorzAngleDegree = 0.0;
+	bool   m_bLastHorzAngleDegreeOk = false;
 
     double m_object_contour_max_y;								//!< Max Y coord for contour of object
     double m_object_contour_min_y;								//!< Min Y coord for contour of object

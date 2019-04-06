@@ -218,9 +218,9 @@ void ProcessingLine::CalcOutputValues()
 	double pixel_per_in = m_defaultPixelPerInch / scaledHeightPixel;
 
 	total_Distance_Inch = ((standard_height_p / m_lineLen) * m_calibCameraDistInch);
-	horizontal_Distance_Inch = (m_endOfLineX - m_im_center_x) / pixel_per_in;	// Convert horizontal pixel offset to inches @ 18 camera dist
+	horizontal_Distance_Inch = (m_endOfLineX - c_im_center_x) / pixel_per_in;	// Convert horizontal pixel offset to inches @ 18 camera dist
 	comp_Horizontal_Distance_Inch = horizontal_Distance_Inch + c_camera_offset_x0;	// because camera at right side of robot when facing to object 
-	vertical_Distance_Pixel = m_im_center_y - m_endOfLineY;
+	vertical_Distance_Pixel = c_im_center_y - m_endOfLineY;
 	vertical_Distance_Inch = vertical_Distance_Pixel / pixel_per_in;				// Convert vertical pixel offset to inches @ 18 camera dist
 	m_Horizontal_Angle_Degree = atan(comp_Horizontal_Distance_Inch / m_calibCameraDistInch) * m_radiansToDegrees;
 	vertical_Angle_Degree = atan(vertical_Distance_Pixel / (pixel_per_in * m_calibCameraDistInch)) * m_radiansToDegrees;
@@ -232,10 +232,10 @@ void ProcessingLine::CalcOutputValues()
 
 	int quality = eYellowTrackingObjects;
 
-	// Constraint output values
-	if ((abs(m_Horizontal_Angle_Degree) > m_maxAngle) ||
-		(abs(vertical_Angle_Degree) > m_maxAngle) ||
-		(m_Actual_Distance_Inch < 0) || (m_Actual_Distance_Inch > m_maxActualDist))
+	// Constrain output values
+	if ((abs(m_Horizontal_Angle_Degree) > c_maxAngle) ||
+		(abs(vertical_Angle_Degree) > c_maxAngle) ||
+		(m_Actual_Distance_Inch < 0) || (m_Actual_Distance_Inch > c_maxActualDist))
 	{
 		cout << "One or more calculated output values are out of bounds, setting to horz angle and dist to zero" << endl;
 		cout << " m_Actual_Distance_Inch : " << m_Actual_Distance_Inch

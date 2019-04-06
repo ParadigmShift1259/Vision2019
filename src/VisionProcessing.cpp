@@ -116,7 +116,7 @@ int main()
 
 #ifdef CAPTURE_EVERY_NTH_IMAGE
 		bImageCaptureTrigger = false;
-		if (loopCounter % 25 == 0)
+		if (loopCounter % c_SaveEveryNthImage == 0)
 		{
 			bImageCaptureTrigger = true;
 		}
@@ -172,7 +172,7 @@ int main()
 		//now = chrono::system_clock::now();
 		//chrono::milliseconds elapsed = chrono::duration_cast<chrono::milliseconds>(now - startTimePoint);
 #ifdef BUILD_ON_WINDOWS
-		printf("Loop time %4I64d ms\n", elapsed.count());
+		//printf("Loop time %4I64d ms\n", elapsed.count());
 #else
 //		printf("Loop time %4d ms\n", elapsed.count());
 #endif

@@ -30,7 +30,7 @@ const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/fisheye_camera/";
 const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/selected/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/ImagingData/cameraOnRobot/";
-const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/";
+//const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/OutputTestMatrixMar9/";
 //const char* c_testImagePath = "C:/Projects/";
 //const char* c_testImagePath = "C:/Users/Developer/Documents/TestData/StLouisData/2019_StLouis_Test/images_30deg/";
 
@@ -515,15 +515,15 @@ void CameraWrapper::AcquireImage()
 			char fileName[255];
 #ifdef BUILD_ON_WINDOWS
 			int ndx = loopCounter % testFiles.size();
-			sprintf_s<sizeof(fileName)>(fileName, "%s%dimage_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
+			sprintf_s<sizeof(fileName)>(fileName, "%s%05d_step1_image_%s", c_testOutputPath, ndx + 1, testFiles[ndx].c_str());
 #else
 			if (c_bUseLastDiagImage)
 			{
-				sprintf(fileName, "image%d.jpg", loopCounter % testFiles.size() + 1);
+				sprintf(fileName, "%05d_step1_image.jpg", loopCounter % testFiles.size() + 1);
 			}
 			else
 			{
-				sprintf(fileName, "image%d.jpg", loopCounter);
+				sprintf(fileName, "%05d_step1_image.jpg", loopCounter);
 			}
 #endif
 			//cout << "Capturing image " << fileName << endl;

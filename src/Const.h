@@ -12,10 +12,18 @@
 //#define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
 //#define PORTRAIT_IMAGE
 #define CAPTURE_EVERY_NTH_IMAGE
-#define CORRECT_UPSIDE_DOWN_IMAGE
+#ifdef CAPTURE_EVERY_NTH_IMAGE
+constexpr int c_SaveEveryNthImage = 1;//25;
+#endif
+//#define CORRECT_UPSIDE_DOWN_IMAGE
 //#define CALC_LEFT_RIGHT_TARGETS				// Uncomment to calculate the distance to each retro target individually
 constexpr double c_camera_offset_x0 = 0.0;					//!< [inch] Camera offset from center of the robot
 //constexpr double c_camera_offset_x0 = 8.5;					//!< [inch] Camera offset from center of the robot
+
+// Output value bounds
+constexpr double c_maxAngleChangePerLoop = 40.0;			//!< [degrees] If the difference from the last known good output angle is more than this, do not send it
+constexpr double c_maxAngle = 60.0;							//!< [degrees] If we calculate an output angle more than this, do not send it
+constexpr double c_maxActualDist = 10.0 * 12.0;				//!< [inch] 8 feet; if we calculate an output distance more than this, do not send it
 
 //#define TRACK_TO_LAST_COORD
 constexpr double c_trackToLastCoordDist = 30.0;	//!< [inch] Distance under which we track to the last object center instead of image center
@@ -34,7 +42,8 @@ constexpr bool c_bDrawAllContours = true;                   //!< If true, draw e
 #define WRITE_OPENCV_TEXT_ON_IMAGES
 #else
 constexpr bool c_bUseLastDiagImage = false;
-constexpr bool c_bDrawAllContours = false;                   //!< If true, draw every countour found
+//constexpr bool c_bDrawAllContours = false;                   //!< If true, draw every countour found
+constexpr bool c_bDrawAllContours = true;                   //!< If true, draw every countour found
 #endif
 
 // Define these one at a time
@@ -102,6 +111,8 @@ constexpr int c_imageWidthPixel = 960;						//!< [pixel] Height in pixels of ima
 constexpr int c_imageHeightPixel = 960;						//!< [pixel] Height in pixels of image captured by camera
 constexpr int c_imageWidthPixel = 1280;						//!< [pixel] Height in pixels of image captured by camera
 #endif
+constexpr int c_im_center_x = c_imageWidthPixel / 2;		//!< X coord for center of image (drawing)
+constexpr int c_im_center_y = c_imageHeightPixel / 2;		//!< Y coord for center of image (drawing)
 
 static cv::Scalar c_contourColor = { 231, 96, 97 };         //!< [HSV triplet] We will draw a contour of specific color
 static cv::Scalar c_fishEyeContourColor = { 30, 130, 250 };	//!< [HSV triplet] Color for drawing uncorrected contours

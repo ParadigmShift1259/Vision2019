@@ -9,12 +9,16 @@
 #define CONST_H
 
 //#define BUILD_ON_WINDOWS					// Uncomment to build on Windows; comment to build on RasPi
-//#define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
-//#define PORTRAIT_IMAGE
-#define CAPTURE_EVERY_NTH_IMAGE
+#define USE_OFFBOARD_COMMS						// Uncomment if you want to use it
+
+//#define CAPTURE_EVERY_NTH_IMAGE
 #ifdef CAPTURE_EVERY_NTH_IMAGE
 constexpr int c_SaveEveryNthImage = 1;//25;
 #endif
+
+constexpr int c_warmUpLoops = 60;
+
+//#define PORTRAIT_IMAGE
 //#define CORRECT_UPSIDE_DOWN_IMAGE
 //#define CALC_LEFT_RIGHT_TARGETS				// Uncomment to calculate the distance to each retro target individually
 constexpr double c_camera_offset_x0 = 0.0;					//!< [inch] Camera offset from center of the robot
@@ -42,8 +46,8 @@ constexpr bool c_bDrawAllContours = true;                   //!< If true, draw e
 #define WRITE_OPENCV_TEXT_ON_IMAGES
 #else
 constexpr bool c_bUseLastDiagImage = false;
-//constexpr bool c_bDrawAllContours = false;                   //!< If true, draw every countour found
-constexpr bool c_bDrawAllContours = true;                   //!< If true, draw every countour found
+constexpr bool c_bDrawAllContours = false;                   //!< If true, draw every countour found
+//constexpr bool c_bDrawAllContours = true;                   //!< If true, draw every countour found
 #endif
 
 // Define these one at a time

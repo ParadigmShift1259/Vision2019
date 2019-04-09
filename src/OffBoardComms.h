@@ -30,7 +30,8 @@ class OffBoardComms
 public:
     OffBoardComms();
 
-	//void Connect();
+	bool IsConnected();
+	void Connect();
     void Publish();
 
 	void SetRetro(const ProcessingBase& retro);

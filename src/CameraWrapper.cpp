@@ -429,7 +429,7 @@ CameraWrapper::CameraWrapper()
 	
 	// Warm up camera for 60 frames to stabilize image brightness
 	cout << "Warming up camera" << endl;
-	int warmUpLoops = 60;
+	int warmUpLoops = c_warmUpLoops;
 #ifdef BUILD_ON_WINDOWS
 	warmUpLoops = 1;
 #endif

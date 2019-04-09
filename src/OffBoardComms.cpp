@@ -18,7 +18,19 @@ OffBoardComms::OffBoardComms()
 	cout << "Initializing off board comms" << endl;
 	m_nt_Inst = NetworkTableInstance::GetDefault();
 	m_nt_Inst.StartClientTeam(1259);
+#endif
+}
 
+bool OffBoardComms::IsConnected()
+{
+#ifdef USE_OFFBOARD_COMMS
+	return m_nt_Inst.IsConnected();
+#endif
+}
+
+void OffBoardComms::Connect()
+{
+#ifdef USE_OFFBOARD_COMMS
 	while (!m_nt_Inst.IsConnected())
 	{
 #ifdef BUILD_ON_WINDOWS
@@ -28,18 +40,13 @@ OffBoardComms::OffBoardComms()
 #endif
 	}
 
-	m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
-	m_netTableSmartDashboard = m_nt_Inst.GetTable("SmartDashboard");
+    m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
+    m_netTableSmartDashboard = m_nt_Inst.GetTable("SmartDashboard");
 
-	m_visioncounter = 0;
-	//Keys = netTable->GetKeys();
-	//for (auto key: Keys)
-	//{
-	//	cout<<"These are the keys: "<<key<<endl;
-	//}
+    m_visioncounter = 0;
 	m_ntval = m_netTableOpenCV->GetValue("visioncounter");
 
-	if (m_ntval)
+    if (m_ntval)
 	{
 		m_visioncounter = m_ntval->GetDouble();
 		cout << "Retrieving counter value: " << m_visioncounter << endl;
@@ -47,38 +54,6 @@ OffBoardComms::OffBoardComms()
 #endif
 	m_counter = (int)m_visioncounter;
 }
-
-//void OffBoardComms::Connect()
-//{
-//#ifdef USE_OFFBOARD_COMMS
-//	while (!m_nt_Inst.IsConnected())
-//	{
-//#ifdef BUILD_ON_WINDOWS
-//		Sleep(100);
-//#else
-//		sleep(0.1);
-//#endif
-//	}
-//
-//    m_netTableOpenCV = m_nt_Inst.GetTable("OpenCV");
-//    m_netTableSmartDashboard = m_nt_Inst.GetTable("SmartDashboard");
-//
-//    m_visioncounter = 0;
-//	//Keys = netTable->GetKeys();
-//	//for (auto key: Keys)
-//	//{
-//	//	cout<<"These are the keys: "<<key<<endl;
-//	//}
-//	m_ntval = m_netTableOpenCV->GetValue("visioncounter");
-//
-//    if (m_ntval)
-//	{
-//		m_visioncounter = m_ntval->GetDouble();
-//		cout << "Retrieving counter value: " << m_visioncounter << endl;
-//	}
-//#endif
-//	m_counter = (int)m_visioncounter;
-//}
 
 void OffBoardComms::Publish()
 {

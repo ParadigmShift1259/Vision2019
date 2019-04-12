@@ -100,7 +100,7 @@ constexpr double PI = 4.0 * atan(1.0);
 #endif
 
 constexpr double c_smallContourPercentOfMax = 0.30;         //!< Reject contours that are less than this % of max countour point count
-constexpr size_t c_minContourPoints = 60;					//!< Reject contours that have less points than this
+constexpr size_t c_minContourPoints = 100;					//!< Reject contours that have less points than this
 constexpr size_t c_maxContourPoints = 700;					//!< Reject contours that have more points than this
 
 constexpr float c_occludedAspectRatio = 0.43f;			    //!< [ratio] Aspect ratio greater than this might be an occluded retroreflective target
